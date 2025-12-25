@@ -9,6 +9,7 @@ const productLinks = [
     { label: "Features", href: "#features" },
     { label: "How It Works", href: "#how-it-works" },
     { label: "Pricing", href: "#pricing" },
+    { label: "For Parents", href: "#" },
 ];
 
 const companyLinks = [
@@ -73,7 +74,7 @@ export function Footer() {
                         </motion.a>
 
                         <p className="text-lg text-gray-400 leading-relaxed max-w-md">
-                            Your personal Islamic curriculum guide. Empowering Muslim parents to raise confident, knowledgeable children with faith-centered education.
+                            They learn in the app. You bring it to life. Built for ages 5-7. Empowering Muslim parents to raise confident, knowledgeable children with faith-centered education.
                         </p>
 
                         {/* Social Links */}
@@ -162,7 +163,7 @@ export function Footer() {
                 {/* Bottom Bar */}
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <p className="text-gray-400 text-sm sm:text-base flex items-center gap-2 flex-wrap justify-center">
-                        © 2026 Sidrat. Built with
+                        © 2025 Sidrat. Built with
                         <Heart className="w-4 h-4 text-red-500 animate-pulse" fill="currentColor" />
                         for Muslim families worldwide.
                     </p>

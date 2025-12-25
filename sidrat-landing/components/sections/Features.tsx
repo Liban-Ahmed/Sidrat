@@ -2,52 +2,85 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Clock, TrendingUp, ShieldCheck, MessageCircle, Smartphone } from "lucide-react";
+import { BookOpen, Clock, TrendingUp, ShieldCheck, MessageCircle, Smartphone, Gamepad2, Award, Ban, Calendar } from "lucide-react";
 import { AnimatedGradientText } from "@/components/effects";
 
-const features = [
+// Features for Kids (In-App)
+const kidFeatures = [
     {
-        icon: BookOpen,
-        title: "Age-Based Curriculum",
-        description: "Personalized lessons for ages 2-14. Your 5-year-old gets Prophet stories, your 12-year-old gets deeper discussions on identity and faith.",
+        icon: Gamepad2,
+        title: "Daily Lessons",
+        description: "5-minute interactive games, stories, and quizzes that make learning feel like play.",
         gradient: "from-primary to-primary/80",
-        span: "md:col-span-2"
     },
     {
-        icon: Clock,
-        title: "15 Minutes a Week",
-        description: "Busy parent-friendly. One focused lesson with activities takes less time than scrolling Instagram.",
+        icon: BookOpen,
+        title: "Friendly Characters",
+        description: "Guides that make learning engaging and fun—designed specifically for ages 5-7.",
         gradient: "from-secondary to-secondary/80",
-        span: "md:col-span-1"
+    },
+    {
+        icon: Award,
+        title: "Streaks & Badges",
+        description: "Rewards that keep them coming back, building a habit of Islamic learning.",
+        gradient: "from-accent to-accent/80",
+    },
+    {
+        icon: Smartphone,
+        title: "Voice & Visuals",
+        description: "Designed for kids who can't read yet—audio narration and visual learning.",
+        gradient: "from-primary to-primary/80",
+    },
+];
+
+// Features for Parents
+const parentFeatures = [
+    {
+        icon: Calendar,
+        title: "Weekly Family Activity",
+        description: "A simple 15-minute activity based on what they learned in the app.",
+        gradient: "from-secondary to-secondary/80",
     },
     {
         icon: TrendingUp,
-        title: "Progress Tracking",
-        description: "See what you've covered, what's next, and celebrate milestones.",
-        gradient: "from-accent to-accent/80",
-        span: "md:col-span-1"
-    },
-    {
-        icon: ShieldCheck,
-        title: "Scholar-Reviewed Content",
-        description: "Every lesson reviewed by Islamic education experts. Teach with confidence knowing the content is authentic and appropriate.",
+        title: "Progress Dashboard",
+        description: "See exactly what they've learned and mastered—no guessing.",
         gradient: "from-primary to-primary/80",
-        span: "md:col-span-2"
     },
     {
         icon: MessageCircle,
-        title: "Conversation Starters",
-        description: 'No more "ummm..." moments. Get prompts like "Ask your child: what makes someone a good friend in Islam?"',
+        title: "Conversation Prompts",
+        description: "Know what to ask at dinner or bedtime to reinforce learning.",
+        gradient: "from-accent to-accent/80",
+    },
+    {
+        icon: Clock,
+        title: "No Prep Required",
+        description: "Everything explained step-by-step. Just open and go.",
         gradient: "from-secondary to-secondary/80",
-        span: "md:col-span-1"
+    },
+];
+
+// Shared features
+const sharedFeatures = [
+    {
+        icon: ShieldCheck,
+        title: "Scholar-Reviewed Content",
+        description: "Accurate and age-appropriate Islamic education you can trust.",
+        gradient: "from-primary to-primary/80",
+    },
+    {
+        icon: Ban,
+        title: "Safe & Ad-Free",
+        description: "No ads, no in-app purchases. Just pure, safe learning.",
+        gradient: "from-secondary to-secondary/80",
     },
     {
         icon: Smartphone,
         title: "Works on Your Schedule",
-        description: "Morning? Bedtime? Car rides? Access lessons anytime, anywhere. Download activities to use offline.",
+        description: "Catch up anytime. Flexible learning that fits your family's life.",
         gradient: "from-accent to-accent/80",
-        span: "md:col-span-1"
-    }
+    },
 ];
 
 export function Features() {
@@ -56,8 +89,8 @@ export function Features() {
         visible: {
             opacity: 1,
             transition: {
-                staggerChildren: 0.15,
-                delayChildren: 0.2
+                staggerChildren: 0.1,
+                delayChildren: 0.1
             }
         }
     };
@@ -74,59 +107,129 @@ export function Features() {
         }
     };
 
+    const FeatureCard = ({ feature }: { feature: typeof kidFeatures[0] }) => (
+        <motion.div
+            variants={itemVariants}
+            className="group relative bg-white rounded-3xl p-8 border border-gray-100 hover:border-primary/30 transition-all duration-500 hover:shadow-xl overflow-hidden"
+        >
+            <div className="relative z-10">
+                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500`}>
+                    <feature.icon className="w-8 h-8 text-white" strokeWidth={2} />
+                </div>
+                <h3 className="text-xl font-bold text-text-dark mb-3 font-heading">
+                    {feature.title}
+                </h3>
+                <p className="text-lg text-text-secondary leading-relaxed">
+                    {feature.description}
+                </p>
+            </div>
+        </motion.div>
+    );
+
     return (
         <section id="features" className="py-32 md:py-40 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
-            <div className="container mx-auto px-8 md:px-16 lg:px-40 max-w-7xl">
+            <div className="container mx-auto px-6 sm:px-8 md:px-12 lg:px-20 xl:px-40 max-w-[1400px]">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-24 space-y-6"
+                    className="text-center mb-20 space-y-6"
                 >
                     <h2 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold font-heading text-text-dark">
-                        Everything you need to
-                        <AnimatedGradientText className="block mt-2">
-                            raise confident Muslim children
+                        <AnimatedGradientText>
+                            The best of both worlds
                         </AnimatedGradientText>
                     </h2>
                 </motion.div>
 
-                {/* Bento grid with staggered animations - asymmetric layout */}
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-100px" }}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-8"
-                >
-                    {features.map((feature, index) => (
-                        <motion.div
-                            key={feature.title}
-                            variants={itemVariants}
-                            className={`group relative bg-gradient-to-br from-white to-${feature.gradient.split(' ')[1].replace('to-', '')}/5 rounded-[40px] p-12 border border-gray-100 hover:border-${feature.gradient.split(' ')[1].replace('to-', '').replace('/80', '')}/30 transition-all duration-500 hover:shadow-large overflow-hidden ${feature.span}`}
-                        >
-                            {/* Animated gradient on hover */}
-                            <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient.split(' ')[1].replace('to-', 'from-')}/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                {/* For Kids Section */}
+                <div className="mb-20">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="flex items-center gap-4 mb-10"
+                    >
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                            <Gamepad2 className="w-7 h-7 text-white" strokeWidth={2} />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl md:text-3xl font-bold text-text-dark">For Kids</h3>
+                            <p className="text-lg text-text-secondary">In-App Learning</p>
+                        </div>
+                    </motion.div>
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                    >
+                        {kidFeatures.map((feature) => (
+                            <FeatureCard key={feature.title} feature={feature} />
+                        ))}
+                    </motion.div>
+                </div>
 
-                            <div className="relative z-10">
-                                {/* Animated icon */}
-                                <div className={`w-20 h-20 rounded-3xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500`}>
-                                    <feature.icon className="w-10 h-10 text-white" strokeWidth={2} />
-                                </div>
+                {/* For Parents Section */}
+                <div className="mb-20">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="flex items-center gap-4 mb-10"
+                    >
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-secondary to-secondary/80 flex items-center justify-center">
+                            <TrendingUp className="w-7 h-7 text-white" strokeWidth={2} />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl md:text-3xl font-bold text-text-dark">For Parents</h3>
+                            <p className="text-lg text-text-secondary">Dashboard + Activities</p>
+                        </div>
+                    </motion.div>
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                    >
+                        {parentFeatures.map((feature) => (
+                            <FeatureCard key={feature.title} feature={feature} />
+                        ))}
+                    </motion.div>
+                </div>
 
-                                <h3 className="text-3xl font-bold text-text-dark mb-4 font-heading">
-                                    {feature.title}
-                                </h3>
-
-                                <p className="text-xl text-text-secondary leading-relaxed">
-                                    {feature.description}
-                                </p>
-                            </div>
-                        </motion.div>
-                    ))}
-                </motion.div>
+                {/* Shared Features */}
+                <div>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="flex items-center gap-4 mb-10"
+                    >
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center">
+                            <ShieldCheck className="w-7 h-7 text-white" strokeWidth={2} />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl md:text-3xl font-bold text-text-dark">Shared</h3>
+                            <p className="text-lg text-text-secondary">For the whole family</p>
+                        </div>
+                    </motion.div>
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        className="grid sm:grid-cols-3 gap-6"
+                    >
+                        {sharedFeatures.map((feature) => (
+                            <FeatureCard key={feature.title} feature={feature} />
+                        ))}
+                    </motion.div>
+                </div>
             </div>
         </section>
     );

@@ -16,23 +16,23 @@ const steps: Step[] = [
     {
         number: 1,
         icon: ClipboardList,
-        title: "Tell Us About Your Kids",
-        description: "Quick quiz: How many children? What ages? What are your priorities? (Islamic manners? Quran? Prophets' stories?)",
-        highlight: "Takes 2 minutes"
+        title: "They Learn in the App",
+        description: "Your child completes 5-minute daily lessons. Games, stories, and quizzes keep them engaged and wanting more.",
+        highlight: "This week: Learning about Wudu"
     },
     {
         number: 2,
         icon: Smartphone,
-        title: "Get Your Weekly Plan",
-        description: "Every Sunday, receive a personalized lesson plan for each child. Exactly what to teach, how to teach it, and fun activities to try.",
-        highlight: "Delivered weekly"
+        title: "You Get the Activity",
+        description: "Every weekend, a 15-minute family activity lands in your dashboard. Clear instructions, no prep needed.",
+        highlight: "Practice Wudu together"
     },
     {
         number: 3,
         icon: Sparkles,
-        title: "Watch Them Grow",
-        description: "Your 6-year-old asks deep questions about Allah. Your 10-year-old teaches younger siblings. You feel confident as an Islamic educator.",
-        highlight: "See the results"
+        title: "Watch Them Grow Together",
+        description: "Track app progress and completed family activities. See what's clicking and what needs reinforcement.",
+        highlight: "Week 6: Knows all Wudu steps"
     },
 ];
 
@@ -60,14 +60,14 @@ export function HowItWorks() {
                     </div>
 
                     <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-heading text-text-dark leading-tight">
-                        Getting started is
+                        A weekly rhythm that
                         <span className="block mt-2 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                            beautifully simple
+                            actually works
                         </span>
                     </h2>
 
                     <p className="text-xl md:text-2xl text-text-secondary max-w-3xl mx-auto leading-relaxed">
-                        Three easy steps to transform your family's Islamic education
+                        By week 12: Your child has learned the foundations of Islam—and you've been part of every step.
                     </p>
                 </motion.div>
 
@@ -219,16 +219,16 @@ export function HowItWorks() {
                                     The result?
                                 </h3>
                                 <p className="text-2xl md:text-3xl text-primary font-semibold">
-                                    Confident kids. Confident parents. Stronger iman.
+                                    Confident kids. Connected parents. Stronger iman.
                                 </p>
                             </div>
 
                             {/* Stats */}
                             <div className="grid sm:grid-cols-3 gap-6 md:gap-8">
                                 {[
-                                    { icon: Clock, stat: "15 min", label: "Weekly investment" },
-                                    { icon: BookOpen, stat: "50+", label: "Lessons ready" },
-                                    { icon: Users, stat: "100+", label: "Families waiting" }
+                                    { icon: Clock, stat: "5 min", label: "Daily in app" },
+                                    { icon: BookOpen, stat: "15 min", label: "Weekly activity" },
+                                    { icon: Users, stat: "12 weeks", label: "Full journey" }
                                 ].map((item, i) => (
                                     <motion.div
                                         key={i}
@@ -264,7 +264,7 @@ export function HowItWorks() {
                         className="group relative px-10 md:px-12 py-5 md:py-6 text-lg md:text-xl font-semibold rounded-2xl bg-gradient-to-r from-primary via-secondary to-accent text-white shadow-primary hover:shadow-primary/50 transition-all duration-300"
                     >
                         <span className="relative z-10 flex items-center justify-center gap-3">
-                            Join 200+ Families on the Waitlist
+                            Join 150+ Families on the Waitlist
                             <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>

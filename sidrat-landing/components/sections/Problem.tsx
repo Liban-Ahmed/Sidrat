@@ -7,31 +7,31 @@ import { Frown, HelpCircle, CloudRain, Smartphone, AlertTriangle, Users, Clock }
 const painPoints = [
     {
         icon: Frown,
-        title: "Random Teaching",
-        description: "You teach Islamic concepts randomly, whenever you remember. No structure, no plan—just guilt when weeks pass by.",
-        stat: "73% of parents",
-        statDesc: "feel unprepared"
+        title: "App-Only Feels Hollow",
+        description: "You want them to learn, but not from a screen alone. Yet Islamic apps feel disconnected from your family's values.",
+        stat: "Screen guilt",
+        statDesc: "is real"
     },
     {
         icon: HelpCircle,
-        title: "Age Confusion",
-        description: "Should your 5-year-old learn about Jannah? Is your 10-year-old too young for Seerah? You're constantly second-guessing.",
-        stat: "Every parent",
-        statDesc: "asks this"
+        title: "DIY Teaching Is Exhausting",
+        description: "You're not a curriculum designer, and life is busy. Finding, planning, and executing lessons takes hours you don't have.",
+        stat: "No time",
+        statDesc: "for prep work"
     },
     {
         icon: CloudRain,
-        title: "The Guilt",
-        description: "Sunday rolls around again. You promised yourself you'd start teaching regularly. But you didn't. Again.",
-        stat: "2 weeks",
-        statDesc: "average gap"
+        title: "Nothing Sticks",
+        description: "They watch Islamic videos but can't tell you what they learned. Information goes in one ear and out the other.",
+        stat: "Zero",
+        statDesc: "retention"
     },
     {
         icon: Smartphone,
-        title: "Lost to Screens",
-        description: "Your kids know every TikTok trend but can't name the 5 pillars. YouTube teaches them more than you do.",
-        stat: "4+ hours",
-        statDesc: "screen time daily"
+        title: "You're Disconnected",
+        description: "When they do use learning apps, you have no idea what's happening. You're left out of their Islamic education journey.",
+        stat: "No visibility",
+        statDesc: "into progress"
     },
 ];
 
@@ -83,7 +83,7 @@ export function Problem() {
                     >
                         <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-large border border-gray-100 max-w-3xl mx-auto">
                             <p className="text-2xl md:text-3xl text-text-dark font-medium italic leading-relaxed">
-                                "I want to raise my kids with strong Islamic values... but I have no idea where to start."
+                                "I either hand them a screen and feel guilty, or try to teach them myself and feel lost."
                             </p>
                             <p className="text-lg text-text-secondary mt-4">— Every Muslim parent</p>
                         </div>
@@ -178,10 +178,7 @@ export function Problem() {
                         <div className="absolute -inset-4 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 rounded-3xl blur-xl" />
                         <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl p-10 md:p-12 shadow-large border border-gray-100">
                             <p className="text-2xl md:text-3xl lg:text-4xl text-text-dark max-w-4xl mx-auto leading-relaxed font-medium">
-                                Sound familiar? You&apos;re doing your best—but you know there&apos;s a
-                                <span className="block mt-3 text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-gradient">
-                                    better way
-                                </span>
+                                What if they could learn independently AND you could be part of the journey?
                             </p>
                         </div>
                     </div>
@@ -199,7 +196,7 @@ export function Problem() {
                                 <Users className="w-6 h-6 text-white" strokeWidth={2} />
                             </div>
                             <div className="text-left">
-                                <div className="text-2xl font-bold text-text-dark">100+</div>
+                                <div className="text-2xl font-bold text-text-dark">150+</div>
                                 <div className="text-sm text-text-secondary">families waiting</div>
                             </div>
                         </div>
@@ -209,8 +206,8 @@ export function Problem() {
                                 <Clock className="w-6 h-6 text-white" strokeWidth={2} />
                             </div>
                             <div className="text-left">
-                                <div className="text-2xl font-bold text-text-dark">15 min</div>
-                                <div className="text-sm text-text-secondary">per week needed</div>
+                                <div className="text-2xl font-bold text-text-dark">5 min/day</div>
+                                <div className="text-sm text-text-secondary">+ 15 min/week</div>
                             </div>
                         </div>
                     </motion.div>

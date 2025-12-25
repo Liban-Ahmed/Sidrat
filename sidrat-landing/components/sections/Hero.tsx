@@ -36,25 +36,21 @@ export function Hero() {
                                 <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
                             </span>
                             <span className="text-sm font-medium text-primary">
-                                Launching December 2026 • Join 100+ families
+                                Launching December 2026 • Join 150+ families
                             </span>
                         </div>
 
                         {/* Headline - Responsive and HUGE with animated gradient */}
                         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold font-heading leading-[1.1] tracking-tight">
-                            Raise confident
+                            They learn in the app.
                             <AnimatedGradientText className="block mt-2">
-                                Muslim children
+                                You bring it to life.
                             </AnimatedGradientText>
-                            <span className="block text-3xl sm:text-4xl md:text-5xl lg:text-6xl mt-4 text-text-secondary">
-                                without the overwhelm
-                            </span>
                         </h1>
 
                         {/* Subheadline - Better spacing */}
                         <p className="text-lg sm:text-xl md:text-2xl text-text-secondary leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                            Get a personalized Islamic curriculum delivered weekly.
-                            Age-appropriate lessons, activities, and conversation starters for ages 2-14.
+                            Sidrat combines Duolingo-style daily lessons with weekly family activities—so your 5-7 year old builds Islamic foundations while you stay connected to their growth.
                         </p>
 
                         {/* CTA with magnetic buttons */}
@@ -107,7 +103,7 @@ export function Hero() {
                                     ))}
                                 </div>
                                 <p className="text-sm sm:text-base text-text-secondary">
-                                    <span className="font-semibold text-text-dark">100+ Muslim families</span> already on the waitlist
+                                    <span className="font-semibold text-text-dark">150+ Muslim families</span> already on the waitlist
                                 </p>
                             </div>
                         </motion.div>
@@ -149,8 +145,8 @@ export function Hero() {
                                     <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                                 </div>
                                 <div>
-                                    <div className="text-xl sm:text-2xl font-bold text-text-dark">50+</div>
-                                    <div className="text-xs sm:text-sm text-text-secondary">Lessons</div>
+                                    <div className="text-xl sm:text-2xl font-bold text-text-dark">5 min/day</div>
+                                    <div className="text-xs sm:text-sm text-text-secondary">In-App Lessons</div>
                                 </div>
                             </div>
                         </motion.div>
@@ -167,8 +163,8 @@ export function Hero() {
                                     <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                                 </div>
                                 <div>
-                                    <div className="text-xl sm:text-2xl font-bold text-text-dark">100%</div>
-                                    <div className="text-xs sm:text-sm text-text-secondary">Scholar Verified</div>
+                                    <div className="text-xl sm:text-2xl font-bold text-text-dark">Ages 5-7</div>
+                                    <div className="text-xs sm:text-sm text-text-secondary">Family Activity/Week</div>
                                 </div>
                             </div>
                         </motion.div>

@@ -7,11 +7,15 @@ import { EmailForm } from "@/components/ui/EmailForm";
 import { AnimatedGradientText } from "@/components/effects";
 
 const included = [
-    "Lifetime access to Sidrat",
-    "All future updates free",
+    "Full 12-week Ages 5-7 experience",
+    "50+ interactive app lessons",
+    "12 guided family activities",
+    "Unlimited child profiles",
+    "Parent dashboard",
+    "All future age ranges free when released",
+    "Lifetime updates",
     "Priority support",
     "Founding member badge",
-    "Early feature requests",
 ];
 
 export function Pricing() {
@@ -35,7 +39,7 @@ export function Pricing() {
                 >
                     <div className="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-accent/20 to-accent/10 border border-accent/30 mb-6">
                         <span className="text-sm font-semibold text-accent uppercase tracking-wide">
-                            Limited Time Offer
+                            Founding Member Offer
                         </span>
                     </div>
 
@@ -98,7 +102,7 @@ export function Pricing() {
                                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                 </svg>
-                                <span className="text-green-800 font-semibold text-sm sm:text-base">Save $45 + Lock in forever!</span>
+                                <span className="text-green-800 font-semibold text-sm sm:text-base">Save $45 + Lock in this rate forever</span>
                             </div>
 
                             <p className="text-sm sm:text-base text-text-secondary">
@@ -141,11 +145,11 @@ export function Pricing() {
                                 </div>
                                 <div>
                                     <p className="text-lg sm:text-xl font-bold text-text-dark mb-2">
-                                        Bonus: Free Islamic Curriculum Planning Guide
+                                        Bonus: Printable "My Islamic Learning" Journal
                                     </p>
                                     <p className="text-base sm:text-lg text-text-secondary">
-                                        Complete guide to structuring your child's Islamic education
-                                        <span className="block mt-1 text-accent font-semibold">($29 value, yours FREE)</span>
+                                        Track your child's progress with this beautifully designed journal
+                                        <span className="block mt-1 text-accent font-semibold">($19 value, yours FREE)</span>
                                     </p>
                                 </div>
                             </div>
@@ -178,7 +182,7 @@ export function Pricing() {
                                 <div className="flex items-center gap-2">
                                     <Users className="w-5 h-5 text-primary" />
                                     <span className="text-text-secondary">
-                                        <span className="font-semibold text-text-dark">100+ families</span> already joined
+                                        <span className="font-semibold text-text-dark">150+ families</span> already joined
                                     </span>
                                 </div>
                             </div>
@@ -196,8 +200,8 @@ export function Pricing() {
                 >
                     <div className="grid sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto">
                         {[
-                            { icon: Zap, stat: "48 hours", label: "Average response time" },
-                            { icon: ShieldCheck, stat: "100%", label: "Scholar verified" },
+                            { icon: Zap, stat: "Ad-free", label: "Safe learning" },
+                            { icon: ShieldCheck, stat: "100%", label: "Scholar reviewed" },
                             { icon: Award, stat: "30-day", label: "Money-back guarantee" }
                         ].map((item, i) => (
                             <motion.div
