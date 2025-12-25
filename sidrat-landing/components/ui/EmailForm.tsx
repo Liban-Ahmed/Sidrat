@@ -64,50 +64,54 @@ export function EmailForm({
 
     return (
         <div className={className}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="flex-1">
-                        <input
-                            type="email"
-                            {...register("email", {
-                                required: "Email is required",
-                                pattern: {
-                                    value: emailRegex,
-                                    message: "Please enter a valid email",
-                                },
-                            })}
-                            placeholder={placeholder}
-                            disabled={isSubmitting || submitStatus === "success"}
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                            aria-label="Email address"
-                        />
-                        {errors.email && (
-                            <motion.p
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="mt-2 text-sm text-red-500 flex items-center gap-1"
-                            >
-                                <AlertCircle className="w-4 h-4" />
-                                {errors.email.message}
-                            </motion.p>
-                        )}
-                    </div>
-                    <button
-                        type="submit"
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <div className="relative">
+                    <input
+                        type="email"
+                        {...register("email", {
+                            required: "Email is required",
+                            pattern: {
+                                value: emailRegex,
+                                message: "Please enter a valid email",
+                            },
+                        })}
+                        placeholder={placeholder}
                         disabled={isSubmitting || submitStatus === "success"}
-                        className="inline-flex items-center justify-center px-6 py-3 bg-primary text-white font-heading font-semibold rounded-lg hover:bg-primary/90 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 sm:w-auto w-full"
-                        aria-label={buttonText}
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                                Submitting...
-                            </>
-                        ) : (
-                            buttonText
-                        )}
-                    </button>
+                        className="w-full px-8 py-6 text-lg rounded-2xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        aria-label="Email address"
+                    />
+                    {errors.email && (
+                        <motion.p
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-2 text-sm text-red-500 flex items-center gap-1"
+                        >
+                            <AlertCircle className="w-4 h-4" />
+                            {errors.email.message}
+                        </motion.p>
+                    )}
                 </div>
+
+                <button
+                    type="submit"
+                    disabled={isSubmitting || submitStatus === "success"}
+                    className="w-full group relative px-10 py-6 text-xl font-semibold rounded-2xl bg-gradient-to-r from-primary to-secondary text-white shadow-primary hover:shadow-primary/50 hover:scale-[1.02] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    aria-label={buttonText}
+                >
+                    {isSubmitting ? (
+                        <span className="flex items-center justify-center gap-3">
+                            <Loader2 className="w-6 h-6 animate-spin" />
+                            Submitting...
+                        </span>
+                    ) : (
+                        <span className="relative z-10 flex items-center justify-center gap-3">
+                            {buttonText}
+                            <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                        </span>
+                    )}
+                </button>
             </form>
 
             <AnimatePresence>
@@ -116,7 +120,7 @@ export function EmailForm({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="mt-4 p-4 bg-secondary/10 border border-secondary/20 rounded-lg flex items-center gap-2 text-secondary"
+                        className="mt-6 p-4 bg-secondary/10 border border-secondary/20 rounded-2xl flex items-center gap-2 text-secondary"
                     >
                         <CheckCircle className="w-5 h-5 flex-shrink-0" />
                         <span>Thank you! You&apos;re on the waitlist. We&apos;ll be in touch soon!</span>
@@ -127,17 +131,13 @@ export function EmailForm({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-600"
+                        className="mt-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2 text-red-600"
                     >
                         <AlertCircle className="w-5 h-5 flex-shrink-0" />
                         <span>{errorMessage}</span>
                     </motion.div>
                 )}
             </AnimatePresence>
-
-            <p className="mt-3 text-sm text-text-secondary flex items-center gap-1">
-                🔒 We respect your privacy. Unsubscribe anytime.
-            </p>
         </div>
     );
 }
