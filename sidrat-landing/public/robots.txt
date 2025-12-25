@@ -1,0 +1,9 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://sidratapp.com/sitemap.xml
+
+# Block sensitive paths
+Disallow: /api/
