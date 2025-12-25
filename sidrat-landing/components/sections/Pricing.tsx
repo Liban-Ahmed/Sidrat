@@ -172,7 +172,7 @@ export function Pricing() {
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                                         <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                                     </div>
-                                    <span className="font-semibold text-text-dark">Launching Q1 2025</span>
+                                    <span className="font-semibold text-text-dark">Launching December 2026</span>
                                 </div>
                                 <span className="hidden sm:inline text-text-secondary">•</span>
                                 <div className="flex items-center gap-2">

@@ -39,7 +39,6 @@ export function EmailForm({
         setErrorMessage("");
 
         try {
-            // ✅ Call your own API route (key is hidden)
             const response = await fetch("/api/subscribe", {
                 method: "POST",
                 headers: {
