@@ -39,24 +39,28 @@ export function EmailForm({
         setErrorMessage("");
 
         try {
-            // Using Formspree - replace YOUR_FORM_ID with actual ID
-            const response = await fetch("https://formspree.io/f/YOUR_FORM_ID", {
+            // ✅ Call your own API route (key is hidden)
+            const response = await fetch("/api/subscribe", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email: data.email }),
+                body: JSON.stringify({
+                    email: data.email,
+                }),
             });
+
+            const result = await response.json();
 
             if (response.ok) {
                 setSubmitStatus("success");
                 reset();
             } else {
-                throw new Error("Failed to submit");
+                throw new Error(result.error || "Failed to submit");
             }
-        } catch {
+        } catch (error) {
             setSubmitStatus("error");
-            setErrorMessage("Something went wrong. Please try again.");
+            setErrorMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
         } finally {
             setIsSubmitting(false);
         }

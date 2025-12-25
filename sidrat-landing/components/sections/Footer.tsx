@@ -162,7 +162,7 @@ export function Footer() {
                 {/* Bottom Bar */}
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <p className="text-gray-400 text-sm sm:text-base flex items-center gap-2 flex-wrap justify-center">
-                        © 2026 Sidrat. Built with
+                        © 2025 Sidrat. Built with
                         <Heart className="w-4 h-4 text-red-500 animate-pulse" fill="currentColor" />
                         for Muslim families worldwide.
                     </p>

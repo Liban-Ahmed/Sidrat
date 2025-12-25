@@ -36,7 +36,7 @@ export function Hero() {
                                 <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
                             </span>
                             <span className="text-sm font-medium text-primary">
-                                Launching December 2026 • Join 100+ families
+                                Launching Q1 2025 • Join 100+ families
                             </span>
                         </div>
 
