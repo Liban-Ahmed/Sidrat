@@ -275,7 +275,7 @@ export function Solution() {
                     className="grid sm:grid-cols-3 gap-6 md:gap-8"
                 >
                     {[
-                        { icon: Users, stat: "150+", label: "Families waiting" },
+                        { icon: Users, stat: "100+", label: "Families waiting" },
                         { icon: BookOpen, stat: "50+", label: "Lesson plans ready" },
                         { icon: ShieldCheck, stat: "100%", label: "Scholar verified" }
                     ].map((item, i) => (

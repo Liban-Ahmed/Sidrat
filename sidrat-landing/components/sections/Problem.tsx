@@ -199,7 +199,7 @@ export function Problem() {
                                 <Users className="w-6 h-6 text-white" strokeWidth={2} />
                             </div>
                             <div className="text-left">
-                                <div className="text-2xl font-bold text-text-dark">150+</div>
+                                <div className="text-2xl font-bold text-text-dark">100+</div>
                                 <div className="text-sm text-text-secondary">families waiting</div>
                             </div>
                         </div>
