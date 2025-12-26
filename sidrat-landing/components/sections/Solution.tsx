@@ -2,50 +2,84 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Users, BookOpen, ShieldCheck, Moon, Star, Sparkles } from "lucide-react";
+import { CheckCircle2, Users, BookOpen, ShieldCheck, Moon, Star, Sparkles, Gamepad2, Calendar, BarChart3 } from "lucide-react";
 
 const benefits = [
-    { icon: CheckCircle2, title: 'Clear lessons for ages 2-14', desc: '(not too basic, not too advanced)' },
-    { icon: CheckCircle2, title: '15-minute activities', desc: 'that actually engage kids' },
-    { icon: CheckCircle2, title: 'Conversation prompts', desc: "so you're never tongue-tied" },
-    { icon: CheckCircle2, title: 'Progress tracking', desc: 'so you see their growth' },
-    { icon: CheckCircle2, title: 'Scholar-reviewed content', desc: 'you can trust' }
+    { icon: CheckCircle2, title: 'Kids learn independently', desc: 'through interactive app lessons' },
+    { icon: CheckCircle2, title: 'Parents stay involved', desc: 'without any prep work' },
+    { icon: CheckCircle2, title: 'Weekly family activities', desc: 'turn screen learning into real-world practice' },
+    { icon: CheckCircle2, title: 'Progress tracking', desc: 'for both app lessons and family time' },
+    { icon: CheckCircle2, title: 'Scholar-reviewed content', desc: 'throughout the entire experience' }
+];
+
+const rhythmSteps = [
+    { icon: Gamepad2, label: "Monday–Friday", desc: "Your child completes bite-sized app lessons (5 min)", color: "from-primary to-primary/80" },
+    { icon: Calendar, label: "Weekend", desc: "You receive a family activity tied to the week's lessons (15 min)", color: "from-secondary to-secondary/80" },
+    { icon: BarChart3, label: "Always", desc: "Parent dashboard shows exactly what they've learned", color: "from-accent to-accent/80" },
 ];
 
 export function Solution() {
     return (
-        <section className="py-32 md:py-40 bg-gradient-to-b from-white via-primary/5 to-white relative overflow-hidden">
+        <section className="py-20 sm:py-24 md:py-32 lg:py-40 bg-gradient-to-b from-white via-primary/5 to-white relative overflow-hidden">
             {/* Enhanced background decorations */}
             <div className="absolute inset-0">
-                <div className="absolute top-1/4 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/4 left-10 w-80 h-80 bg-secondary/10 rounded-full blur-3xl" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 rounded-full blur-3xl" />
+                <div className="absolute top-1/4 right-4 sm:right-10 w-64 sm:w-96 h-64 sm:h-96 bg-primary/10 rounded-full blur-3xl" />
+                <div className="absolute bottom-1/4 left-4 sm:left-10 w-48 sm:w-80 h-48 sm:h-80 bg-secondary/10 rounded-full blur-3xl" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 rounded-full blur-3xl" />
             </div>
 
-            <div className="container mx-auto px-6 sm:px-8 md:px-12 lg:px-20 xl:px-40 max-w-[1400px] relative z-10">
+            <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-40 max-w-[1400px] relative z-10">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-24 space-y-8"
+                    className="text-center mb-16 sm:mb-20 md:mb-24 space-y-6 sm:space-y-8"
                 >
-                    <div className="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 mb-6">
-                        <span className="text-sm font-semibold text-primary uppercase tracking-wide">THE SOLUTION</span>
+                    <div className="inline-block px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 mb-4 sm:mb-6">
+                        <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-wide">THE SOLUTION</span>
                     </div>
 
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-heading text-text-dark leading-tight">
-                        Meet Sidrat—Your
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold font-heading text-text-dark leading-tight">
+                        Meet Sidrat—Where
                         <span className="block mt-2 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                            Islamic Curriculum Guide
+                            App Learning Meets Family Teaching
                         </span>
                     </h2>
 
                     <p className="text-xl md:text-2xl text-text-secondary max-w-4xl mx-auto leading-relaxed">
-                        Imagine having a personal Islamic education consultant who tells you exactly
-                        what to teach your child this week, with ready-made activities and conversation starters.
+                        Your child spends 5 minutes a day learning through games and stories. Then once a week, you get a simple 15-minute activity to do together—reinforcing exactly what they learned. They build knowledge. You build connection.
                     </p>
+                </motion.div>
+
+                {/* How the rhythm works */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="mb-12 sm:mb-16 md:mb-20"
+                >
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-text-dark mb-6 sm:mb-8 md:mb-10">How the rhythm works:</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                        {rhythmSteps.map((step, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.1 * i, duration: 0.5 }}
+                                className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 shadow-card border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                            >
+                                <div className={`w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center mb-4 sm:mb-6`}>
+                                    <step.icon className="w-6 sm:w-7 md:w-8 h-6 sm:h-7 md:h-8 text-white" strokeWidth={2} />
+                                </div>
+                                <h4 className="text-lg sm:text-xl font-bold text-text-dark mb-2 sm:mb-3">{step.label}</h4>
+                                <p className="text-sm sm:text-base md:text-lg text-text-secondary">{step.desc}</p>
+                            </motion.div>
+                        ))}
+                    </div>
                 </motion.div>
 
                 {/* Improved Bento grid layout */}
@@ -256,10 +290,10 @@ export function Solution() {
                             className="pt-8 relative"
                         >
                             <div className="absolute -inset-4 bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 rounded-3xl blur-xl" />
-                            <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-large border border-gray-100">
+                            <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-large border border-gray-100">
                                 <p className="text-2xl md:text-3xl text-text-dark font-medium leading-relaxed">
                                     No more guessing. No more guilt.
-                                    <span className="block mt-3 text-primary font-bold">Just consistent, joyful Islamic education.</span>
+                                    <span className="block mt-3 text-primary font-bold">They learn. You connect. Together.</span>
                                 </p>
                             </div>
                         </motion.div>
@@ -272,12 +306,13 @@ export function Solution() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.4 }}
-                    className="grid sm:grid-cols-3 gap-6 md:gap-8"
+                    className="grid sm:grid-cols-4 gap-6 md:gap-8"
                 >
                     {[
-                        { icon: Users, stat: "100+", label: "Families waiting" },
-                        { icon: BookOpen, stat: "50+", label: "Lesson plans ready" },
-                        { icon: ShieldCheck, stat: "100%", label: "Scholar verified" }
+                        { icon: Users, stat: "150+", label: "Families waiting" },
+                        { icon: BookOpen, stat: "50+", label: "App lessons" },
+                        { icon: Calendar, stat: "12", label: "Family activities" },
+                        { icon: ShieldCheck, stat: "100%", label: "Scholar reviewed" }
                     ].map((item, i) => (
                         <motion.div
                             key={i}

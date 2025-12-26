@@ -7,31 +7,31 @@ import { Frown, HelpCircle, CloudRain, Smartphone, AlertTriangle, Users, Clock }
 const painPoints = [
     {
         icon: Frown,
-        title: "Random Teaching",
-        description: "You teach Islamic concepts randomly, whenever you remember. No structure, no plan—just guilt when weeks pass by.",
-        stat: "73% of parents",
-        statDesc: "feel unprepared"
+        title: "App-Only Feels Hollow",
+        description: "You want them to learn, but not from a screen alone. Yet Islamic apps feel disconnected from your family's values.",
+        stat: "Screen guilt",
+        statDesc: "is real"
     },
     {
         icon: HelpCircle,
-        title: "Age Confusion",
-        description: "Should your 5-year-old learn about Jannah? Is your 10-year-old too young for Seerah? You're constantly second-guessing.",
-        stat: "Every parent",
-        statDesc: "asks this"
+        title: "DIY Teaching Is Exhausting",
+        description: "You're not a curriculum designer, and life is busy. Finding, planning, and executing lessons takes hours you don't have.",
+        stat: "No time",
+        statDesc: "for prep work"
     },
     {
         icon: CloudRain,
-        title: "The Guilt",
-        description: "Sunday rolls around again. You promised yourself you'd start teaching regularly. But you didn't. Again.",
-        stat: "2 weeks",
-        statDesc: "average gap"
+        title: "Nothing Sticks",
+        description: "They watch Islamic videos but can't tell you what they learned. Information goes in one ear and out the other.",
+        stat: "Zero",
+        statDesc: "retention"
     },
     {
         icon: Smartphone,
-        title: "Lost to Screens",
-        description: "Your kids know every TikTok trend but can't name the 5 pillars. YouTube teaches them more than you do.",
-        stat: "4+ hours",
-        statDesc: "screen time daily"
+        title: "You're Disconnected",
+        description: "When they do use learning apps, you have no idea what's happening. You're left out of their Islamic education journey.",
+        stat: "No visibility",
+        statDesc: "into progress"
     },
 ];
 
@@ -50,28 +50,28 @@ const itemVariants = {
     visible: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.6, ease: "easeOut" },
+        transition: { duration: 0.6, ease: "easeOut" as const },
     },
 };
 
 export function Problem() {
     return (
-        <section className="py-32 md:py-40 bg-gradient-to-b from-white via-gray-50/50 to-white relative overflow-hidden">
+        <section className="py-20 sm:py-24 md:py-32 lg:py-40 bg-gradient-to-b from-white via-gray-50/50 to-white relative overflow-hidden">
             {/* Enhanced background decorations */}
             <div className="absolute inset-0">
-                <div className="absolute top-1/4 left-10 w-72 h-72 bg-red-500/5 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-red-500/5 via-transparent to-primary/5 rounded-full blur-3xl" />
+                <div className="absolute top-1/4 left-4 sm:left-10 w-48 sm:w-72 h-48 sm:h-72 bg-red-500/5 rounded-full blur-3xl" />
+                <div className="absolute bottom-1/4 right-4 sm:right-10 w-64 sm:w-96 h-64 sm:h-96 bg-primary/5 rounded-full blur-3xl" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-gradient-to-r from-red-500/5 via-transparent to-primary/5 rounded-full blur-3xl" />
             </div>
 
-            <div className="container mx-auto px-6 sm:px-8 md:px-12 lg:px-20 xl:px-40 max-w-[1400px] relative z-10">
+            <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-40 max-w-[1400px] relative z-10">
                 {/* Section header with quote */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-20 space-y-8"
+                    className="text-center mb-12 sm:mb-16 md:mb-20 space-y-5 sm:space-y-8"
                 >
                     {/* Quote bubble */}
                     <motion.div
@@ -81,20 +81,24 @@ export function Problem() {
                         transition={{ delay: 0.2, duration: 0.5 }}
                         className="inline-block"
                     >
-                        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-large border border-gray-100 max-w-3xl mx-auto">
-                            <p className="text-2xl md:text-3xl text-text-dark font-medium italic leading-relaxed">
-                                "I want to raise my kids with strong Islamic values... but I have no idea where to start."
+                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-large border border-gray-100 max-w-3xl mx-auto">
+                            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-text-dark font-medium italic leading-relaxed">
+                                “I either hand them a screen and feel guilty, or try to teach them myself and feel lost.”
                             </p>
-                            <p className="text-lg text-text-secondary mt-4">— Every Muslim parent</p>
+                            <p className="text-sm sm:text-base md:text-lg text-text-secondary mt-3 sm:mt-4">— Every Muslim parent</p>
                         </div>
                     </motion.div>
 
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-heading text-text-dark leading-tight">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold font-heading text-text-dark leading-tight">
                         You&apos;re not alone in this
                         <span className="block mt-2 bg-gradient-to-r from-red-600 via-primary to-red-600 bg-clip-text text-transparent">
                             struggle
                         </span>
                     </h2>
+
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/20">
+                        <span className="text-sm font-medium text-primary">For parents of 5-7 year olds</span>
+                    </div>
 
                     <p className="text-xl md:text-2xl text-text-secondary max-w-4xl mx-auto leading-relaxed">
                         You love your children and want to raise them with strong Islamic values.
@@ -178,10 +182,7 @@ export function Problem() {
                         <div className="absolute -inset-4 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 rounded-3xl blur-xl" />
                         <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl p-10 md:p-12 shadow-large border border-gray-100">
                             <p className="text-2xl md:text-3xl lg:text-4xl text-text-dark max-w-4xl mx-auto leading-relaxed font-medium">
-                                Sound familiar? You&apos;re doing your best—but you know there&apos;s a
-                                <span className="block mt-3 text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-gradient">
-                                    better way
-                                </span>
+                                What if they could learn independently AND you could be part of the journey?
                             </p>
                         </div>
                     </div>
@@ -199,7 +200,7 @@ export function Problem() {
                                 <Users className="w-6 h-6 text-white" strokeWidth={2} />
                             </div>
                             <div className="text-left">
-                                <div className="text-2xl font-bold text-text-dark">100+</div>
+                                <div className="text-2xl font-bold text-text-dark">150+</div>
                                 <div className="text-sm text-text-secondary">families waiting</div>
                             </div>
                         </div>
@@ -209,8 +210,8 @@ export function Problem() {
                                 <Clock className="w-6 h-6 text-white" strokeWidth={2} />
                             </div>
                             <div className="text-left">
-                                <div className="text-2xl font-bold text-text-dark">15 min</div>
-                                <div className="text-sm text-text-secondary">per week needed</div>
+                                <div className="text-2xl font-bold text-text-dark">5 min/day</div>
+                                <div className="text-sm text-text-secondary">+ 15 min/week</div>
                             </div>
                         </div>
                     </motion.div>

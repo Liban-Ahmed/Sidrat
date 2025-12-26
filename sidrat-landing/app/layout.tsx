@@ -35,6 +35,7 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  metadataBase: new URL('https://sidratapp.com'),
 };
 
 export default function RootLayout({

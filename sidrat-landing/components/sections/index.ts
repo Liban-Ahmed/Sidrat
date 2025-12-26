@@ -4,5 +4,7 @@ export { Problem } from "./Problem";
 export { Solution } from "./Solution";
 export { Features } from "./Features";
 export { HowItWorks } from "./HowItWorks";
+export { Testimonials } from "./Testimonials";
 export { Pricing } from "./Pricing";
+export { FAQ } from "./FAQ";
 export { Footer } from "./Footer";

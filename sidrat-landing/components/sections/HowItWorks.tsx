@@ -16,58 +16,58 @@ const steps: Step[] = [
     {
         number: 1,
         icon: ClipboardList,
-        title: "Tell Us About Your Kids",
-        description: "Quick quiz: How many children? What ages? What are your priorities? (Islamic manners? Quran? Prophets' stories?)",
-        highlight: "Takes 2 minutes"
+        title: "They Learn in the App",
+        description: "Your child completes 5-minute daily lessons. Games, stories, and quizzes keep them engaged and wanting more.",
+        highlight: "This week: Learning about Wudu"
     },
     {
         number: 2,
         icon: Smartphone,
-        title: "Get Your Weekly Plan",
-        description: "Every Sunday, receive a personalized lesson plan for each child. Exactly what to teach, how to teach it, and fun activities to try.",
-        highlight: "Delivered weekly"
+        title: "You Get the Activity",
+        description: "Every weekend, a 15-minute family activity lands in your dashboard. Clear instructions, no prep needed.",
+        highlight: "Practice Wudu together"
     },
     {
         number: 3,
         icon: Sparkles,
-        title: "Watch Them Grow",
-        description: "Your 6-year-old asks deep questions about Allah. Your 10-year-old teaches younger siblings. You feel confident as an Islamic educator.",
-        highlight: "See the results"
+        title: "Watch Them Grow Together",
+        description: "Track app progress and completed family activities. See what's clicking and what needs reinforcement.",
+        highlight: "Week 6: Knows all Wudu steps"
     },
 ];
 
 export function HowItWorks() {
     return (
-        <section id="how-it-works" className="py-32 md:py-40 bg-gradient-to-b from-white via-gray-50/30 to-white relative overflow-hidden">
+        <section id="how-it-works" className="py-20 sm:py-24 md:py-32 lg:py-40 bg-gradient-to-b from-white via-gray-50/30 to-white relative overflow-hidden">
             {/* Background decorations */}
             <div className="absolute inset-0">
-                <div className="absolute top-1/4 left-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/4 right-10 w-80 h-80 bg-secondary/5 rounded-full blur-3xl" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 rounded-full blur-3xl" />
+                <div className="absolute top-1/4 left-4 sm:left-10 w-64 sm:w-96 h-64 sm:h-96 bg-primary/5 rounded-full blur-3xl" />
+                <div className="absolute bottom-1/4 right-4 sm:right-10 w-48 sm:w-80 h-48 sm:h-80 bg-secondary/5 rounded-full blur-3xl" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 rounded-full blur-3xl" />
             </div>
 
-            <div className="container mx-auto px-6 sm:px-8 md:px-12 lg:px-20 xl:px-40 max-w-[1400px] relative z-10">
+            <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-40 max-w-[1400px] relative z-10">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-20 md:mb-24 space-y-8"
+                    className="text-center mb-12 sm:mb-16 md:mb-20 lg:mb-24 space-y-4 sm:space-y-6 md:space-y-8"
                 >
-                    <div className="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 mb-6">
-                        <span className="text-sm font-semibold text-primary uppercase tracking-wide">HOW IT WORKS</span>
+                    <div className="inline-block px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 mb-4 sm:mb-6">
+                        <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-wide">HOW IT WORKS</span>
                     </div>
 
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-heading text-text-dark leading-tight">
-                        Getting started is
-                        <span className="block mt-2 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                            beautifully simple
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold font-heading text-text-dark leading-tight">
+                        A weekly rhythm that
+                        <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                            actually works
                         </span>
                     </h2>
 
-                    <p className="text-xl md:text-2xl text-text-secondary max-w-3xl mx-auto leading-relaxed">
-                        Three easy steps to transform your family's Islamic education
+                    <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-text-secondary max-w-3xl mx-auto leading-relaxed">
+                        By week 12: Your child has learned the foundations of Islam—and you’ve been part of every step.
                     </p>
                 </motion.div>
 
@@ -83,9 +83,9 @@ export function HowItWorks() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true, margin: "-100px" }}
                             transition={{ delay: 0.2 * index, duration: 0.6 }}
-                            className="relative mb-20 md:mb-24 last:mb-0"
+                            className="relative mb-10 sm:mb-14 md:mb-20 lg:mb-24 last:mb-0"
                         >
-                            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                            <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
                                 {/* Alternate layout on desktop */}
                                 {index % 2 === 0 ? (
                                     <>
@@ -97,7 +97,7 @@ export function HowItWorks() {
                                             transition={{ delay: 0.3 + (0.2 * index), duration: 0.6 }}
                                             className="lg:text-right"
                                         >
-                                            <div className="group bg-white rounded-3xl p-8 md:p-10 border border-gray-100 shadow-large hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+                                            <div className="group bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 lg:p-10 border border-gray-100 shadow-large hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
                                                 {/* Icon and title */}
                                                 <div className="flex lg:flex-row-reverse items-start gap-6 mb-6">
                                                     <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
@@ -219,16 +219,16 @@ export function HowItWorks() {
                                     The result?
                                 </h3>
                                 <p className="text-2xl md:text-3xl text-primary font-semibold">
-                                    Confident kids. Confident parents. Stronger iman.
+                                    Confident kids. Connected parents. Stronger iman.
                                 </p>
                             </div>
 
                             {/* Stats */}
                             <div className="grid sm:grid-cols-3 gap-6 md:gap-8">
                                 {[
-                                    { icon: Clock, stat: "15 min", label: "Weekly investment" },
-                                    { icon: BookOpen, stat: "50+", label: "Lessons ready" },
-                                    { icon: Users, stat: "100+", label: "Families waiting" }
+                                    { icon: Clock, stat: "5 min", label: "Daily in app" },
+                                    { icon: BookOpen, stat: "15 min", label: "Weekly activity" },
+                                    { icon: Users, stat: "12 weeks", label: "Full journey" }
                                 ].map((item, i) => (
                                     <motion.div
                                         key={i}
@@ -264,7 +264,7 @@ export function HowItWorks() {
                         className="group relative px-10 md:px-12 py-5 md:py-6 text-lg md:text-xl font-semibold rounded-2xl bg-gradient-to-r from-primary via-secondary to-accent text-white shadow-primary hover:shadow-primary/50 transition-all duration-300"
                     >
                         <span className="relative z-10 flex items-center justify-center gap-3">
-                            Join 200+ Families on the Waitlist
+                            Join 150+ Families on the Waitlist
                             <svg className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
