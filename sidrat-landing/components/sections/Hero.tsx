@@ -7,7 +7,7 @@ import { ParallaxSection, MagneticButton, AnimatedGradientText } from "@/compone
 
 export function Hero() {
     return (
-        <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-b from-gray-50 via-white to-gray-50/50 pt-24 pb-16 sm:pt-28 sm:pb-20 md:py-0">
+        <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-b from-gray-50 via-white to-gray-50/50 pt-28 pb-16 sm:pt-32 sm:pb-20 md:pt-36 lg:pt-40 md:pb-24">
             {/* Animated background orbs with parallax - Fixed z-index */}
             <div className="absolute inset-0 z-0">
                 <ParallaxSection offset={-20}>
