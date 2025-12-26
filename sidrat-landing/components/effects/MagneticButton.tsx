@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
-interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface MagneticButtonProps {
     children: React.ReactNode;
     className?: string;
     strength?: number;
@@ -13,12 +13,24 @@ export function MagneticButton({
     children, 
     className = "", 
     strength = 0.3,
-    ...props 
 }: MagneticButtonProps) {
-    const ref = useRef<HTMLButtonElement>(null);
+    const ref = useRef<HTMLDivElement>(null);
     const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
 
-    const handleMouse = (e: React.MouseEvent<HTMLButtonElement>) => {
+    useEffect(() => {
+        // Check if device supports touch
+        setIsTouchDevice(
+            'ontouchstart' in window || 
+            navigator.maxTouchPoints > 0 ||
+            window.matchMedia('(pointer: coarse)').matches
+        );
+    }, []);
+
+    const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
+        // Disable magnetic effect on touch devices
+        if (isTouchDevice) return;
+        
         const { clientX, clientY } = e;
         const { width, height, left, top } = e.currentTarget.getBoundingClientRect();
         const x = (clientX - (left + width / 2)) * strength;
@@ -28,17 +40,25 @@ export function MagneticButton({
 
     const reset = () => setPosition({ x: 0, y: 0 });
 
+    // On touch devices, render without magnetic effect
+    if (isTouchDevice) {
+        return (
+            <div className={`inline-block w-full sm:w-auto ${className}`}>
+                {children}
+            </div>
+        );
+    }
+
     return (
-        <motion.button
+        <motion.div
             ref={ref}
             onMouseMove={handleMouse}
             onMouseLeave={reset}
             animate={{ x: position.x, y: position.y }}
             transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
-            className={className}
-            {...props}
+            className={`inline-block ${className}`}
         >
             {children}
-        </motion.button>
+        </motion.div>
     );
 }

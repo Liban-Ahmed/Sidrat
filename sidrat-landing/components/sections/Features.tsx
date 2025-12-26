@@ -102,7 +102,7 @@ export function Features() {
             y: 0,
             transition: {
                 duration: 0.6,
-                ease: [0.22, 1, 0.36, 1]
+                ease: "easeOut" as const
             }
         }
     };
@@ -110,16 +110,16 @@ export function Features() {
     const FeatureCard = ({ feature }: { feature: typeof kidFeatures[0] }) => (
         <motion.div
             variants={itemVariants}
-            className="group relative bg-white rounded-3xl p-8 border border-gray-100 hover:border-primary/30 transition-all duration-500 hover:shadow-xl overflow-hidden"
+            className="group relative bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 border border-gray-100 hover:border-primary/30 transition-all duration-500 hover:shadow-xl overflow-hidden"
         >
             <div className="relative z-10">
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500`}>
-                    <feature.icon className="w-8 h-8 text-white" strokeWidth={2} />
+                <div className={`w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500`}>
+                    <feature.icon className="w-6 sm:w-7 md:w-8 h-6 sm:h-7 md:h-8 text-white" strokeWidth={2} />
                 </div>
-                <h3 className="text-xl font-bold text-text-dark mb-3 font-heading">
+                <h3 className="text-lg sm:text-xl font-bold text-text-dark mb-2 sm:mb-3 font-heading">
                     {feature.title}
                 </h3>
-                <p className="text-lg text-text-secondary leading-relaxed">
+                <p className="text-sm sm:text-base md:text-lg text-text-secondary leading-relaxed">
                     {feature.description}
                 </p>
             </div>
@@ -127,17 +127,17 @@ export function Features() {
     );
 
     return (
-        <section id="features" className="py-32 md:py-40 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
-            <div className="container mx-auto px-6 sm:px-8 md:px-12 lg:px-20 xl:px-40 max-w-[1400px]">
+        <section id="features" className="py-20 sm:py-24 md:py-32 lg:py-40 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+            <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-40 max-w-[1400px]">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-20 space-y-6"
+                    className="text-center mb-12 sm:mb-16 md:mb-20 space-y-4 sm:space-y-6"
                 >
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold font-heading text-text-dark">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold font-heading text-text-dark">
                         <AnimatedGradientText>
                             The best of both worlds
                         </AnimatedGradientText>
@@ -172,6 +172,24 @@ export function Features() {
                         ))}
                     </motion.div>
                 </div>
+
+                {/* Visual connector */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    className="flex items-center justify-center mb-20"
+                >
+                    <div className="relative bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 rounded-full px-8 py-4 border border-primary/20">
+                        <div className="flex items-center gap-4">
+                            <span className="text-lg font-semibold text-primary">App Learning</span>
+                            <div className="w-12 h-0.5 bg-gradient-to-r from-primary to-secondary" />
+                            <span className="text-xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">+</span>
+                            <div className="w-12 h-0.5 bg-gradient-to-r from-secondary to-accent" />
+                            <span className="text-lg font-semibold text-secondary">Family Time</span>
+                        </div>
+                    </div>
+                </motion.div>
 
                 {/* For Parents Section */}
                 <div className="mb-20">

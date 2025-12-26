@@ -20,28 +20,28 @@ const rhythmSteps = [
 
 export function Solution() {
     return (
-        <section className="py-32 md:py-40 bg-gradient-to-b from-white via-primary/5 to-white relative overflow-hidden">
+        <section className="py-20 sm:py-24 md:py-32 lg:py-40 bg-gradient-to-b from-white via-primary/5 to-white relative overflow-hidden">
             {/* Enhanced background decorations */}
             <div className="absolute inset-0">
-                <div className="absolute top-1/4 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-                <div className="absolute bottom-1/4 left-10 w-80 h-80 bg-secondary/10 rounded-full blur-3xl" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 rounded-full blur-3xl" />
+                <div className="absolute top-1/4 right-4 sm:right-10 w-64 sm:w-96 h-64 sm:h-96 bg-primary/10 rounded-full blur-3xl" />
+                <div className="absolute bottom-1/4 left-4 sm:left-10 w-48 sm:w-80 h-48 sm:h-80 bg-secondary/10 rounded-full blur-3xl" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 rounded-full blur-3xl" />
             </div>
 
-            <div className="container mx-auto px-6 sm:px-8 md:px-12 lg:px-20 xl:px-40 max-w-[1400px] relative z-10">
+            <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-40 max-w-[1400px] relative z-10">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-24 space-y-8"
+                    className="text-center mb-16 sm:mb-20 md:mb-24 space-y-6 sm:space-y-8"
                 >
-                    <div className="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 mb-6">
-                        <span className="text-sm font-semibold text-primary uppercase tracking-wide">THE SOLUTION</span>
+                    <div className="inline-block px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 mb-4 sm:mb-6">
+                        <span className="text-xs sm:text-sm font-semibold text-primary uppercase tracking-wide">THE SOLUTION</span>
                     </div>
 
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-heading text-text-dark leading-tight">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold font-heading text-text-dark leading-tight">
                         Meet Sidrat—Where
                         <span className="block mt-2 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
                             App Learning Meets Family Teaching
@@ -59,10 +59,10 @@ export function Solution() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.2 }}
-                    className="mb-20"
+                    className="mb-12 sm:mb-16 md:mb-20"
                 >
-                    <h3 className="text-2xl md:text-3xl font-bold text-center text-text-dark mb-10">How the rhythm works:</h3>
-                    <div className="grid sm:grid-cols-3 gap-6">
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-center text-text-dark mb-6 sm:mb-8 md:mb-10">How the rhythm works:</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                         {rhythmSteps.map((step, i) => (
                             <motion.div
                                 key={i}
@@ -70,13 +70,13 @@ export function Solution() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.1 * i, duration: 0.5 }}
-                                className="bg-white rounded-3xl p-8 shadow-card border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                                className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 shadow-card border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
                             >
-                                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center mb-6`}>
-                                    <step.icon className="w-8 h-8 text-white" strokeWidth={2} />
+                                <div className={`w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center mb-4 sm:mb-6`}>
+                                    <step.icon className="w-6 sm:w-7 md:w-8 h-6 sm:h-7 md:h-8 text-white" strokeWidth={2} />
                                 </div>
-                                <h4 className="text-xl font-bold text-text-dark mb-3">{step.label}</h4>
-                                <p className="text-lg text-text-secondary">{step.desc}</p>
+                                <h4 className="text-lg sm:text-xl font-bold text-text-dark mb-2 sm:mb-3">{step.label}</h4>
+                                <p className="text-sm sm:text-base md:text-lg text-text-secondary">{step.desc}</p>
                             </motion.div>
                         ))}
                     </div>

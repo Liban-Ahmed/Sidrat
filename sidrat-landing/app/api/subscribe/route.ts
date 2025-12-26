@@ -6,7 +6,7 @@ const rateLimit = new Map<string, { count: number; resetTime: number }>();
 export async function POST(request: Request) {
     try {
         // Get IP for rate limiting
-        const headersList = headers();
+        const headersList = await headers();
         const ip = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "unknown";
         
         // Rate limit: 5 requests per minute per IP
