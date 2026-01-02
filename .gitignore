@@ -60,3 +60,11 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+.DS_Store
+
+# Ignore Xcode user data
+*.xcuserdatad/
+*.xcscmblueprint
+*.xcscheme
+Sidrat.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
