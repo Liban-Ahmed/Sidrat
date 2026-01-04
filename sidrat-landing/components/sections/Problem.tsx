@@ -56,7 +56,7 @@ const itemVariants = {
 
 export function Problem() {
     return (
-        <section className="py-20 sm:py-24 md:py-32 lg:py-40 bg-gradient-to-b from-white via-gray-50/50 to-white relative overflow-hidden">
+        <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-white via-gray-50/50 to-white relative overflow-hidden">
             {/* Enhanced background decorations */}
             <div className="absolute inset-0">
                 <div className="absolute top-1/4 left-4 sm:left-10 w-48 sm:w-72 h-48 sm:h-72 bg-red-500/5 rounded-full blur-3xl" />
@@ -64,14 +64,14 @@ export function Problem() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-gradient-to-r from-red-500/5 via-transparent to-primary/5 rounded-full blur-3xl" />
             </div>
 
-            <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-40 max-w-[1400px] relative z-10">
+            <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24 max-w-[1100px] relative z-10">
                 {/* Section header with quote */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-12 sm:mb-16 md:mb-20 space-y-5 sm:space-y-8"
+                    className="text-center mb-6 sm:mb-8 md:mb-10 space-y-3 sm:space-y-4"
                 >
                     {/* Quote bubble */}
                     <motion.div
@@ -81,28 +81,28 @@ export function Problem() {
                         transition={{ delay: 0.2, duration: 0.5 }}
                         className="inline-block"
                     >
-                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-large border border-gray-100 max-w-3xl mx-auto">
-                            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-text-dark font-medium italic leading-relaxed">
-                                “I either hand them a screen and feel guilty, or try to teach them myself and feel lost.”
+                        <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 shadow-lg border border-gray-100 max-w-2xl mx-auto">
+                            <p className="text-sm sm:text-base md:text-lg text-text-dark font-medium italic leading-relaxed">
+                                "I either hand them a screen and feel guilty, or try to teach them myself and feel lost."
                             </p>
-                            <p className="text-sm sm:text-base md:text-lg text-text-secondary mt-3 sm:mt-4">— Every Muslim parent</p>
+                            <p className="text-xs sm:text-sm text-text-secondary mt-2">— Every Muslim parent</p>
                         </div>
                     </motion.div>
 
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold font-heading text-text-dark leading-tight">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold font-heading text-text-dark leading-tight">
                         You&apos;re not alone in this
-                        <span className="block mt-2 bg-gradient-to-r from-red-600 via-primary to-red-600 bg-clip-text text-transparent">
+                        <span className="block mt-1 bg-gradient-to-r from-red-600 via-primary to-red-600 bg-clip-text text-transparent">
                             struggle
                         </span>
                     </h2>
 
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/20">
-                        <span className="text-sm font-medium text-primary">For parents of 5-7 year olds</span>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/5 border border-primary/20">
+                        <span className="text-xs font-medium text-primary">For parents of 5-7 year olds</span>
                     </div>
 
-                    <p className="text-xl md:text-2xl text-text-secondary max-w-4xl mx-auto leading-relaxed">
+                    <p className="text-sm sm:text-base md:text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
                         You love your children and want to raise them with strong Islamic values.
-                        <span className="block mt-2 font-semibold text-text-dark">But between work, school runs, and daily chaos...</span>
+                        <span className="block mt-1 font-semibold text-text-dark">But between work, school runs, and daily chaos...</span>
                     </p>
                 </motion.div>
 
@@ -112,58 +112,50 @@ export function Problem() {
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-16"
+                    className="text-center mb-6 sm:mb-8"
                 >
-                    <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-red-50 border border-red-200">
-                        <AlertTriangle className="w-6 h-6 text-red-600" strokeWidth={2.5} />
-                        <span className="text-lg font-semibold text-red-700">The reality hits hard:</span>
+                    <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-red-50 border border-red-200">
+                        <AlertTriangle className="w-4 h-4 text-red-600" strokeWidth={2.5} />
+                        <span className="text-sm font-semibold text-red-700">The reality hits hard:</span>
                     </div>
                 </motion.div>
 
-                {/* Pain point cards - Enhanced 2x2 grid */}
+                {/* Pain point cards - Single column on mobile, 2 columns on tablet+ */}
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
                     whileInView="visible"
-                    viewport={{ once: true, margin: "-100px" }}
-                    className="grid sm:grid-cols-2 gap-6 md:gap-8 mb-20"
+                    viewport={{ once: true, margin: "-50px" }}
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5 mb-8 sm:mb-10"
                 >
-                    {painPoints.map((point, index) => (
+                    {painPoints.map((point) => (
                         <motion.div key={point.title} variants={itemVariants}>
-                            <div className="group relative bg-white rounded-3xl p-8 md:p-10 border border-gray-200 hover:border-red-300 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 h-full">
+                            <div className="group relative bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 border border-gray-200 hover:border-red-300 transition-all duration-300 hover:shadow-lg h-full">
                                 {/* Accent bar */}
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-20 bg-gradient-to-b from-red-500 to-red-600 rounded-r-full group-hover:h-32 transition-all duration-500" />
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 bg-gradient-to-b from-red-500 to-red-600 rounded-r-full group-hover:h-16 transition-all duration-500" />
 
-                                {/* Corner accent */}
-                                <div className="absolute top-6 right-6 w-12 h-12 rounded-full bg-red-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110">
-                                    <AlertTriangle className="w-5 h-5 text-red-600" strokeWidth={2.5} />
-                                </div>
-
-                                <div className="pl-6 relative z-10">
-                                    {/* Icon with animation */}
-                                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg">
-                                        <point.icon className="w-8 h-8 md:w-10 md:h-10 text-white" strokeWidth={2} />
+                                <div className="pl-4 relative z-10">
+                                    {/* Icon */}
+                                    <div className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-300 shadow-sm">
+                                        <point.icon className="w-5 h-5 sm:w-5.5 sm:h-5.5 text-white" strokeWidth={2} />
                                     </div>
 
                                     {/* Title */}
-                                    <h3 className="text-2xl md:text-3xl font-bold text-text-dark mb-4 group-hover:text-red-700 transition-colors">
+                                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-text-dark mb-2 group-hover:text-red-700 transition-colors leading-tight">
                                         {point.title}
                                     </h3>
 
                                     {/* Description */}
-                                    <p className="text-lg md:text-xl text-text-secondary leading-relaxed mb-6">
+                                    <p className="text-sm sm:text-base text-text-secondary leading-relaxed mb-3">
                                         {point.description}
                                     </p>
 
                                     {/* Stat badge */}
-                                    <div className="inline-flex flex-col gap-1 px-5 py-3 rounded-xl bg-gradient-to-br from-red-50 to-red-100/50 border border-red-200/50">
-                                        <span className="text-xl md:text-2xl font-bold text-red-700">{point.stat}</span>
-                                        <span className="text-sm text-red-600">{point.statDesc}</span>
+                                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 border border-red-200/50">
+                                        <span className="text-sm font-bold text-red-700">{point.stat}</span>
+                                        <span className="text-xs text-red-600">{point.statDesc}</span>
                                     </div>
                                 </div>
-
-                                {/* Hover gradient overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none" />
                             </div>
                         </motion.div>
                     ))}
@@ -175,13 +167,13 @@ export function Problem() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.3, duration: 0.6 }}
-                    className="text-center space-y-8"
+                    className="text-center space-y-4 sm:space-y-5"
                 >
                     {/* Main statement */}
                     <div className="relative inline-block">
-                        <div className="absolute -inset-4 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 rounded-3xl blur-xl" />
-                        <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl p-10 md:p-12 shadow-large border border-gray-100">
-                            <p className="text-2xl md:text-3xl lg:text-4xl text-text-dark max-w-4xl mx-auto leading-relaxed font-medium">
+                        <div className="absolute -inset-2 sm:-inset-3 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 rounded-xl sm:rounded-2xl blur-xl" />
+                        <div className="relative bg-white/90 backdrop-blur-sm rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 shadow-lg border border-gray-100">
+                            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-text-dark max-w-2xl mx-auto leading-relaxed font-medium">
                                 What if they could learn independently AND you could be part of the journey?
                             </p>
                         </div>
@@ -193,25 +185,25 @@ export function Problem() {
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.5, duration: 0.6 }}
-                        className="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-8 pt-6"
+                        className="flex flex-row items-center justify-center gap-2 sm:gap-4 pt-2 sm:pt-4"
                     >
-                        <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-primary/5 border border-primary/20">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-                                <Users className="w-6 h-6 text-white" strokeWidth={2} />
+                        <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl bg-primary/5 border border-primary/20">
+                            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-md sm:rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" strokeWidth={2} />
                             </div>
                             <div className="text-left">
-                                <div className="text-2xl font-bold text-text-dark">150+</div>
-                                <div className="text-sm text-text-secondary">families waiting</div>
+                                <div className="text-sm sm:text-base font-bold text-text-dark">150+</div>
+                                <div className="text-[10px] sm:text-xs text-text-secondary">families waiting</div>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-secondary/5 border border-secondary/20">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-secondary to-secondary/80 flex items-center justify-center">
-                                <Clock className="w-6 h-6 text-white" strokeWidth={2} />
+                        <div className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl bg-secondary/5 border border-secondary/20">
+                            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-md sm:rounded-lg bg-gradient-to-br from-secondary to-secondary/80 flex items-center justify-center">
+                                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" strokeWidth={2} />
                             </div>
                             <div className="text-left">
-                                <div className="text-2xl font-bold text-text-dark">5 min/day</div>
-                                <div className="text-sm text-text-secondary">+ 15 min/week</div>
+                                <div className="text-sm sm:text-base font-bold text-text-dark">5 min/day</div>
+                                <div className="text-[10px] sm:text-xs text-text-secondary">+ 15 min/week</div>
                             </div>
                         </div>
                     </motion.div>

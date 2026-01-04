@@ -67,7 +67,7 @@ export function EmailForm({
 
     return (
         <div className={className}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
                 <div className="relative">
                     <input
                         type="email"
@@ -80,14 +80,14 @@ export function EmailForm({
                         })}
                         placeholder={placeholder}
                         disabled={isSubmitting || submitStatus === "success"}
-                        className="w-full px-8 py-6 text-lg rounded-2xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="w-full px-4 sm:px-8 py-3.5 sm:py-6 text-sm sm:text-lg rounded-xl sm:rounded-2xl border-2 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                         aria-label="Email address"
                     />
                     {errors.email && (
                         <motion.p
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="mt-2 text-sm text-red-500 flex items-center gap-1"
+                            className="mt-2 text-xs sm:text-sm text-red-500 flex items-center gap-1"
                         >
                             <AlertCircle className="w-4 h-4" />
                             {errors.email.message}
@@ -98,18 +98,18 @@ export function EmailForm({
                 <button
                     type="submit"
                     disabled={isSubmitting || submitStatus === "success"}
-                    className="w-full group relative px-10 py-6 text-xl font-semibold rounded-2xl bg-gradient-to-r from-primary to-secondary text-white shadow-primary hover:shadow-primary/50 hover:scale-[1.02] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    className="w-full group relative px-5 sm:px-10 py-3.5 sm:py-6 text-base sm:text-xl font-semibold rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary to-secondary text-white shadow-primary hover:shadow-primary/50 hover:scale-[1.02] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     aria-label={buttonText}
                 >
                     {isSubmitting ? (
                         <span className="flex items-center justify-center gap-3">
-                            <Loader2 className="w-6 h-6 animate-spin" />
+                            <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" />
                             Submitting...
                         </span>
                     ) : (
-                        <span className="relative z-10 flex items-center justify-center gap-3">
+                        <span className="relative z-10 flex items-center justify-center gap-2 sm:gap-3">
                             {buttonText}
-                            <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </span>

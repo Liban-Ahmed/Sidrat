@@ -125,7 +125,7 @@ export function Navbar() {
                             className="hidden md:block"
                         >
                             <button
-                                onClick={() => scrollToSection("#pricing")}
+                                onClick={() => scrollToSection("#signup")}
                                 className="group relative px-8 py-3.5 rounded-full font-semibold text-base lg:text-lg overflow-hidden transition-all duration-300 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30"
                             >
                                 {/* Button background */}
@@ -255,7 +255,7 @@ export function Navbar() {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.4 }}
-                                        onClick={() => scrollToSection("#pricing")}
+                                        onClick={() => scrollToSection("#signup")}
                                         className="w-full py-4 px-6 bg-gradient-to-r from-primary to-secondary rounded-2xl text-white font-semibold text-lg shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all duration-300"
                                     >
                                         Join the Waitlist
