@@ -38,7 +38,7 @@ const steps: Step[] = [
 
 export function HowItWorks() {
     return (
-        <section id="how-it-works" className="py-20 sm:py-24 md:py-32 lg:py-40 bg-gradient-to-b from-white via-gray-50/30 to-white relative overflow-hidden">
+        <section id="how-it-works" className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-white via-gray-50/30 to-white relative overflow-hidden">
             {/* Background decorations */}
             <div className="absolute inset-0">
                 <div className="absolute top-1/4 left-4 sm:left-10 w-64 sm:w-96 h-64 sm:h-96 bg-primary/5 rounded-full blur-3xl" />
@@ -46,7 +46,7 @@ export function HowItWorks() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 rounded-full blur-3xl" />
             </div>
 
-            <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-20 xl:px-40 max-w-[1400px] relative z-10">
+            <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24 max-w-[1100px] relative z-10">
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -83,9 +83,9 @@ export function HowItWorks() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true, margin: "-100px" }}
                             transition={{ delay: 0.2 * index, duration: 0.6 }}
-                            className="relative mb-10 sm:mb-14 md:mb-20 lg:mb-24 last:mb-0"
+                            className="relative mb-6 sm:mb-8 md:mb-10 last:mb-0"
                         >
-                            <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
+                            <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 items-center">
                                 {/* Alternate layout on desktop */}
                                 {index % 2 === 0 ? (
                                     <>
@@ -97,25 +97,25 @@ export function HowItWorks() {
                                             transition={{ delay: 0.3 + (0.2 * index), duration: 0.6 }}
                                             className="lg:text-right"
                                         >
-                                            <div className="group bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 lg:p-10 border border-gray-100 shadow-large hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+                                            <div className="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-500">
                                                 {/* Icon and title */}
-                                                <div className="flex lg:flex-row-reverse items-start gap-6 mb-6">
-                                                    <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                                                        <step.icon className="w-8 h-8 md:w-10 md:h-10 text-white" strokeWidth={2} />
+                                                <div className="flex lg:flex-row-reverse items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
+                                                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center group-hover:scale-105 transition-all duration-500">
+                                                        <step.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" strokeWidth={2} />
                                                     </div>
                                                     <div className="flex-1 lg:text-right">
-                                                        <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-text-dark mb-3 font-heading group-hover:text-primary transition-colors">
+                                                        <h3 className="text-base sm:text-lg md:text-xl font-bold text-text-dark mb-2 font-heading group-hover:text-primary transition-colors">
                                                             {step.title}
                                                         </h3>
-                                                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-4">
-                                                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                                                            <span className="text-sm font-semibold text-primary">{step.highlight}</span>
+                                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                                                            <span className="text-xs font-semibold text-primary">{step.highlight}</span>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {/* Description */}
-                                                <p className="text-lg md:text-xl text-text-secondary leading-relaxed">
+                                                <p className="text-sm sm:text-base text-text-secondary leading-relaxed">
                                                     {step.description}
                                                 </p>
                                             </div>
@@ -166,25 +166,25 @@ export function HowItWorks() {
                                             viewport={{ once: true }}
                                             transition={{ delay: 0.3 + (0.2 * index), duration: 0.6 }}
                                         >
-                                            <div className="group bg-white rounded-3xl p-8 md:p-10 border border-gray-100 shadow-large hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+                                            <div className="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-500">
                                                 {/* Icon and title */}
-                                                <div className="flex items-start gap-6 mb-6">
-                                                    <div className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-secondary to-secondary/80 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                                                        <step.icon className="w-8 h-8 md:w-10 md:h-10 text-white" strokeWidth={2} />
+                                                <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
+                                                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-secondary to-secondary/80 flex items-center justify-center group-hover:scale-105 transition-all duration-500">
+                                                        <step.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" strokeWidth={2} />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-text-dark mb-3 font-heading group-hover:text-secondary transition-colors">
+                                                        <h3 className="text-base sm:text-lg md:text-xl font-bold text-text-dark mb-2 font-heading group-hover:text-secondary transition-colors">
                                                             {step.title}
                                                         </h3>
-                                                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 border border-secondary/20 mb-4">
-                                                            <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-                                                            <span className="text-sm font-semibold text-secondary">{step.highlight}</span>
+                                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/10 border border-secondary/20">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
+                                                            <span className="text-xs font-semibold text-secondary">{step.highlight}</span>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {/* Description */}
-                                                <p className="text-lg md:text-xl text-text-secondary leading-relaxed">
+                                                <p className="text-sm sm:text-base text-text-secondary leading-relaxed">
                                                     {step.description}
                                                 </p>
                                             </div>
@@ -209,22 +209,22 @@ export function HowItWorks() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.6, duration: 0.6 }}
-                    className="mt-20 md:mt-24"
+                    className="mt-10 sm:mt-12 md:mt-16"
                 >
                     <div className="relative">
-                        <div className="absolute -inset-4 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 rounded-3xl blur-xl" />
-                        <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-large border border-gray-100">
-                            <div className="text-center mb-8">
-                                <h3 className="text-3xl md:text-4xl font-bold text-text-dark mb-4">
+                        <div className="absolute -inset-2 sm:-inset-3 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 rounded-xl sm:rounded-2xl blur-xl" />
+                        <div className="relative bg-white/90 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 shadow-lg border border-gray-100">
+                            <div className="text-center mb-4 sm:mb-6">
+                                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-text-dark mb-2 sm:mb-3">
                                     The result?
                                 </h3>
-                                <p className="text-2xl md:text-3xl text-primary font-semibold">
+                                <p className="text-base sm:text-lg md:text-xl text-primary font-semibold">
                                     Confident kids. Connected parents. Stronger iman.
                                 </p>
                             </div>
 
                             {/* Stats */}
-                            <div className="grid sm:grid-cols-3 gap-6 md:gap-8">
+                            <div className="grid grid-cols-3 gap-2 sm:gap-4">
                                 {[
                                     { icon: Clock, stat: "5 min", label: "Daily in app" },
                                     { icon: BookOpen, stat: "15 min", label: "Weekly activity" },
@@ -236,13 +236,13 @@ export function HowItWorks() {
                                         whileInView={{ opacity: 1, y: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: 0.7 + (i * 0.1) }}
-                                        className="text-center p-6 rounded-2xl bg-gradient-to-br from-gray-50 to-white border border-gray-100"
+                                        className="text-center p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-gray-50 to-white border border-gray-100"
                                     >
-                                        <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mb-3">
-                                            <item.icon className="w-7 h-7 text-white" strokeWidth={2} />
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mb-2">
+                                            <item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" strokeWidth={2} />
                                         </div>
-                                        <div className="text-3xl md:text-4xl font-bold text-text-dark mb-1">{item.stat}</div>
-                                        <div className="text-sm md:text-base text-text-secondary">{item.label}</div>
+                                        <div className="text-base sm:text-xl md:text-2xl font-bold text-text-dark mb-0.5">{item.stat}</div>
+                                        <div className="text-[10px] sm:text-xs text-text-secondary">{item.label}</div>
                                     </motion.div>
                                 ))}
                             </div>
