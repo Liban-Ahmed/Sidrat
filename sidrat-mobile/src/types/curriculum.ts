@@ -216,4 +216,6 @@ export interface LessonPlayerState {
     startedAt: string;
     /** Whether narration is playing */
     isNarrating: boolean;
+    /** Whether this is a review session (skips Hook, goes straight to Practice) */
+    isReview: boolean;
 }

@@ -20,6 +20,8 @@ import { haptics } from '../utils/haptics';
 interface UseLessonPlayerOptions {
     lesson: CurriculumLesson;
     childId: string;
+    /** If true, skips Hook phase and starts directly at Practice */
+    isReview?: boolean;
 }
 
 interface UseLessonPlayerReturn {
@@ -64,12 +66,13 @@ interface UseLessonPlayerReturn {
     stopNarration: () => void;
 }
 
-function createInitialState(lessonId: string, childId: string, lesson: CurriculumLesson): LessonPlayerState {
+function createInitialState(lessonId: string, childId: string, lesson: CurriculumLesson, isReview: boolean): LessonPlayerState {
     const maxScore = lesson.practice.reduce((sum, p) => sum + p.points, 0);
     return {
         lessonId,
         childId,
-        currentPhase: 'hook',
+        // Review mode → skip hook and teach, start at practice
+        currentPhase: isReview ? 'practice' : 'hook',
         teachIndex: 0,
         practiceIndex: 0,
         score: 0,
@@ -78,16 +81,18 @@ function createInitialState(lessonId: string, childId: string, lesson: Curriculu
         answeredCount: 0,
         startedAt: new Date().toISOString(),
         isNarrating: false,
+        isReview,
     };
 }
 
-export function useLessonPlayer({ lesson, childId }: UseLessonPlayerOptions): UseLessonPlayerReturn {
+export function useLessonPlayer({ lesson, childId, isReview = false }: UseLessonPlayerOptions): UseLessonPlayerReturn {
     const [state, setState] = useState<LessonPlayerState>(() =>
-        createInitialState(lesson.id, childId, lesson),
+        createInitialState(lesson.id, childId, lesson, isReview),
     );
 
     const markPhaseComplete = useLessonStore((s) => s.markPhaseComplete);
     const completeLessonInStore = useLessonStore((s) => s.completeLesson);
+    const completeReviewInStore = useLessonStore((s) => s.completeReview);
     const recordLessonCompletion = useChildStore((s) => s.recordLessonCompletion);
 
     const narrationRef = useRef(false);
@@ -138,9 +143,9 @@ export function useLessonPlayer({ lesson, childId }: UseLessonPlayerOptions): Us
     // ── Actions ──
 
     const start = useCallback(() => {
-        setState(createInitialState(lesson.id, childId, lesson));
-        markPhaseComplete(childId, lesson.id, 'hook');
-    }, [lesson, childId, markPhaseComplete]);
+        setState(createInitialState(lesson.id, childId, lesson, isReview));
+        markPhaseComplete(childId, lesson.id, isReview ? 'practice' : 'hook');
+    }, [lesson, childId, isReview, markPhaseComplete]);
 
     const startTeaching = useCallback(() => {
         audioService.stop();
@@ -202,10 +207,16 @@ export function useLessonPlayer({ lesson, childId }: UseLessonPlayerOptions): Us
     }, [childId, lesson.id, markPhaseComplete]);
 
     const completeLesson = useCallback(() => {
-        completeLessonInStore(childId, lesson.id, scorePercent, lesson.xpReward);
-        recordLessonCompletion(childId, lesson.xpReward);
+        if (isReview) {
+            // Review mode: update review schedule, don't re-award XP
+            completeReviewInStore(childId, lesson.id, scorePercent);
+        } else {
+            // Normal mode: full completion with XP
+            completeLessonInStore(childId, lesson.id, scorePercent, lesson.xpReward);
+            recordLessonCompletion(childId, lesson.xpReward);
+        }
         haptics.success();
-    }, [childId, lesson.id, scorePercent, lesson.xpReward, completeLessonInStore, recordLessonCompletion]);
+    }, [childId, lesson.id, scorePercent, lesson.xpReward, isReview, completeLessonInStore, completeReviewInStore, recordLessonCompletion]);
 
     const narrate = useCallback(async (text: string) => {
         if (narrationRef.current) {

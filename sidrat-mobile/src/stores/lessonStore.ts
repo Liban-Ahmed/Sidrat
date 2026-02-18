@@ -13,6 +13,7 @@ import { mmkvStorage } from './persist';
 import type { Lesson, LessonProgress, LessonPhase } from '../types';
 import { sampleLessons } from '../data/lessons';
 import { uuid } from '../utils/uuid';
+import { calculateNextReview } from '../utils/spacedRepetition';
 
 function progressKey(childId: string, lessonId: string) {
     return `${childId}:${lessonId}`;
@@ -37,6 +38,9 @@ interface LessonStore {
         phase: LessonPhase,
     ) => void;
     completeLesson: (childId: string, lessonId: string, score: number, xp: number) => void;
+
+    /** Record a review session result and schedule the next review */
+    completeReview: (childId: string, lessonId: string, score: number) => void;
 }
 
 export const useLessonStore = create<LessonStore>()(
@@ -100,6 +104,9 @@ export const useLessonStore = create<LessonStore>()(
                     const existing = s.progress[key];
                     const now = new Date().toISOString();
 
+                    // Calculate first review schedule from lesson score
+                    const review = calculateNextReview(score, 0);
+
                     const updated: LessonProgress = {
                         id: existing?.id ?? uuid(),
                         lessonId,
@@ -115,6 +122,36 @@ export const useLessonStore = create<LessonStore>()(
                             reward: now,
                         },
                         lastAccessedAt: now,
+                        // Spaced repetition fields
+                        nextReviewDate: review.nextReviewDate.toISOString(),
+                        intervalIndex: review.intervalIndex,
+                        reviewCount: existing?.reviewCount ?? 0,
+                        lastReviewScore: score,
+                    };
+
+                    return { progress: { ...s.progress, [key]: updated } };
+                }),
+
+            completeReview: (childId, lessonId, score) =>
+                set((s) => {
+                    const key = progressKey(childId, lessonId);
+                    const existing = s.progress[key];
+                    if (!existing) return s; // guard: can't review lesson without prior progress
+
+                    const now = new Date().toISOString();
+                    const currentInterval = existing.intervalIndex ?? 0;
+                    const review = calculateNextReview(score, currentInterval);
+
+                    const updated: LessonProgress = {
+                        ...existing,
+                        lastAccessedAt: now,
+                        lastReviewedAt: now,
+                        lastReviewScore: score,
+                        nextReviewDate: review.nextReviewDate.toISOString(),
+                        intervalIndex: review.intervalIndex,
+                        reviewCount: (existing.reviewCount ?? 0) + 1,
+                        // Update score if the review score is higher
+                        score: Math.max(existing.score, score),
                     };
 
                     return { progress: { ...s.progress, [key]: updated } };

@@ -1,219 +1,248 @@
 /**
- * WeekStreak — 7-day crescent tracker with staggered animation,
- * active-day connection line, today glow ring, and celebration
- * state for a full week.
+ * WeekStreak — Minimal 7-day streak tracker.
  *
- * Islamic motif: crescent moons mark active days.
+ * A clean, surface-level card that sits on the home screen with
+ * the same card language as AnimatedStatCard. No hardcoded colors —
+ * everything from theme tokens.
  *
  * Features:
- *  • Staggered entrance animation per day column
- *  • Today column highlighted with golden glow ring
- *  • Active days connected by a subtle gradient line
- *  • Full-week celebration pulse
- *  • Better typography with dynamic sizing
- *  • Refined dark/light mode treatment
+ *  • Surface card with subtle shadow matching the theme
+ *  • 7 day columns: filled circle for active, outlined for inactive
+ *  • Today column gets the accent ring and label underline
+ *  • Streak count + flame icon headline
+ *  • "Best" and "This week" meta row
+ *  • Full-week congratulations badge
+ *  • Dark/light mode aware throughout
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, {
-    FadeInUp,
-    useSharedValue,
-    useAnimatedStyle,
-    withRepeat,
-    withSequence,
-    withTiming,
-} from 'react-native-reanimated';
-import { MiniCrescent } from './MiniCrescent';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../theme';
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
 
 interface WeekStreakProps {
     streak: number;
-    parentBg: string;
+    longestStreak?: number;
 }
 
-export function WeekStreak({ streak, parentBg }: WeekStreakProps) {
-    const today = new Date().getDay(); // 0=Sun
+export function WeekStreak({ streak, longestStreak }: WeekStreakProps) {
+    const { brand, colors, typography, radius, shadows, isDark } = useTheme();
+    const today = new Date().getDay(); // 0 = Sun
     const isFullWeek = streak >= 7;
 
-    // Celebration glow for full week
-    const celebrationGlow = useSharedValue(0);
-    useEffect(() => {
-        if (isFullWeek) {
-            celebrationGlow.value = withRepeat(
-                withSequence(
-                    withTiming(1, { duration: 1500 }),
-                    withTiming(0, { duration: 1500 }),
-                ),
-                -1,
-                true,
-            );
-        }
-    }, [isFullWeek, celebrationGlow]);
-
-    const celebrationStyle = useAnimatedStyle(() => ({
-        opacity: isFullWeek ? 0.06 + celebrationGlow.value * 0.08 : 0,
-    }));
+    // Count how many days this week are active
+    const activeDaysThisWeek = Math.min(streak, 7);
 
     return (
-        <View
-            style={styles.container}
-            accessible
-            accessibilityLabel={`Weekly streak: ${streak} day${streak !== 1 ? 's' : ''} active${isFullWeek ? '. Perfect week!' : ''}`}
+        <Animated.View
+            entering={FadeIn.duration(500)}
+            style={[
+                styles.card,
+                {
+                    backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
+                    borderRadius: radius.xl,
+                    borderWidth: isDark ? 1 : 0,
+                    borderColor: isDark ? colors.border : 'transparent',
+                    ...shadows.card,
+                },
+            ]}
         >
-            {/* Separator line */}
-            <View style={styles.separator} />
+            {/* ── Header row: streak count + meta ── */}
+            <View style={styles.header}>
+                <View style={styles.streakInfo}>
+                    <View style={styles.streakCountRow}>
+                        <Text style={[typography.title1, { color: colors.text }]}>
+                            {streak}
+                        </Text>
+                        <Ionicons
+                            name="flame"
+                            size={22}
+                            color={brand.coral}
+                            style={{ marginLeft: 4, marginBottom: 2 }}
+                        />
+                    </View>
+                    <Text style={[typography.caption, { color: colors.textTertiary }]}>
+                        day streak
+                    </Text>
+                </View>
 
-            {/* Full-week celebration background glow */}
-            {isFullWeek && (
-                <Animated.View
-                    style={[
-                        styles.celebrationBg,
-                        { backgroundColor: '#FFD700' },
-                        celebrationStyle,
-                    ]}
-                />
-            )}
+                {longestStreak !== undefined && (
+                    <View style={styles.metaPill}>
+                        <Text
+                            style={[
+                                typography.labelXs,
+                                { color: colors.textTertiary },
+                            ]}
+                        >
+                            Best {longestStreak}
+                        </Text>
+                    </View>
+                )}
+            </View>
 
-            <View style={styles.row}>
+            {/* ── Day dots ── */}
+            <View style={styles.daysRow}>
                 {WEEKDAYS.map((day, i) => {
                     const daysAgo = (today - i + 7) % 7;
                     const isActive = daysAgo < streak && daysAgo >= 0;
                     const isCurrentDay = i === today;
 
                     return (
-                        <Animated.View
-                            key={i}
-                            entering={FadeInUp.delay(i * 40 + 100)
-                                .duration(350)
-                                .springify()
-                                .damping(14)}
-                            style={styles.item}
-                        >
-                            {/* Day label */}
+                        <View key={i} style={styles.dayColumn}>
+                            {/* Dot */}
+                            <View
+                                style={[
+                                    styles.dot,
+                                    {
+                                        backgroundColor: isActive
+                                            ? brand.primary
+                                            : isDark
+                                                ? colors.surfaceTertiary
+                                                : colors.backgroundTertiary,
+                                    },
+                                    isCurrentDay && {
+                                        backgroundColor: brand.accent,
+                                    },
+                                ]}
+                            >
+                                {isActive && (
+                                    <Ionicons
+                                        name="checkmark"
+                                        size={10}
+                                        color="#FFF"
+                                    />
+                                )}
+                            </View>
+
+                            {/* Label */}
                             <Text
                                 style={[
-                                    styles.label,
+                                    styles.dayLabel,
                                     {
                                         color: isCurrentDay
-                                            ? '#FFFFFF'
+                                            ? colors.text
                                             : isActive
-                                                ? 'rgba(255,255,255,0.55)'
-                                                : 'rgba(255,255,255,0.25)',
-                                        fontWeight: isCurrentDay ? '800' : '600',
-                                        fontSize: isCurrentDay ? 11 : 10,
+                                                ? colors.textSecondary
+                                                : colors.textTertiary,
+                                        fontWeight: isCurrentDay ? '700' : '500',
                                     },
                                 ]}
                             >
                                 {day}
                             </Text>
-
-                            {/* Indicator with today ring */}
-                            <View style={styles.indicatorWrap}>
-                                {isCurrentDay && (
-                                    <View style={styles.todayRing}>
-                                        {/* Inner glow ring */}
-                                        <View style={styles.todayRingInner} />
-                                    </View>
-                                )}
-                                <MiniCrescent
-                                    active={isActive || isCurrentDay}
-                                    parentBg={parentBg}
-                                    size={isCurrentDay ? 17 : 15}
-                                    isToday={isCurrentDay}
-                                />
-                            </View>
-
-                            {/* Today dot indicator */}
-                            {isCurrentDay && (
-                                <View style={styles.todayDot} />
-                            )}
-                        </Animated.View>
+                        </View>
                     );
                 })}
             </View>
 
-            {/* Full week label */}
-            {isFullWeek && (
-                <Animated.View
-                    entering={FadeInUp.delay(400).duration(400).springify()}
-                    style={styles.fullWeekRow}
-                >
-                    <Text style={styles.fullWeekText}>
-                        ✨ Perfect Week!
+            {/* ── Progress note ── */}
+            <View
+                style={[
+                    styles.progressRow,
+                    {
+                        borderTopWidth: StyleSheet.hairlineWidth,
+                        borderTopColor: isDark ? colors.border : colors.separator,
+                    },
+                ]}
+            >
+                {isFullWeek ? (
+                    <View style={styles.celebrationRow}>
+                        <View
+                            style={[
+                                styles.celebrationBadge,
+                                { backgroundColor: brand.accent + '14' },
+                            ]}
+                        >
+                            <Ionicons name="star" size={12} color={brand.accent} />
+                        </View>
+                        <Text
+                            style={[
+                                typography.captionBold,
+                                { color: brand.accent },
+                            ]}
+                        >
+                            Perfect week!
+                        </Text>
+                    </View>
+                ) : (
+                    <Text
+                        style={[
+                            typography.caption,
+                            { color: colors.textTertiary },
+                        ]}
+                    >
+                        {activeDaysThisWeek}/7 this week
                     </Text>
-                </Animated.View>
-            )}
-        </View>
+                )}
+            </View>
+        </Animated.View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        marginTop: 14,
-        overflow: 'hidden',
+    card: {
+        paddingTop: 18,
+        paddingHorizontal: 20,
     },
-    separator: {
-        height: StyleSheet.hairlineWidth,
-        backgroundColor: 'rgba(255,255,255,0.1)',
-        marginBottom: 14,
+
+    /* Header */
+    header: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        marginBottom: 20,
     },
-    celebrationBg: {
-        ...StyleSheet.absoluteFillObject,
-        borderRadius: 12,
+    streakInfo: {},
+    streakCountRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
-    row: {
+    metaPill: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+    },
+
+    /* Day dots */
+    daysRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: 2,
+        paddingHorizontal: 4,
     },
-    item: {
+    dayColumn: {
         alignItems: 'center',
-        gap: 5,
+        gap: 6,
     },
-    label: {
-        letterSpacing: 0.6,
-        textAlign: 'center',
-    },
-    indicatorWrap: {
-        width: 28,
-        height: 28,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    todayRing: {
-        position: 'absolute',
+    dot: {
         width: 28,
         height: 28,
         borderRadius: 14,
-        borderWidth: 1.5,
-        borderColor: 'rgba(255,215,0,0.4)',
         alignItems: 'center',
         justifyContent: 'center',
     },
-    todayRingInner: {
-        width: 26,
-        height: 26,
-        borderRadius: 13,
-        borderWidth: 1,
-        borderColor: 'rgba(255,215,0,0.15)',
+    dayLabel: {
+        fontSize: 10,
+        letterSpacing: 0.3,
     },
-    todayDot: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: 'rgba(255,215,0,0.7)',
-        marginTop: -1,
-    },
-    fullWeekRow: {
+
+    /* Progress row */
+    progressRow: {
+        marginTop: 16,
+        paddingVertical: 12,
         alignItems: 'center',
-        marginTop: 10,
     },
-    fullWeekText: {
-        fontSize: 11,
-        fontWeight: '700',
-        color: 'rgba(255,215,0,0.8)',
-        letterSpacing: 0.8,
+    celebrationRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    celebrationBadge: {
+        width: 22,
+        height: 22,
+        borderRadius: 11,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });

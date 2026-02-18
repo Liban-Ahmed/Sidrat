@@ -7,7 +7,7 @@
  *
  * Components extracted to:
  *   src/components/         — ScalePress, SectionHeader, ProgressBar
- *   src/components/home/    — AnimatedCounter, AnimatedStatCard, QuickAction, WeekStreak, MiniCrescent
+ *   src/components/home/    — AnimatedCounter, AnimatedStatCard, WeekStreak
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -15,7 +15,6 @@ import {
     View,
     Text,
     StyleSheet,
-    ScrollView as HScrollView,
     RefreshControl,
     LayoutAnimation,
     Platform,
@@ -39,9 +38,10 @@ import Animated, {
 import { useTheme } from '../../src/theme';
 import { useAppStore, useChildStore, useLessonStore } from '../../src/stores';
 import { Avatar, Badge, Button, ScalePress, SectionHeader, ProgressBar } from '../../src/components';
-import { QuickAction, WeekStreak, AnimatedStatCard } from '../../src/components/home';
+import { WeekStreak, AnimatedStatCard } from '../../src/components/home';
 import { categoryMeta } from '../../src/types';
 import { allCurriculumLessons } from '../../src/data/curriculum';
+import { useReviewQueue } from '../../src/hooks/useReviewQueue';
 
 // ── Constants ────────────────────────────────────────────────────
 
@@ -86,6 +86,9 @@ export default function HomeScreen() {
     // Use curriculum lessons as the source of truth
     const curriculumLessons = allCurriculumLessons;
 
+    // ── Review queue ──
+    const { reviewCount, hasReviews, nextReview } = useReviewQueue();
+
     // Next uncompleted curriculum lesson
     const todayLesson = useMemo(() => {
         if (!activeChildId) return undefined;
@@ -104,27 +107,13 @@ export default function HomeScreen() {
         });
     }, [curriculumLessons, progressMap, activeChildId]);
 
-    // Daily progress stats
-    const completedCount = useMemo(() => {
-        if (!activeChildId) return 0;
-        return curriculumLessons.filter((l) => progressMap[`${activeChildId}:${l.id}`]?.isCompleted).length;
-    }, [curriculumLessons, progressMap, activeChildId]);
     const totalLessons = curriculumLessons.length;
-    const dailyProgress = totalLessons > 0 ? completedCount / totalLessons : 0;
 
     // Current lesson index
     const currentLessonIndex = useMemo(() => {
         if (!todayLesson) return totalLessons;
         return curriculumLessons.findIndex((l) => l.id === todayLesson.id) + 1;
     }, [todayLesson, curriculumLessons, totalLessons]);
-
-    // Memoized quick actions config
-    const quickActions = useMemo(() => [
-        { icon: 'refresh' as const, label: 'Review', color: brand.primary },
-        { icon: 'pencil' as const, label: 'Practice', color: brand.secondary },
-        { icon: 'headset' as const, label: 'Listen', color: brand.accent },
-        { icon: 'people' as const, label: 'Family', color: brand.primaryLight, route: '/family' },
-    ], [brand]);
 
     // Pull-to-refresh with store re-hydration
     const [refreshing, setRefreshing] = useState(false);
@@ -181,23 +170,6 @@ export default function HomeScreen() {
 
     const ctaStyle = useAnimatedStyle(() => ({
         transform: [{ scale: ctaPulse.value }],
-    }));
-
-    // ── Flame icon glow pulse ──
-    const flameGlow = useSharedValue(0.8);
-    useEffect(() => {
-        flameGlow.value = withRepeat(
-            withSequence(
-                withTiming(1, { duration: 800, easing: Easing.out(Easing.ease) }),
-                withTiming(0.8, { duration: 800, easing: Easing.in(Easing.ease) }),
-            ),
-            -1, true,
-        );
-    }, [flameGlow]);
-
-    const flameStyle = useAnimatedStyle(() => ({
-        opacity: flameGlow.value,
-        transform: [{ scale: interpolate(flameGlow.value, [0.8, 1], [0.95, 1.12]) }],
     }));
 
     const greeting = useMemo(getGreeting, []);
@@ -323,142 +295,80 @@ export default function HomeScreen() {
                     </ScalePress>
                 </Animated.View>
 
-                {/* ── Streak Banner ──────────────────────────── */}
+                {/* ── Streak Card ──────────────────────────── */}
                 {child && (
                     <Animated.View
-                        entering={FadeInDown.delay(STAGGER).duration(600).springify().damping(16)}
+                        entering={FadeInDown.delay(STAGGER).duration(600)}
+                        style={{ marginTop: spacing.lg }}
                     >
-                        <ScalePress accessibilityLabel={`Daily streak: ${child.currentStreak} days. Best: ${child.longestStreak} days`}>
-                            <View
-                                accessible
-                                accessibilityLabel={`Daily streak: ${child.currentStreak} days. Best streak: ${child.longestStreak} days. Week ${child.currentWeekNumber}`}
-                                style={[
-                                    styles.streakBanner,
-                                    {
-                                        marginTop: spacing.lg,
-                                        backgroundColor: brand.primary,
-                                        borderRadius: radius.xl,
-                                        padding: spacing.lg,
-                                        ...shadows.elevated,
-                                    },
-                                ]}
-                            >
-                                {/* Decorative background circles */}
-                                <View style={[styles.decorCircle, styles.decorCircle1]} />
-                                <View style={[styles.decorCircle, styles.decorCircle2]} />
-
-                                <View style={styles.streakContent}>
-                                    <View style={{ flex: 1 }}>
-                                        <Text
-                                            style={[
-                                                typography.captionBold,
-                                                {
-                                                    color: 'rgba(255,255,255,0.7)',
-                                                    textTransform: 'uppercase',
-                                                    letterSpacing: 1.2,
-                                                },
-                                            ]}
-                                        >
-                                            Daily Streak
-                                        </Text>
-                                        <View style={styles.streakRow}>
-                                            <Text style={[typography.displayMedium, { color: '#FFFFFF' }]}>
-                                                {child.currentStreak}
-                                            </Text>
-                                            <Animated.View style={[styles.flameWrapper, flameStyle]}>
-                                                <Ionicons name="flame" size={30} color="#FF9500" />
-                                            </Animated.View>
-                                        </View>
-                                        <Text
-                                            style={[
-                                                typography.caption,
-                                                { color: 'rgba(255,255,255,0.5)', marginTop: 2 },
-                                            ]}
-                                        >
-                                            Best: {child.longestStreak} days
-                                        </Text>
-                                    </View>
-
-                                    {/* Week indicator ring */}
-                                    <View style={styles.weekRingOuter}>
-                                        <Text style={[typography.labelSmall, { color: 'rgba(255,255,255,0.6)' }]}>
-                                            WEEK
-                                        </Text>
-                                        <Text style={[typography.title1, { color: '#FFFFFF' }]}>
-                                            {child.currentWeekNumber}
-                                        </Text>
-                                    </View>
-                                </View>
-
-                                {/* Weekly crescent streak tracker */}
-                                <WeekStreak streak={child.currentStreak} parentBg={brand.primary} />
-                            </View>
-                        </ScalePress>
+                        <WeekStreak
+                            streak={child.currentStreak}
+                            longestStreak={child.longestStreak}
+                        />
                     </Animated.View>
                 )}
 
-                {/* ── Quick Actions ────────────────────────── */}
-                <Animated.View
-                    entering={FadeInDown.delay(STAGGER * 2).duration(600).springify().damping(16)}
-                    style={{ marginTop: spacing.xl }}
-                >
-                    <SectionHeader title="Quick Actions" />
-                    <HScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{ gap: spacing.sm, paddingVertical: spacing.sm }}
-                    >
-                        {quickActions.map((action) => (
-                            <QuickAction
-                                key={action.label}
-                                icon={action.icon}
-                                label={action.label}
-                                color={action.color}
-                                onPress={action.route ? () => router.push(action.route as any) : undefined}
-                            />
-                        ))}
-                    </HScrollView>
-                </Animated.View>
-
-                {/* ── Daily Progress ──────────────────────────── */}
-                {child && (
+                {/* ── Reviews Due ──────────────────────────────── */}
+                {hasReviews && (
                     <Animated.View
-                        entering={FadeInDown.delay(STAGGER * 2.5).duration(600).springify().damping(16)}
+                        entering={FadeInDown.delay(STAGGER * 2.7).duration(600).springify().damping(16)}
                         style={{ marginTop: spacing.lg }}
                     >
-                        <View
-                            accessible
-                            accessibilityLabel={`Daily progress: ${completedCount} of ${totalLessons} lessons completed`}
-                            style={[
-                                styles.progressCard,
-                                {
-                                    backgroundColor: colors.surface,
-                                    borderRadius: radius.lg,
-                                    padding: spacing.md,
-                                    ...shadows.subtle,
-                                },
-                            ]}
-                        >
-                            <View style={styles.progressHeader}>
-                                <View style={styles.progressLeft}>
-                                    <Ionicons name="trending-up" size={18} color={brand.secondary} />
-                                    <Text style={[typography.label, { color: colors.text, marginLeft: spacing.xs }]}>
-                                        Daily Progress
+                        <ScalePress onPress={() => router.push('/review' as any)}>
+                            <View
+                                accessible
+                                accessibilityLabel={`${reviewCount} lessons due for review. Tap to start reviewing.`}
+                                style={[
+                                    styles.continueCard,
+                                    {
+                                        marginTop: spacing.sm,
+                                        backgroundColor: brand.coral + '08',
+                                        borderRadius: radius.lg,
+                                        borderWidth: 1,
+                                        borderColor: brand.coral + '22',
+                                        padding: spacing.md,
+                                    },
+                                ]}
+                            >
+                                <View
+                                    style={[
+                                        styles.continueIcon,
+                                        { backgroundColor: brand.coral + '18', borderRadius: radius.md },
+                                    ]}
+                                >
+                                    <Ionicons name="refresh" size={22} color={brand.coral} />
+                                </View>
+                                <View style={{ flex: 1, marginLeft: spacing.sm }}>
+                                    <Text style={[typography.caption, { color: brand.coral }]}>
+                                        Reviews Due
+                                    </Text>
+                                    <Text style={[typography.label, { color: colors.text, marginTop: 2 }]}>
+                                        {reviewCount} {reviewCount === 1 ? 'lesson' : 'lessons'} to review
+                                    </Text>
+                                    {nextReview && (
+                                        <Text
+                                            style={[typography.caption, { color: colors.textTertiary, marginTop: 2 }]}
+                                            numberOfLines={1}
+                                        >
+                                            Next: {nextReview.lesson.title}
+                                        </Text>
+                                    )}
+                                </View>
+                                <View
+                                    style={[
+                                        styles.reviewBadge,
+                                        {
+                                            backgroundColor: brand.coral,
+                                            borderRadius: radius.full,
+                                        },
+                                    ]}
+                                >
+                                    <Text style={[typography.captionBold, { color: '#FFF' }]}>
+                                        {reviewCount}
                                     </Text>
                                 </View>
-                                <Text style={[typography.labelSmall, { color: brand.secondary }]}>
-                                    {completedCount}/{totalLessons}
-                                </Text>
                             </View>
-                            <View style={{ marginTop: spacing.sm }}>
-                                <ProgressBar
-                                    progress={dailyProgress}
-                                    color={brand.secondary}
-                                    trackColor={brand.secondary + '18'}
-                                    height={8}
-                                />
-                            </View>
-                        </View>
+                        </ScalePress>
                     </Animated.View>
                 )}
 
@@ -769,47 +679,6 @@ const styles = StyleSheet.create({
         borderWidth: 1.5,
     },
 
-    /* Streak banner */
-    streakBanner: {
-        overflow: 'hidden',
-    },
-    streakContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    streakRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 4,
-    },
-    decorCircle: {
-        position: 'absolute',
-        borderRadius: 9999,
-        backgroundColor: 'rgba(255,255,255,0.07)',
-    },
-    decorCircle1: {
-        width: 130,
-        height: 130,
-        top: -35,
-        right: -25,
-    },
-    decorCircle2: {
-        width: 90,
-        height: 90,
-        bottom: -25,
-        right: 55,
-    },
-    weekRingOuter: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        borderWidth: 2,
-        borderColor: 'rgba(255,255,255,0.15)',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-
     /* Lesson card */
     lessonCard: {
         flexDirection: 'row',
@@ -840,17 +709,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 
-    /* Daily progress card */
-    progressCard: {},
-    progressHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    progressLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
     badgeRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -865,9 +723,6 @@ const styles = StyleSheet.create({
     greetingRow: {
         flexDirection: 'row',
         alignItems: 'center',
-    },
-    flameWrapper: {
-        marginLeft: 6,
     },
 
     /* Stat cards */
@@ -885,6 +740,15 @@ const styles = StyleSheet.create({
         height: 44,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+
+    /* Review badge */
+    reviewBadge: {
+        minWidth: 26,
+        height: 26,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 6,
     },
 
     /* Empty state (no child) */

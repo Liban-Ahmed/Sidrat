@@ -21,8 +21,9 @@ import { categoryMeta } from '../../src/types';
 export default function LessonScreen() {
     const { brand, colors, typography } = useTheme();
     const router = useRouter();
-    const { id } = useLocalSearchParams<{ id: string }>();
+    const { id, review } = useLocalSearchParams<{ id: string; review?: string }>();
     const activeChildId = useAppStore((s) => s.activeChildId);
+    const isReview = review === '1';
 
     const lesson = id ? getCurriculumLesson(id) : undefined;
 
@@ -43,20 +44,22 @@ export default function LessonScreen() {
         );
     }
 
-    return <LessonPlayerContent lesson={lesson} childId={activeChildId} />;
+    return <LessonPlayerContent lesson={lesson} childId={activeChildId} isReview={isReview} />;
 }
 
 function LessonPlayerContent({
     lesson,
     childId,
+    isReview,
 }: {
     lesson: NonNullable<ReturnType<typeof getCurriculumLesson>>;
     childId: string;
+    isReview: boolean;
 }) {
     const { brand, colors, typography, radius } = useTheme();
     const router = useRouter();
 
-    const player = useLessonPlayer({ lesson, childId });
+    const player = useLessonPlayer({ lesson, childId, isReview });
 
     const handleClose = useCallback(() => {
         player.stopNarration();
@@ -71,12 +74,14 @@ function LessonPlayerContent({
     const categoryInfo = categoryMeta[lesson.category];
 
     // Phase labels for the progress bar
-    const phaseLabels: Record<string, string> = {
-        hook: 'Start',
-        teach: 'Learn',
-        practice: 'Practice',
-        reward: 'Done!',
-    };
+    const phaseLabels: Record<string, string> = isReview
+        ? { practice: 'Review', reward: 'Done!' }
+        : { hook: 'Start', teach: 'Learn', practice: 'Practice', reward: 'Done!' };
+
+    // In review mode, only show practice + reward phases
+    const visiblePhases = isReview
+        ? (['practice', 'reward'] as const)
+        : (['hook', 'teach', 'practice', 'reward'] as const);
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -89,8 +94,8 @@ function LessonPlayerContent({
 
                 {/* Title + category */}
                 <View style={styles.titleArea}>
-                    <Text style={[typography.captionBold, { color: brand.primary }]} numberOfLines={1}>
-                        {categoryInfo?.label ?? lesson.category}
+                    <Text style={[typography.captionBold, { color: isReview ? brand.accent : brand.primary }]} numberOfLines={1}>
+                        {isReview ? 'Review' : categoryInfo?.label ?? lesson.category}
                     </Text>
                     <Text style={[typography.footnote, { color: colors.textTertiary }]} numberOfLines={1}>
                         {lesson.title}
@@ -101,10 +106,10 @@ function LessonPlayerContent({
                 <View
                     style={[
                         styles.phaseBadge,
-                        { backgroundColor: brand.primary + '12', borderRadius: radius.full },
+                        { backgroundColor: (isReview ? brand.accent : brand.primary) + '12', borderRadius: radius.full },
                     ]}
                 >
-                    <Text style={[typography.captionBold, { color: brand.primary }]}>
+                    <Text style={[typography.captionBold, { color: isReview ? brand.accent : brand.primary }]}>
                         {phaseLabels[player.phase] ?? player.phase}
                     </Text>
                 </View>
@@ -112,12 +117,13 @@ function LessonPlayerContent({
 
             {/* Phase progress dots */}
             <View style={styles.phaseProgress}>
-                {(['hook', 'teach', 'practice', 'reward'] as const).map((phase) => {
-                    const phases = ['hook', 'teach', 'practice', 'reward'];
-                    const currentIdx = phases.indexOf(player.phase);
-                    const thisIdx = phases.indexOf(phase);
+                {visiblePhases.map((phase) => {
+                    const phasesArr: string[] = [...visiblePhases];
+                    const currentIdx = phasesArr.indexOf(player.phase);
+                    const thisIdx = phasesArr.indexOf(phase);
                     const isDone = thisIdx < currentIdx;
                     const isCurrent = phase === player.phase;
+                    const accentColor = isReview ? brand.accent : brand.primary;
                     return (
                         <View
                             key={phase}
@@ -125,9 +131,9 @@ function LessonPlayerContent({
                                 styles.phaseDot,
                                 {
                                     backgroundColor: isDone
-                                        ? brand.primary
+                                        ? accentColor
                                         : isCurrent
-                                            ? brand.primary + '60'
+                                            ? accentColor + '60'
                                             : colors.surfaceTertiary,
                                     flex: 1,
                                 },

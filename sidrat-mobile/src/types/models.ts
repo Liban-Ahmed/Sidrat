@@ -157,6 +157,13 @@ export interface LessonProgress {
     lastCompletedPhase?: LessonPhase;
     phaseProgress: Partial<Record<LessonPhase, string>>; // phase → ISO date
     lastAccessedAt?: string;
+
+    // Spaced repetition scheduling
+    nextReviewDate?: string;        // ISO date — when this lesson is due for review
+    intervalIndex?: number;          // Position in the SM-2 interval array (0-4)
+    reviewCount?: number;            // Total number of times this lesson has been reviewed
+    lastReviewedAt?: string;         // ISO date — last review completion
+    lastReviewScore?: number;        // Score from most recent review (0-100)
 }
 
 export interface Achievement {
