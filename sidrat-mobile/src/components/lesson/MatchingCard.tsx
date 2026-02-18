@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { PracticeMatching } from '../../types/curriculum';
+import { FormattedText } from './FormattedText';
 
 interface Props {
     block: PracticeMatching;
@@ -81,9 +82,9 @@ export function MatchingCard({ block, onAnswer }: Props) {
         <View style={styles.container}>
             {/* ── Instruction ── */}
             <Animated.View entering={FadeInDown.delay(100).duration(500)}>
-                <Text style={[typography.title3, { color: colors.text, marginBottom: 20 }]}>
+                <FormattedText style={[typography.title3, { color: colors.text, marginBottom: 20 }]}>
                     {block.instruction}
-                </Text>
+                </FormattedText>
             </Animated.View>
 
             {/* ── Matching columns ── */}
@@ -247,9 +248,9 @@ export function MatchingCard({ block, onAnswer }: Props) {
                     ]}
                 >
                     <Ionicons name="sparkles" size={18} color={colors.success} />
-                    <Text style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
+                    <FormattedText style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
                         {block.explanation}
-                    </Text>
+                    </FormattedText>
                 </Animated.View>
             )}
 

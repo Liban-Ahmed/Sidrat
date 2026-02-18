@@ -30,6 +30,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { TeachBlock } from '../../types/curriculum';
+import { FormattedText } from './FormattedText';
 
 interface Props {
     block: TeachBlock;
@@ -150,7 +151,7 @@ export function TeachPhase({ block, index, total, isNarrating, onNarrate, onNext
 
                 {/* ── Body text ── */}
                 <Animated.View entering={FadeInDown.delay(250).duration(500)}>
-                    <Text
+                    <FormattedText
                         style={[
                             typography.body,
                             {
@@ -160,7 +161,7 @@ export function TeachPhase({ block, index, total, isNarrating, onNarrate, onNext
                         ]}
                     >
                         {block.body}
-                    </Text>
+                    </FormattedText>
                 </Animated.View>
 
                 {/* ── Speaker pill ── */}
@@ -220,7 +221,7 @@ export function TeachPhase({ block, index, total, isNarrating, onNarrate, onNext
                 {/* ── Arabic text showcase ── */}
                 {block.arabic && (
                     <Animated.View
-                        entering={FadeInRight.delay(500).duration(600).springify().damping(16)}
+                        entering={FadeInRight.delay(500).duration(600)}
                         style={[
                             styles.arabicCard,
                             {

@@ -30,6 +30,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { HookBlock } from '../../types/curriculum';
+import { FormattedText } from './FormattedText';
 
 interface Props {
     hook: HookBlock;
@@ -144,7 +145,7 @@ export function HookPhase({ hook, isNarrating, onNarrate, onContinue }: Props) {
 
             {/* Icon with glow */}
             <Animated.View
-                entering={FadeInDown.delay(100).duration(700).springify().damping(14)}
+                entering={FadeInDown.delay(100).duration(600)}
                 style={styles.iconArea}
             >
                 {/* Outer glow ring */}
@@ -175,10 +176,10 @@ export function HookPhase({ hook, isNarrating, onNarrate, onContinue }: Props) {
 
             {/* Prompt text */}
             <Animated.View
-                entering={FadeInDown.delay(300).duration(700).springify().damping(16)}
+                entering={FadeInDown.delay(300).duration(600)}
                 style={styles.promptArea}
             >
-                <Text
+                <FormattedText
                     style={[
                         typography.title1,
                         {
@@ -189,7 +190,7 @@ export function HookPhase({ hook, isNarrating, onNarrate, onContinue }: Props) {
                     ]}
                 >
                     {hook.prompt}
-                </Text>
+                </FormattedText>
             </Animated.View>
 
             {/* Speaker button */}
@@ -252,7 +253,7 @@ export function HookPhase({ hook, isNarrating, onNarrate, onContinue }: Props) {
 
             {/* CTA button */}
             <Animated.View
-                entering={FadeInUp.delay(800).duration(600).springify().damping(14)}
+                entering={FadeInUp.delay(800).duration(500)}
                 style={styles.ctaArea}
             >
                 <Animated.View style={ctaAnimStyle}>

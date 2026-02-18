@@ -68,3 +68,5 @@ fastlane/test_output
 *.xcscmblueprint
 *.xcscheme
 Sidrat.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+MASTER_PLAN.md

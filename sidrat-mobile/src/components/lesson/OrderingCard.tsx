@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { PracticeOrdering } from '../../types/curriculum';
+import { FormattedText } from './FormattedText';
 
 interface Props {
     block: PracticeOrdering;
@@ -70,9 +71,9 @@ export function OrderingCard({ block, onAnswer }: Props) {
         <View style={styles.container}>
             {/* ── Instruction ── */}
             <Animated.View entering={FadeInDown.delay(100).duration(500)}>
-                <Text style={[typography.title3, { color: colors.text, marginBottom: 18 }]}>
+                <FormattedText style={[typography.title3, { color: colors.text, marginBottom: 18 }]}>
                     {block.instruction}
-                </Text>
+                </FormattedText>
             </Animated.View>
 
             {/* ── Answer area ── */}
@@ -242,9 +243,9 @@ export function OrderingCard({ block, onAnswer }: Props) {
                         size={18}
                         color={isCorrect ? colors.success : brand.accent}
                     />
-                    <Text style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
+                    <FormattedText style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
                         {block.explanation}
-                    </Text>
+                    </FormattedText>
                 </Animated.View>
             )}
         </View>

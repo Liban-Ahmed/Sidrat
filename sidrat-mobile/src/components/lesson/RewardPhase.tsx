@@ -21,16 +21,18 @@ import Animated, {
     FadeIn,
     useSharedValue,
     useAnimatedStyle,
-    withSequence,
     withSpring,
     withTiming,
     withDelay,
+    withRepeat,
     Easing,
+    interpolate,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { RewardConfig } from '../../types/curriculum';
+import { FormattedText } from './FormattedText';
 
 interface Props {
     reward: RewardConfig;
@@ -67,50 +69,152 @@ export function RewardPhase({
     const percent = maxScore > 0 ? Math.round((score / maxScore) * 100) : 100;
     const grade = getGrade(percent, brand);
 
-    // Trophy bouncing in
+    // ── Celebration animations ──
     const trophyScale = useSharedValue(0);
+    const shimmer = useSharedValue(0);
+    const ring1 = useSharedValue(0);
+    const ring2 = useSharedValue(0);
+    const ring3 = useSharedValue(0);
+    const sparkleAngle = useSharedValue(0);
     const hasCompleted = useRef(false);
+
     useEffect(() => {
+        // Smooth trophy entrance
         trophyScale.value = withDelay(
-            300,
-            withSequence(
-                withSpring(1.2, { damping: 4, stiffness: 200 }),
-                withTiming(1, { duration: 200, easing: Easing.out(Easing.ease) }),
+            200,
+            withSpring(1, { damping: 12, stiffness: 80 }),
+        );
+
+        // Gentle breathing shimmer
+        shimmer.value = withDelay(
+            700,
+            withRepeat(
+                withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+                -1,
+                true,
             ),
         );
+
+        // Radiating pulse rings (staggered)
+        ring1.value = withDelay(
+            500,
+            withRepeat(withTiming(1, { duration: 2400, easing: Easing.out(Easing.quad) }), -1),
+        );
+        ring2.value = withDelay(
+            1300,
+            withRepeat(withTiming(1, { duration: 2400, easing: Easing.out(Easing.quad) }), -1),
+        );
+        ring3.value = withDelay(
+            2100,
+            withRepeat(withTiming(1, { duration: 2400, easing: Easing.out(Easing.quad) }), -1),
+        );
+
+        // Slow sparkle rotation
+        sparkleAngle.value = withRepeat(
+            withTiming(360, { duration: 10000, easing: Easing.linear }),
+            -1,
+        );
+
         // Celebration haptic
         haptics.medium();
-        // Complete the lesson only once
         if (!hasCompleted.current) {
             hasCompleted.current = true;
             onComplete();
         }
-    }, [trophyScale, onComplete]);
+    }, [trophyScale, shimmer, ring1, ring2, ring3, sparkleAngle, onComplete]);
 
     const trophyStyle = useAnimatedStyle(() => ({
         transform: [{ scale: trophyScale.value }],
     }));
 
+    const shimmerStyle = useAnimatedStyle(() => ({
+        opacity: interpolate(shimmer.value, [0, 1], [0.06, 0.2]),
+        transform: [{ scale: interpolate(shimmer.value, [0, 1], [1, 1.06]) }],
+    }));
+
+    const ring1Style = useAnimatedStyle(() => ({
+        transform: [{ scale: interpolate(ring1.value, [0, 1], [0.5, 1.8]) }],
+        opacity: interpolate(ring1.value, [0, 0.12, 1], [0, 0.3, 0]),
+    }));
+
+    const ring2Style = useAnimatedStyle(() => ({
+        transform: [{ scale: interpolate(ring2.value, [0, 1], [0.5, 1.8]) }],
+        opacity: interpolate(ring2.value, [0, 0.12, 1], [0, 0.3, 0]),
+    }));
+
+    const ring3Style = useAnimatedStyle(() => ({
+        transform: [{ scale: interpolate(ring3.value, [0, 1], [0.5, 1.8]) }],
+        opacity: interpolate(ring3.value, [0, 0.12, 1], [0, 0.3, 0]),
+    }));
+
+    const sparkleStyle = useAnimatedStyle(() => ({
+        transform: [{ rotate: `${sparkleAngle.value}deg` }],
+    }));
+
     return (
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
             <View style={styles.container}>
-                {/* ── Trophy ── */}
-                <Animated.View style={[styles.trophyArea, trophyStyle]}>
-                    {/* Outer glow ring */}
-                    <View
-                        style={[
-                            styles.trophyGlow,
-                            { backgroundColor: grade.color + '10' },
-                        ]}
+                {/* ── Celebration area ── */}
+                <View style={styles.celebrationArea}>
+                    {/* Radiating pulse rings */}
+                    <Animated.View
+                        style={[styles.pulseRing, { borderColor: grade.color }, ring1Style]}
                     />
-                    <View style={[styles.trophyCircle, { backgroundColor: grade.color + '18' }]}>
-                        <Ionicons
-                            name={grade.icon as keyof typeof Ionicons.glyphMap}
-                            size={60}
-                            color={grade.color}
+                    <Animated.View
+                        style={[styles.pulseRing, { borderColor: grade.color }, ring2Style]}
+                    />
+                    <Animated.View
+                        style={[styles.pulseRing, { borderColor: grade.color }, ring3Style]}
+                    />
+
+                    {/* Rotating sparkle dots */}
+                    <Animated.View style={[styles.sparkleContainer, sparkleStyle]}>
+                        {[0, 60, 120, 180, 240, 300].map((angle) => {
+                            const rad = (angle * Math.PI) / 180;
+                            const x = Math.cos(rad) * 72;
+                            const y = Math.sin(rad) * 72;
+                            return (
+                                <View
+                                    key={angle}
+                                    style={[
+                                        styles.sparkleDot,
+                                        {
+                                            backgroundColor: grade.color,
+                                            left: 72 + x,
+                                            top: 72 + y,
+                                            opacity: angle % 120 === 0 ? 0.7 : 0.3,
+                                        },
+                                    ]}
+                                />
+                            );
+                        })}
+                    </Animated.View>
+
+                    {/* Trophy with entrance */}
+                    <Animated.View style={[styles.trophyOuter, trophyStyle]}>
+                        {/* Shimmer glow */}
+                        <Animated.View
+                            style={[
+                                styles.trophyShimmer,
+                                { backgroundColor: grade.color },
+                                shimmerStyle,
+                            ]}
                         />
-                    </View>
-                </Animated.View>
+                        {/* Main circle */}
+                        <View
+                            style={[
+                                styles.trophyCircle,
+                                { backgroundColor: grade.color + '15' },
+                            ]}
+                        >
+                            <Ionicons
+                                name={grade.icon as keyof typeof Ionicons.glyphMap}
+                                size={52}
+                                color={grade.color}
+                            />
+                        </View>
+                    </Animated.View>
+                </View>
 
                 {/* ── Grade label ── */}
                 <Animated.View entering={FadeInDown.delay(500).duration(600)}>
@@ -126,7 +230,7 @@ export function RewardPhase({
 
                 {/* ── Message ── */}
                 <Animated.View entering={FadeInDown.delay(600).duration(600)}>
-                    <Text
+                    <FormattedText
                         style={[
                             typography.body,
                             {
@@ -138,7 +242,7 @@ export function RewardPhase({
                         ]}
                     >
                         {reward.message}
-                    </Text>
+                    </FormattedText>
                 </Animated.View>
 
                 {/* ── Stats row ── */}
@@ -245,9 +349,9 @@ export function RewardPhase({
                             </View>
                             <Text style={[typography.label, { color: brand.accent }]}>Did You Know?</Text>
                         </View>
-                        <Text style={[typography.body, { color: colors.text, lineHeight: 24 }]}>
+                        <FormattedText style={[typography.body, { color: colors.text, lineHeight: 24 }]}>
                             {reward.funFact}
-                        </Text>
+                        </FormattedText>
                     </Animated.View>
                 )}
 
@@ -347,18 +451,46 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 
-    /* Trophy */
-    trophyArea: { marginBottom: 18, alignItems: 'center', justifyContent: 'center' },
-    trophyGlow: {
+    /* Celebration area */
+    celebrationArea: {
+        width: 150,
+        height: 150,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 20,
+    },
+    pulseRing: {
         position: 'absolute',
         width: 150,
         height: 150,
         borderRadius: 75,
+        borderWidth: 2,
+    },
+    sparkleContainer: {
+        position: 'absolute',
+        width: 150,
+        height: 150,
+    },
+    sparkleDot: {
+        position: 'absolute',
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+    },
+    trophyOuter: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    trophyShimmer: {
+        position: 'absolute',
+        width: 130,
+        height: 130,
+        borderRadius: 65,
     },
     trophyCircle: {
-        width: 110,
-        height: 110,
-        borderRadius: 55,
+        width: 100,
+        height: 100,
+        borderRadius: 50,
         alignItems: 'center',
         justifyContent: 'center',
     },

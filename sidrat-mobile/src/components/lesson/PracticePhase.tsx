@@ -129,7 +129,7 @@ export function PracticePhase({ block, index, total, score, maxScore, onAnswer }
             {/* ── Practice card ── */}
             <Animated.View
                 key={`practice-${index}`}
-                entering={FadeInDown.delay(150).duration(400).springify().damping(18)}
+                entering={FadeInDown.delay(150).duration(400)}
                 style={styles.cardWrapper}
             >
                 {renderBlock()}

@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { PracticeTrueFalse } from '../../types/curriculum';
+import { FormattedText } from './FormattedText';
 
 interface Props {
     block: PracticeTrueFalse;
@@ -90,7 +91,7 @@ export function TrueFalseCard({ block, onAnswer }: Props) {
         <View style={styles.container}>
             {/* ── Statement ── */}
             <Animated.View entering={FadeInDown.delay(100).duration(500)}>
-                <Text
+                <FormattedText
                     style={[
                         typography.title3,
                         {
@@ -102,7 +103,7 @@ export function TrueFalseCard({ block, onAnswer }: Props) {
                     ]}
                 >
                     {block.statement}
-                </Text>
+                </FormattedText>
             </Animated.View>
 
             {/* ── True / False buttons ── */}
@@ -112,7 +113,7 @@ export function TrueFalseCard({ block, onAnswer }: Props) {
                     return (
                         <Animated.View
                             key={String(value)}
-                            entering={FadeInUp.delay(250 + i * 100).duration(450).springify().damping(16)}
+                            entering={FadeInUp.delay(250 + i * 100).duration(400)}
                             style={{ flex: 1 }}
                         >
                             <Pressable
@@ -178,9 +179,9 @@ export function TrueFalseCard({ block, onAnswer }: Props) {
                         size={18}
                         color={isCorrect ? colors.success : brand.accent}
                     />
-                    <Text style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
+                    <FormattedText style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
                         {block.explanation}
-                    </Text>
+                    </FormattedText>
                 </Animated.View>
             )}
         </View>

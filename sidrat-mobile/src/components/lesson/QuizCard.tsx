@@ -27,6 +27,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { PracticeQuiz } from '../../types/curriculum';
+import { FormattedText } from './FormattedText';
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -89,9 +90,9 @@ export function QuizCard({ block, onAnswer }: Props) {
         <Animated.View style={[styles.container, shakeStyle]}>
             {/* ── Question ── */}
             <Animated.View entering={FadeInDown.delay(100).duration(500)}>
-                <Text style={[typography.title3, { color: colors.text, marginBottom: 22 }]}>
+                <FormattedText style={[typography.title3, { color: colors.text, marginBottom: 22 }]}>
                     {block.question}
-                </Text>
+                </FormattedText>
             </Animated.View>
 
             {/* ── Options ── */}
@@ -214,9 +215,9 @@ export function QuizCard({ block, onAnswer }: Props) {
                     ]}
                 >
                     <Ionicons name="sparkles" size={18} color={colors.success} />
-                    <Text style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
+                    <FormattedText style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
                         {block.explanation}
-                    </Text>
+                    </FormattedText>
                 </Animated.View>
             )}
         </Animated.View>
