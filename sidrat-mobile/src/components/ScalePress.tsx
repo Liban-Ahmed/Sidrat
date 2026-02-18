@@ -1,6 +1,8 @@
 /**
- * ScalePress — spring-animated pressable wrapper.
- * Provides tactile press-feedback across the app.
+ * ScalePress — spring-animated pressable wrapper with haptic feedback.
+ *
+ * Provides premium tactile press-feedback across the app.
+ * Uses tuned spring physics for a bouncy, responsive feel.
  */
 
 import React from 'react';
@@ -10,14 +12,22 @@ import Animated, {
     useAnimatedStyle,
     withSpring,
 } from 'react-native-reanimated';
+import { haptics } from '../utils/haptics';
 
-const SPRING_CONFIG = { damping: 15, stiffness: 150, mass: 0.8 };
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const SPRING_PRESS = { damping: 15, stiffness: 200, mass: 0.7 };
+const SPRING_RELEASE = { damping: 20, stiffness: 300, mass: 0.8 };
 
 interface ScalePressProps {
     children: React.ReactNode;
     onPress?: () => void;
     style?: StyleProp<ViewStyle>;
+    /** Scale factor when pressed (default 0.95) */
+    pressScale?: number;
+    /** Trigger haptic on press */
+    haptic?: boolean;
+    disabled?: boolean;
     accessibilityRole?: 'button' | 'link' | 'none';
     accessibilityLabel?: string;
 }
@@ -26,6 +36,9 @@ export function ScalePress({
     children,
     onPress,
     style,
+    pressScale = 0.95,
+    haptic = false,
+    disabled = false,
     accessibilityRole = 'button',
     accessibilityLabel,
 }: ScalePressProps) {
@@ -34,14 +47,21 @@ export function ScalePress({
         transform: [{ scale: scale.value }],
     }));
 
+    const handlePress = () => {
+        if (haptic) haptics.light();
+        onPress?.();
+    };
+
     return (
         <AnimatedPressable
-            onPressIn={() => { scale.value = withSpring(0.96, SPRING_CONFIG); }}
-            onPressOut={() => { scale.value = withSpring(1, SPRING_CONFIG); }}
-            onPress={onPress}
-            style={[animatedStyle, style]}
+            onPressIn={() => { scale.value = withSpring(pressScale, SPRING_PRESS); }}
+            onPressOut={() => { scale.value = withSpring(1, SPRING_RELEASE); }}
+            onPress={handlePress}
+            disabled={disabled}
+            style={[animatedStyle, style, disabled && { opacity: 0.5 }]}
             accessibilityRole={accessibilityRole}
             accessibilityLabel={accessibilityLabel}
+            accessibilityState={{ disabled }}
         >
             {children}
         </AnimatedPressable>

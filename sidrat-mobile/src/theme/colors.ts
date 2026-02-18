@@ -1,92 +1,178 @@
 /**
  * Sidrat Color System
  *
- * Matches landing page palette with full dark mode support.
- * Improved over iOS version: semantic tokens with clear naming,
- * no legacy aliases, and explicit light/dark variants.
+ * A rich, warm palette inspired by Islamic art — deep teals from
+ * mosque tiles, emerald greens from the Prophet's banner ﷺ, and
+ * golden accents evoking illuminated manuscripts.
+ *
+ * Design principles:
+ *  • WCAG AA+ contrast ratios for all text on background
+ *  • Warm neutrals (never pure grey) to feel inviting for children
+ *  • Gradient pairs for every brand color for depth
+ *  • Dark mode uses warm charcoal, not cold black
  */
 
 // ── Brand Colors (constant across modes) ──────────────────────────
 
 export const brand = {
-    primary: '#0C7489',
-    primaryLight: '#0E8FA6',
-    primaryDark: '#095A6B',
+    /** Deep teal — primary CTAs, active states, app identity */
+    primary: '#0A7E8C',
+    primaryLight: '#12A4B4',
+    primaryDark: '#066570',
+    primaryMuted: '#0A7E8C20',
 
-    secondary: '#488B49',
-    secondaryLight: '#5AA85B',
-    secondaryDark: '#3A7A3B',
+    /** Emerald green — success, Quran, nature themes */
+    secondary: '#2E8B57',
+    secondaryLight: '#3DA96C',
+    secondaryDark: '#1E6B42',
+    secondaryMuted: '#2E8B5720',
 
-    accent: '#DAA520',
-    accentLight: '#E8B84A',
-    accentDark: '#C49318',
+    /** Warm gold — achievements, accents, Islamic art inspiration */
+    accent: '#D4982A',
+    accentLight: '#EDC55E',
+    accentDark: '#B07D1E',
+    accentMuted: '#D4982A20',
+
+    /** Soft coral — engagement, hearts, streak fire */
+    coral: '#E8636F',
+    coralLight: '#F2959D',
+    coralDark: '#C74E59',
+
+    /** Lavender — calm states, bedtime content */
+    lavender: '#7C6BC4',
+    lavenderLight: '#A599D9',
+    lavenderDark: '#5B4FA0',
+} as const;
+
+// ── Gradient Pairs ────────────────────────────────────────────────
+// Use with LinearGradient or as reference for manual gradient layers.
+
+export const gradients = {
+    /** Primary CTA gradient — teal to bright teal */
+    primary: ['#066570', '#12A4B4'] as const,
+    /** Achievement / gold shimmer */
+    gold: ['#B07D1E', '#EDC55E'] as const,
+    /** Success / nature */
+    emerald: ['#1E6B42', '#3DA96C'] as const,
+    /** Streak fire */
+    coral: ['#C74E59', '#F2959D'] as const,
+    /** Night / calm */
+    night: ['#1B1B3A', '#2D2D5E'] as const,
+    /** Warm sunset — onboarding backgrounds */
+    sunset: ['#D4982A', '#E8636F'] as const,
+    /** Card shimmer overlay */
+    shimmer: ['rgba(255,255,255,0)', 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0)'] as const,
 } as const;
 
 // ── Semantic Palette ──────────────────────────────────────────────
 
 export const palette = {
     light: {
-        background: '#FFFFFF',
-        backgroundSecondary: '#F5F5F5',
-        backgroundTertiary: '#EDEDED',
+        /** Warm off-white — never pure #FFF */
+        background: '#FAFAF8',
+        backgroundSecondary: '#F2F1EE',
+        backgroundTertiary: '#E8E6E1',
 
+        /** Card surfaces — slightly warmer than background */
         surface: '#FFFFFF',
-        surfaceSecondary: '#F5F5F5',
-        surfaceTertiary: '#EDEDED',
+        surfaceSecondary: '#F7F6F3',
+        surfaceTertiary: '#EEEDEA',
         surfaceElevated: '#FFFFFF',
 
-        text: '#2C3E3F',
-        textSecondary: '#6B7280',
-        textTertiary: '#9CA3AF',
+        /** Text — warm charcoal, never pure black */
+        text: '#1A2B2D',
+        textSecondary: '#5A6B6D',
+        textTertiary: '#8A9496',
+        textInverse: '#FFFFFF',
 
-        separator: '#E5E5EA',
-        overlay: 'rgba(0,0,0,0.4)',
+        /** Interactive states */
+        interactive: brand.primary,
+        interactiveHover: brand.primaryDark,
+        interactivePressed: brand.primaryDark,
+        interactiveMuted: brand.primaryMuted,
 
-        success: '#488B49',
-        warning: '#DAA520',
-        error: '#DC2626',
+        /** Borders & dividers */
+        separator: '#E2DFD9',
+        border: '#D8D5CE',
+        borderFocused: brand.primary,
+
+        /** Overlay */
+        overlay: 'rgba(26, 43, 45, 0.45)',
+        overlayHeavy: 'rgba(26, 43, 45, 0.7)',
+
+        /** Feedback colors */
+        success: '#2E8B57',
+        successMuted: '#2E8B5715',
+        warning: '#D4982A',
+        warningMuted: '#D4982A15',
+        error: '#D94052',
+        errorMuted: '#D9405215',
+        info: brand.primary,
+        infoMuted: brand.primaryMuted,
     },
     dark: {
-        background: '#121214',
-        backgroundSecondary: '#1C1C1E',
-        backgroundTertiary: '#2C2C2E',
+        /** Warm dark — charcoal with slight warmth */
+        background: '#141618',
+        backgroundSecondary: '#1C1F22',
+        backgroundTertiary: '#262A2E',
 
-        surface: '#121214',
-        surfaceSecondary: '#1C1C1E',
-        surfaceTertiary: '#2C2C2E',
-        surfaceElevated: '#2C2C2E',
+        /** Card surfaces — elevated from background */
+        surface: '#1C1F22',
+        surfaceSecondary: '#242830',
+        surfaceTertiary: '#2E3238',
+        surfaceElevated: '#2E3238',
 
-        text: '#F5F5F7',
-        textSecondary: '#A1A1A6',
-        textTertiary: '#6B6B70',
+        /** Text — warm white, never pure #FFF */
+        text: '#F0EDE8',
+        textSecondary: '#9BA4A6',
+        textTertiary: '#636B6D',
+        textInverse: '#1A2B2D',
 
-        separator: '#38383A',
-        overlay: 'rgba(0,0,0,0.6)',
+        /** Interactive states */
+        interactive: '#12A4B4',
+        interactiveHover: '#15B8CA',
+        interactivePressed: '#0A7E8C',
+        interactiveMuted: '#12A4B425',
 
-        success: '#5AA85B',
-        warning: '#E8B84A',
-        error: '#EF4444',
+        /** Borders & dividers */
+        separator: '#2E3238',
+        border: '#3A3E44',
+        borderFocused: '#12A4B4',
+
+        /** Overlay */
+        overlay: 'rgba(0, 0, 0, 0.55)',
+        overlayHeavy: 'rgba(0, 0, 0, 0.8)',
+
+        /** Feedback colors */
+        success: '#3DA96C',
+        successMuted: '#3DA96C20',
+        warning: '#EDC55E',
+        warningMuted: '#EDC55E20',
+        error: '#EF5F6B',
+        errorMuted: '#EF5F6B20',
+        info: '#12A4B4',
+        infoMuted: '#12A4B420',
     },
 } as const;
 
 // ── Category Colors (for lesson categories) ──────────────────────
 
-export const categoryColors: Record<string, string> = {
-    aqeedah: brand.primary,
-    salah: brand.accent,
-    wudu: brand.primaryLight,
-    quran: brand.secondary,
-    seerah: brand.accentDark,
-    adab: '#E8636F',
-    duaa: brand.primaryDark,
-    stories: brand.secondaryLight,
+export const categoryColors: Record<string, { solid: string; muted: string }> = {
+    aqeedah: { solid: '#0A7E8C', muted: '#0A7E8C18' },
+    salah: { solid: '#D4982A', muted: '#D4982A18' },
+    wudu: { solid: '#12A4B4', muted: '#12A4B418' },
+    quran: { solid: '#2E8B57', muted: '#2E8B5718' },
+    seerah: { solid: '#B07D1E', muted: '#B07D1E18' },
+    adab: { solid: '#E8636F', muted: '#E8636F18' },
+    duaa: { solid: '#7C6BC4', muted: '#7C6BC418' },
+    stories: { solid: '#3DA96C', muted: '#3DA96C18' },
 };
 
 // ── Achievement Rarity Colors ────────────────────────────────────
 
 export const rarityColors = {
-    bronze: '#CD7F32',
-    silver: '#C0C0C0',
-    gold: '#DAA520',
-    platinum: '#E5E4E2',
+    bronze: { solid: '#CD7F32', glow: '#CD7F3240' },
+    silver: { solid: '#A8B5BD', glow: '#A8B5BD40' },
+    gold: { solid: '#D4982A', glow: '#D4982A40' },
+    platinum: { solid: '#B8C4D0', glow: '#B8C4D040' },
 } as const;

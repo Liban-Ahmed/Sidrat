@@ -1,5 +1,10 @@
 /**
  * WeekStreak — 7-day crescent tracker (Islamic motif).
+ *
+ * Features:
+ *  • Today is highlighted with a ring + bold label
+ *  • Active days show a filled crescent
+ *  • Subtle divider from content above
  */
 
 import React from 'react';
@@ -29,7 +34,8 @@ export function WeekStreak({ streak, parentBg }: WeekStreakProps) {
                                 {
                                     color: isToday
                                         ? '#FFFFFF'
-                                        : 'rgba(255,255,255,0.4)',
+                                        : 'rgba(255,255,255,0.35)',
+                                    fontWeight: isToday ? '700' : '600',
                                 },
                             ]}
                         >
@@ -54,24 +60,30 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: 16,
-        paddingTop: 12,
+        paddingTop: 14,
         borderTopWidth: StyleSheet.hairlineWidth,
-        borderTopColor: 'rgba(255,255,255,0.1)',
+        borderTopColor: 'rgba(255,255,255,0.08)',
     },
-    item: { alignItems: 'center', gap: 6 },
-    label: { fontSize: 10, fontWeight: '600', letterSpacing: 0.5 },
+    item: {
+        alignItems: 'center',
+        gap: 6,
+    },
+    label: {
+        fontSize: 10,
+        letterSpacing: 0.5,
+    },
     indicatorWrap: {
-        width: 22,
-        height: 22,
+        width: 24,
+        height: 24,
         alignItems: 'center',
         justifyContent: 'center',
     },
     todayRing: {
         position: 'absolute',
-        width: 22,
-        height: 22,
-        borderRadius: 11,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
         borderWidth: 1.5,
-        borderColor: 'rgba(255,255,255,0.25)',
+        borderColor: 'rgba(255,255,255,0.2)',
     },
 });

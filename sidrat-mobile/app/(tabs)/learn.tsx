@@ -75,7 +75,8 @@ export default function LearnScreen() {
                 {allUnits.map((unit, ui) => {
                     const unitProgress = getUnitProgress(unit);
                     const unitLessons = allCurriculumLessons.filter((l) => l.unitId === unit.id);
-                    const catColor = categoryColors[unit.category] ?? brand.primary;
+                    const cat = categoryColors[unit.category];
+                    const catColor = cat ? cat.solid : brand.primary;
 
                     return (
                         <Animated.View

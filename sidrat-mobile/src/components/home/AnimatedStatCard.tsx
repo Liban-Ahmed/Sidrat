@@ -1,5 +1,12 @@
 /**
- * AnimatedStatCard — stat card with entrance animation and counter.
+ * AnimatedStatCard — stat card with entrance animation, press feedback,
+ * and an accented icon background.
+ *
+ * Features:
+ *  • FadeInUp entrance with spring physics
+ *  • Scale-down press feedback
+ *  • Tinted icon background with subtle border
+ *  • AnimatedCounter for rolling number display
  */
 
 import React from 'react';
@@ -14,7 +21,6 @@ import Animated, {
 import { useTheme } from '../../theme';
 import { AnimatedCounter } from './AnimatedCounter';
 
-const SPRING_CONFIG = { damping: 15, stiffness: 150, mass: 0.8 };
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface AnimatedStatCardProps {
@@ -32,7 +38,7 @@ export function AnimatedStatCard({
     color,
     delay = 0,
 }: AnimatedStatCardProps) {
-    const { colors, typography, spacing, radius, shadows } = useTheme();
+    const { colors, typography, spacing, radius, shadows, springs, isDark } = useTheme();
     const scale = useSharedValue(1);
 
     const pressStyle = useAnimatedStyle(() => ({
@@ -45,15 +51,17 @@ export function AnimatedStatCard({
             style={[{ flex: 1 }, pressStyle]}
         >
             <AnimatedPressable
-                onPressIn={() => { scale.value = withSpring(0.93, SPRING_CONFIG); }}
-                onPressOut={() => { scale.value = withSpring(1, SPRING_CONFIG); }}
+                onPressIn={() => { scale.value = withSpring(0.93, springs.press); }}
+                onPressOut={() => { scale.value = withSpring(1, springs.snappy); }}
                 style={[
                     styles.statCard,
                     {
-                        backgroundColor: colors.surfaceSecondary,
+                        backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
                         borderRadius: radius.lg,
                         padding: spacing.md,
-                        ...shadows.subtle,
+                        borderWidth: 1,
+                        borderColor: isDark ? colors.border : color + '10',
+                        ...shadows.card,
                     },
                 ]}
                 accessibilityRole="button"
@@ -62,7 +70,10 @@ export function AnimatedStatCard({
                 <View
                     style={[
                         styles.statIconBg,
-                        { backgroundColor: color + '15', borderRadius: radius.md },
+                        {
+                            backgroundColor: color + (isDark ? '20' : '12'),
+                            borderRadius: radius.md,
+                        },
                     ]}
                 >
                     <Ionicons name={iconName} size={20} color={color} />
@@ -72,7 +83,12 @@ export function AnimatedStatCard({
                     color={colors.text}
                     style={[typography.title2, { marginTop: spacing.xs }]}
                 />
-                <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 2 }]}>
+                <Text
+                    style={[
+                        typography.caption,
+                        { color: colors.textSecondary, marginTop: spacing.xxxs },
+                    ]}
+                >
                     {label}
                 </Text>
             </AnimatedPressable>

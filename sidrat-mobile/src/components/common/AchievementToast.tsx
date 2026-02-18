@@ -20,15 +20,10 @@ import { useTheme } from '../../theme';
 import { useAchievementStore, getAchievementDef } from '../../stores/achievementStore';
 import { haptics } from '../../utils/haptics';
 
-const RARITY_COLORS: Record<string, string> = {
-    bronze: '#CD7F32',
-    silver: '#C0C0C0',
-    gold: '#FFD700',
-    platinum: '#E5E4E2',
-};
+// Using theme rarityColors — imported via useTheme
 
 export function AchievementToast() {
-    const { colors, typography, spacing, radius, shadows } = useTheme();
+    const { colors, typography, spacing, radius, shadows, rarityColors } = useTheme();
     const insets = useSafeAreaInsets();
     const pendingToasts = useAchievementStore((s) => s.pendingToasts);
     const dismissToast = useAchievementStore((s) => s.dismissToast);
@@ -77,7 +72,8 @@ export function AchievementToast() {
 
     if (!achievement) return null;
 
-    const rarityColor = RARITY_COLORS[achievement.rarity] ?? RARITY_COLORS.bronze;
+    const rarity = rarityColors[achievement.rarity as keyof typeof rarityColors] ?? rarityColors.bronze;
+    const rarityColor = rarity.solid;
 
     return (
         <Animated.View
@@ -96,12 +92,12 @@ export function AchievementToast() {
                 style={[
                     styles.toast,
                     {
-                        backgroundColor: colors.surfaceSecondary,
-                        borderRadius: radius.lg,
+                        backgroundColor: colors.surfaceElevated,
+                        borderRadius: radius.xl,
                         padding: spacing.md,
                         borderLeftWidth: 4,
                         borderLeftColor: rarityColor,
-                        ...shadows.card,
+                        ...shadows.elevated,
                     },
                 ]}
             >

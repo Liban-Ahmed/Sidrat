@@ -1,12 +1,22 @@
 /**
- * Progress Ring — circular progress indicator
+ * ProgressRing — Animated circular progress indicator.
  *
- * Used for daily progress, lesson completion, streaks.
- * Draws an SVG-style ring using borderRadius trick.
+ * Uses 4 rotated semi-circle quadrants for a true arc effect
+ * without requiring react-native-svg. The fill animates smoothly
+ * via Reanimated.
+ *
+ * Used for: daily progress, lesson completion, streaks.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withTiming,
+    Easing,
+    interpolate,
+} from 'react-native-reanimated';
 import { useTheme } from '../../theme';
 
 interface ProgressRingProps {
@@ -14,6 +24,9 @@ interface ProgressRingProps {
     size?: number;
     strokeWidth?: number;
     color?: string;
+    trackColor?: string;
+    /** Optional glow behind the ring */
+    glow?: boolean;
     children?: React.ReactNode;
 }
 
@@ -22,29 +35,139 @@ export function ProgressRing({
     size = 80,
     strokeWidth = 6,
     color,
+    trackColor,
+    glow = false,
     children,
 }: ProgressRingProps) {
-    const { brand, typography } = useTheme();
+    const { brand, typography, isDark } = useTheme();
     const fillColor = color ?? brand.primary;
+    const track = trackColor ?? (isDark ? fillColor + '18' : fillColor + '12');
     const pct = Math.min(Math.max(progress, 0), 1);
 
-    // Simple approach: background ring + foreground ring via border trick
-    // For a proper SVG ring, swap in react-native-svg later.
+    const animProgress = useSharedValue(0);
+    useEffect(() => {
+        animProgress.value = withTiming(pct, {
+            duration: 1000,
+            easing: Easing.out(Easing.cubic),
+        });
+    }, [pct, animProgress]);
+
+    // Each half-circle covers 180°. We rotate them to fill the arc.
+    const halfSize = size / 2;
+
+    const leftStyle = useAnimatedStyle(() => {
+        const rotate = interpolate(
+            animProgress.value,
+            [0, 0.5, 1],
+            [0, 0, 180],
+        );
+        return {
+            transform: [{ rotate: `${rotate}deg` }],
+            opacity: animProgress.value > 0.5 ? 1 : 0,
+        };
+    });
+
+    const rightStyle = useAnimatedStyle(() => {
+        const rotate = interpolate(
+            animProgress.value,
+            [0, 0.5],
+            [0, 180],
+        );
+        return {
+            transform: [{ rotate: `${Math.min(rotate, 180)}deg` }],
+        };
+    });
+
     return (
         <View style={[styles.container, { width: size, height: size }]}>
-            {/* Track */}
+            {/* Glow effect */}
+            {glow && (
+                <View
+                    style={[
+                        styles.glow,
+                        {
+                            width: size + 16,
+                            height: size + 16,
+                            borderRadius: (size + 16) / 2,
+                            backgroundColor: fillColor + '15',
+                        },
+                    ]}
+                />
+            )}
+
+            {/* Background track */}
             <View
                 style={[
                     styles.ring,
                     {
                         width: size,
                         height: size,
-                        borderRadius: size / 2,
+                        borderRadius: halfSize,
                         borderWidth: strokeWidth,
-                        borderColor: fillColor + '20',
+                        borderColor: track,
                     },
                 ]}
             />
+
+            {/* Right half (0–50%) */}
+            <View
+                style={[
+                    styles.halfClip,
+                    {
+                        width: halfSize,
+                        height: size,
+                        left: halfSize,
+                        overflow: 'hidden',
+                    },
+                ]}
+            >
+                <Animated.View
+                    style={[
+                        rightStyle,
+                        {
+                            width: halfSize,
+                            height: size,
+                            borderTopRightRadius: halfSize,
+                            borderBottomRightRadius: halfSize,
+                            borderWidth: strokeWidth,
+                            borderLeftWidth: 0,
+                            borderColor: fillColor,
+                            transformOrigin: 'left center',
+                        },
+                    ]}
+                />
+            </View>
+
+            {/* Left half (50–100%) */}
+            <View
+                style={[
+                    styles.halfClip,
+                    {
+                        width: halfSize,
+                        height: size,
+                        left: 0,
+                        overflow: 'hidden',
+                    },
+                ]}
+            >
+                <Animated.View
+                    style={[
+                        leftStyle,
+                        {
+                            width: halfSize,
+                            height: size,
+                            left: 0,
+                            borderTopLeftRadius: halfSize,
+                            borderBottomLeftRadius: halfSize,
+                            borderWidth: strokeWidth,
+                            borderRightWidth: 0,
+                            borderColor: fillColor,
+                            transformOrigin: 'right center',
+                        },
+                    ]}
+                />
+            </View>
+
             {/* Center content */}
             <View style={styles.center}>
                 {children ?? (
@@ -62,8 +185,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    glow: {
+        position: 'absolute',
+    },
     ring: {
         position: 'absolute',
+    },
+    halfClip: {
+        position: 'absolute',
+        top: 0,
     },
     center: {
         alignItems: 'center',

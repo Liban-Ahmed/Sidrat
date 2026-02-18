@@ -58,14 +58,23 @@ export class ErrorBoundary extends Component<Props, State> {
 
             return (
                 <View style={[styles.container, { backgroundColor: colors.background }]}>
-                    <View style={styles.iconContainer}>
+                    <View
+                        style={[
+                            styles.iconContainer,
+                            { backgroundColor: brand.primaryMuted },
+                        ]}
+                    >
                         <Ionicons name="cloudy-night-outline" size={64} color={brand.primary} />
                     </View>
                     <Text style={[styles.title, { color: colors.text }]}>Oops! Something went wrong</Text>
                     <Text style={[styles.message, { color: colors.textSecondary }]}>
                         Don&apos;t worry, let&apos;s try again InshaAllah
                     </Text>
-                    <TouchableOpacity style={styles.button} onPress={this.handleRetry}>
+                    <TouchableOpacity
+                        style={[styles.button, { backgroundColor: brand.primary }]}
+                        onPress={this.handleRetry}
+                        activeOpacity={0.85}
+                    >
                         <Text style={styles.buttonText}>Try Again</Text>
                     </TouchableOpacity>
                 </View>
@@ -87,7 +96,6 @@ const styles = StyleSheet.create({
         width: 120,
         height: 120,
         borderRadius: 60,
-        backgroundColor: `${brand.primary}15`,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 24,
@@ -105,10 +113,9 @@ const styles = StyleSheet.create({
     },
     button: {
         marginTop: 32,
-        backgroundColor: brand.primary,
         paddingHorizontal: 32,
         paddingVertical: 14,
-        borderRadius: 12,
+        borderRadius: 14,
     },
     buttonText: {
         color: '#FFFFFF',

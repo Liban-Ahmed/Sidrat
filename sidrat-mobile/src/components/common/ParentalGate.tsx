@@ -4,14 +4,13 @@
  * COPPA-compliant parental verification using math challenge.
  * A child must solve an addition problem to access parent features.
  *
- * Used for: Settings, adding children, viewing detailed progress,
- * subscription management.
+ * Uses the theme system for full dark mode support.
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { brand } from '../../theme/colors';
+import { useTheme } from '../../theme';
 
 interface ParentalGateProps {
     visible: boolean;
@@ -24,6 +23,7 @@ export function ParentalGate({ visible, onSuccess, onCancel }: ParentalGateProps
     const [b] = useState(() => Math.floor(Math.random() * 10) + 5);
     const [answer, setAnswer] = useState('');
     const [error, setError] = useState(false);
+    const { brand, colors, typography, spacing, radius, shadows } = useTheme();
 
     const handleSubmit = useCallback(() => {
         if (parseInt(answer, 10) === a + b) {
@@ -49,49 +49,92 @@ export function ParentalGate({ visible, onSuccess, onCancel }: ParentalGateProps
             animationType="fade"
             onRequestClose={handleCancel}
         >
-            <View style={styles.overlay}>
-                <View style={styles.card}>
-                    <View style={styles.iconContainer}>
+            <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
+                <View
+                    style={[
+                        styles.card,
+                        {
+                            backgroundColor: colors.surface,
+                            borderRadius: radius.xl,
+                            ...shadows.elevated,
+                        },
+                    ]}
+                >
+                    <View
+                        style={[
+                            styles.iconContainer,
+                            {
+                                backgroundColor: brand.primaryMuted,
+                                borderRadius: radius.full,
+                            },
+                        ]}
+                    >
                         <Ionicons name="lock-closed" size={28} color={brand.primary} />
                     </View>
 
-                    <Text style={styles.title}>Parent Verification</Text>
-                    <Text style={styles.subtitle}>
+                    <Text style={[typography.title3, { color: colors.text, marginBottom: 4 }]}>
+                        Parent Verification
+                    </Text>
+                    <Text style={[typography.bodySmall, { color: colors.textSecondary, marginBottom: spacing.xl }]}>
                         Please solve this to continue
                     </Text>
 
-                    <Text style={styles.equation}>
+                    <Text
+                        style={[
+                            typography.displaySmall,
+                            { color: brand.primary, marginBottom: spacing.md },
+                        ]}
+                    >
                         {a} + {b} = ?
                     </Text>
 
                     {error && (
-                        <Text style={styles.error}>Incorrect, try again</Text>
+                        <Text style={[typography.bodySmall, { color: colors.error, marginBottom: spacing.xs }]}>
+                            Incorrect, try again
+                        </Text>
                     )}
 
                     <TextInput
                         value={answer}
                         onChangeText={setAnswer}
                         keyboardType="number-pad"
-                        style={[styles.input, error && styles.inputError]}
+                        style={[
+                            styles.input,
+                            {
+                                borderColor: error ? colors.error : colors.border,
+                                borderRadius: radius.md,
+                                color: colors.text,
+                                backgroundColor: colors.backgroundSecondary,
+                            },
+                        ]}
                         placeholder="Answer"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={colors.textTertiary}
                         maxLength={3}
                         autoFocus
                         returnKeyType="done"
                         onSubmitEditing={handleSubmit}
                     />
 
-                    <TouchableOpacity
-                        style={styles.submitButton}
+                    <Pressable
+                        style={({ pressed }) => [
+                            styles.submitButton,
+                            {
+                                backgroundColor: brand.primary,
+                                borderRadius: radius.md,
+                                opacity: pressed ? 0.85 : 1,
+                                ...shadows.glow(brand.primary),
+                            },
+                        ]}
                         onPress={handleSubmit}
-                        activeOpacity={0.8}
                     >
-                        <Text style={styles.submitText}>Submit</Text>
-                    </TouchableOpacity>
+                        <Text style={[typography.labelLarge, { color: '#FFFFFF' }]}>Submit</Text>
+                    </Pressable>
 
-                    <TouchableOpacity onPress={handleCancel}>
-                        <Text style={styles.cancelText}>Cancel</Text>
-                    </TouchableOpacity>
+                    <Pressable onPress={handleCancel} hitSlop={12}>
+                        <Text style={[typography.label, { color: colors.textSecondary, paddingVertical: spacing.xs }]}>
+                            Cancel
+                        </Text>
+                    </Pressable>
                 </View>
             </View>
         </Modal>
@@ -103,83 +146,34 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)',
     },
     card: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 24,
         padding: 32,
         width: '85%',
         maxWidth: 360,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.15,
-        shadowRadius: 24,
-        elevation: 12,
     },
     iconContainer: {
         width: 56,
         height: 56,
-        borderRadius: 28,
-        backgroundColor: `${brand.primary}15`,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 16,
     },
-    title: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: '#2C3E3F',
-        marginBottom: 4,
-    },
-    subtitle: {
-        fontSize: 14,
-        color: '#6B7280',
-        marginBottom: 24,
-    },
-    equation: {
-        fontSize: 36,
-        fontWeight: '700',
-        color: brand.primary,
-        marginBottom: 16,
-    },
-    error: {
-        fontSize: 14,
-        color: '#DC2626',
-        marginBottom: 8,
-    },
     input: {
         borderWidth: 1.5,
-        borderColor: '#E5E7EB',
-        borderRadius: 12,
         paddingVertical: 14,
         paddingHorizontal: 20,
         fontSize: 22,
         fontWeight: '600',
         width: '60%',
         textAlign: 'center',
-        color: '#2C3E3F',
         marginBottom: 20,
     },
-    inputError: {
-        borderColor: '#DC2626',
-    },
     submitButton: {
-        backgroundColor: brand.primary,
         paddingVertical: 14,
         paddingHorizontal: 48,
-        borderRadius: 12,
+        alignItems: 'center',
         marginBottom: 12,
-    },
-    submitText: {
-        color: '#FFFFFF',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    cancelText: {
-        fontSize: 14,
-        color: '#6B7280',
-        paddingVertical: 8,
     },
 });
