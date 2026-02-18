@@ -10,8 +10,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { mmkvStorage } from './persist';
-import type { Lesson, LessonProgress, LessonPhase } from '../types';
+import type { Lesson, LessonProgress, LessonPhase, LessonCategory } from '../types';
 import { sampleLessons } from '../data/lessons';
+import { allCurriculumLessons } from '../data/curriculum';
 import { uuid } from '../utils/uuid';
 import { calculateNextReview } from '../utils/spacedRepetition';
 
@@ -29,6 +30,8 @@ interface LessonStore {
     getLessonsForWeek: (week: number) => Lesson[];
     getProgress: (childId: string, lessonId: string) => LessonProgress | undefined;
     getCompletedCount: (childId: string) => number;
+    /** Get count of completed lessons grouped by category */
+    getCompletedByCategory: (childId: string) => Record<LessonCategory, number>;
     getTodayLesson: (childId: string) => Lesson | undefined;
 
     // Mutations
@@ -58,6 +61,28 @@ export const useLessonStore = create<LessonStore>()(
                 Object.values(get().progress).filter(
                     (p) => p.childId === childId && p.isCompleted,
                 ).length,
+
+            getCompletedByCategory: (childId) => {
+                const { lessons, progress } = get();
+
+                // Build a lessonId → category lookup from both sampleLessons and curriculum
+                const categoryMap = new Map<string, LessonCategory>();
+                for (const l of lessons) categoryMap.set(l.id, l.category);
+                for (const l of allCurriculumLessons) categoryMap.set(l.id, l.category);
+
+                const counts: Record<LessonCategory, number> = {
+                    aqeedah: 0, salah: 0, wudu: 0, quran: 0,
+                    seerah: 0, adab: 0, duaa: 0, stories: 0,
+                };
+
+                for (const p of Object.values(progress)) {
+                    if (p.childId !== childId || !p.isCompleted) continue;
+                    const cat = categoryMap.get(p.lessonId);
+                    if (cat) counts[cat]++;
+                }
+
+                return counts;
+            },
 
             getTodayLesson: (childId) => {
                 const { lessons, progress } = get();
