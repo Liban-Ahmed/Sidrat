@@ -1,6 +1,16 @@
 /**
- * QuizCard — Multiple choice quiz component.
- * Shows question, options, feedback, and explanation.
+ * QuizCard — Premium multiple-choice quiz with letter labels,
+ * haptic feedback, themed success/error feedback, and staggered
+ * option entrance animations.
+ *
+ * Features:
+ *  • A/B/C/D circled labels for each option
+ *  • Shake animation on wrong answer with error-muted background
+ *  • Theme-token success / error colors (no hardcoded hex)
+ *  • Hint card after first wrong attempt (golden accent)
+ *  • Explanation card on correct with sparkle icon
+ *  • Haptic feedback on selection
+ *  • Dark mode support
  */
 
 import React, { useState, useCallback } from 'react';
@@ -15,7 +25,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
+import { haptics } from '../../utils/haptics';
 import type { PracticeQuiz } from '../../types/curriculum';
+
+const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 interface Props {
     block: PracticeQuiz;
@@ -23,7 +36,7 @@ interface Props {
 }
 
 export function QuizCard({ block, onAnswer }: Props) {
-    const { brand, colors, typography, radius } = useTheme();
+    const { brand, colors, typography, radius, isDark, shadows } = useTheme();
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
     const [showResult, setShowResult] = useState(false);
     const [showHint, setShowHint] = useState(false);
@@ -40,6 +53,7 @@ export function QuizCard({ block, onAnswer }: Props) {
     const handleSelect = useCallback(
         (index: number) => {
             if (showResult) return;
+            haptics.medium();
             setSelectedIndex(index);
             setShowResult(true);
 
@@ -63,7 +77,7 @@ export function QuizCard({ block, onAnswer }: Props) {
                     setSelectedIndex(null);
                 }, 1500);
             } else {
-                // Correct — auto-advance after showing feedback
+                haptics.light();
                 const pointsEarned = attempts === 0 ? block.points : Math.max(1, Math.floor(block.points / 2));
                 setTimeout(() => onAnswer(true, pointsEarned), 1200);
             }
@@ -73,42 +87,51 @@ export function QuizCard({ block, onAnswer }: Props) {
 
     return (
         <Animated.View style={[styles.container, shakeStyle]}>
-            {/* Question */}
+            {/* ── Question ── */}
             <Animated.View entering={FadeInDown.delay(100).duration(500)}>
-                <Text style={[typography.title3, { color: colors.text, marginBottom: 20 }]}>
+                <Text style={[typography.title3, { color: colors.text, marginBottom: 22 }]}>
                     {block.question}
                 </Text>
             </Animated.View>
 
-            {/* Options */}
+            {/* ── Options ── */}
             <View style={styles.options}>
                 {block.options.map((option, i) => {
                     const isSelected = selectedIndex === i;
                     const isCorrectOption = i === block.correctIndex;
-                    let bgColor: string = colors.surfaceSecondary;
-                    let borderColor: string = colors.separator;
+
+                    // Default styling
+                    let bgColor: string = isDark ? colors.surfaceSecondary : colors.surface;
+                    let borderColor: string = isDark ? colors.surfaceTertiary : colors.separator;
                     let textColor: string = colors.text;
-                    let iconName: 'checkmark-circle' | 'close-circle' | 'ellipse-outline' = 'ellipse-outline';
+                    let letterBg: string = isDark ? colors.surfaceTertiary : colors.backgroundSecondary;
+                    let letterColor: string = colors.textSecondary;
+                    let iconName: 'checkmark-circle' | 'close-circle' | undefined;
                     let iconColor: string = colors.textTertiary;
 
                     if (showResult && isSelected) {
                         if (isCorrect) {
-                            bgColor = '#E8F5E9';
+                            bgColor = colors.successMuted;
                             borderColor = colors.success;
                             textColor = colors.success;
+                            letterBg = colors.success;
+                            letterColor = '#FFF';
                             iconName = 'checkmark-circle';
                             iconColor = colors.success;
                         } else {
-                            bgColor = '#FFEBEE';
+                            bgColor = colors.errorMuted;
                             borderColor = colors.error;
                             textColor = colors.error;
+                            letterBg = colors.error;
+                            letterColor = '#FFF';
                             iconName = 'close-circle';
                             iconColor = colors.error;
                         }
                     } else if (showResult && isCorrectOption && !isCorrect) {
-                        // Highlight the correct answer when wrong
-                        bgColor = '#E8F5E9';
+                        bgColor = colors.successMuted;
                         borderColor = colors.success;
+                        letterBg = colors.success;
+                        letterColor = '#FFF';
                     }
 
                     return (
@@ -116,42 +139,82 @@ export function QuizCard({ block, onAnswer }: Props) {
                             <Pressable
                                 onPress={() => handleSelect(i)}
                                 disabled={showResult}
-                                style={[
+                                style={({ pressed }) => [
                                     styles.optionButton,
                                     {
                                         backgroundColor: bgColor,
                                         borderColor,
                                         borderRadius: radius.md,
+                                        ...shadows.subtle,
+                                        transform: [{ scale: pressed ? 0.98 : 1 }],
                                     },
                                 ]}
                             >
-                                <Ionicons name={iconName} size={22} color={iconColor} />
-                                <Text style={[typography.callout, { color: textColor, flex: 1 }]}>{option}</Text>
+                                {/* Letter circle */}
+                                <View
+                                    style={[
+                                        styles.letterCircle,
+                                        {
+                                            backgroundColor: letterBg,
+                                            borderRadius: radius.full,
+                                        },
+                                    ]}
+                                >
+                                    <Text style={[typography.labelSmall, { color: letterColor, fontWeight: '700' }]}>
+                                        {OPTION_LETTERS[i]}
+                                    </Text>
+                                </View>
+
+                                <Text style={[typography.callout, { color: textColor, flex: 1 }]}>
+                                    {option}
+                                </Text>
+
+                                {iconName && (
+                                    <Ionicons name={iconName} size={22} color={iconColor} />
+                                )}
                             </Pressable>
                         </Animated.View>
                     );
                 })}
             </View>
 
-            {/* Hint */}
+            {/* ── Hint ── */}
             {showHint && block.hint && (
                 <Animated.View
                     entering={FadeIn.duration(400)}
-                    style={[styles.hintCard, { backgroundColor: brand.accent + '15', borderRadius: radius.md }]}
+                    style={[
+                        styles.hintCard,
+                        {
+                            backgroundColor: colors.warningMuted,
+                            borderRadius: radius.md,
+                            borderLeftWidth: 3,
+                            borderLeftColor: brand.accent,
+                        },
+                    ]}
                 >
                     <Ionicons name="bulb-outline" size={18} color={brand.accent} />
-                    <Text style={[typography.caption, { color: colors.text, flex: 1 }]}>{block.hint}</Text>
+                    <Text style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
+                        {block.hint}
+                    </Text>
                 </Animated.View>
             )}
 
-            {/* Explanation (after correct) */}
+            {/* ── Explanation (after correct) ── */}
             {showResult && isCorrect && block.explanation && (
                 <Animated.View
                     entering={FadeIn.delay(400).duration(400)}
-                    style={[styles.explanationCard, { backgroundColor: '#E8F5E9', borderRadius: radius.md }]}
+                    style={[
+                        styles.explanationCard,
+                        {
+                            backgroundColor: colors.successMuted,
+                            borderRadius: radius.md,
+                            borderLeftWidth: 3,
+                            borderLeftColor: colors.success,
+                        },
+                    ]}
                 >
                     <Ionicons name="sparkles" size={18} color={colors.success} />
-                    <Text style={[typography.caption, { color: colors.text, flex: 1 }]}>
+                    <Text style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
                         {block.explanation}
                     </Text>
                 </Animated.View>
@@ -169,20 +232,26 @@ const styles = StyleSheet.create({
     optionButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 16,
+        padding: 14,
         gap: 12,
         borderWidth: 1.5,
     },
+    letterCircle: {
+        width: 32,
+        height: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     hintCard: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         gap: 10,
         padding: 14,
         marginTop: 16,
     },
     explanationCard: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         gap: 10,
         padding: 14,
         marginTop: 12,

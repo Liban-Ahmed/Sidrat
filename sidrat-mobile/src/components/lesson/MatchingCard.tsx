@@ -1,6 +1,14 @@
 /**
- * MatchingCard — Match pairs practice component.
- * Child taps left item, then taps matching right item.
+ * MatchingCard — Two-column tap-to-match with themed feedback,
+ * haptic response, and polished visual states.
+ *
+ * Features:
+ *  • Theme-token success/error colors (no hardcoded hex)
+ *  • Haptic feedback on selection and match
+ *  • Selected item highlight with colored left border
+ *  • ZoomIn checkmark on matched pairs
+ *  • Subtle shadow on items + dark mode aware
+ *  • Explanation with accent left-border card
  */
 
 import React, { useState, useCallback } from 'react';
@@ -8,6 +16,7 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeInDown, FadeIn, ZoomIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
+import { haptics } from '../../utils/haptics';
 import type { PracticeMatching } from '../../types/curriculum';
 
 interface Props {
@@ -16,7 +25,7 @@ interface Props {
 }
 
 export function MatchingCard({ block, onAnswer }: Props) {
-    const { brand, colors, typography, radius } = useTheme();
+    const { brand, colors, typography, radius, isDark, shadows } = useTheme();
 
     // Shuffle right column
     const [shuffledRight] = useState(() =>
@@ -32,6 +41,7 @@ export function MatchingCard({ block, onAnswer }: Props) {
     const handleLeftTap = useCallback(
         (left: string) => {
             if (matched.has(left)) return;
+            haptics.light();
             setSelectedLeft(left);
             setWrongPair(null);
         },
@@ -45,7 +55,7 @@ export function MatchingCard({ block, onAnswer }: Props) {
 
             const correctPair = block.pairs.find((p) => p.left === selectedLeft);
             if (correctPair && correctPair.right === right) {
-                // Correct match
+                haptics.medium();
                 const newMatched = new Map(matched);
                 newMatched.set(selectedLeft, right);
                 setMatched(newMatched);
@@ -53,11 +63,10 @@ export function MatchingCard({ block, onAnswer }: Props) {
                 setWrongPair(null);
 
                 if (newMatched.size === block.pairs.length) {
-                    // All matched
                     setTimeout(() => onAnswer(true, block.points), 800);
                 }
             } else {
-                // Wrong match
+                haptics.light();
                 setWrongPair({ left: selectedLeft, right });
                 setTimeout(() => {
                     setWrongPair(null);
@@ -70,14 +79,14 @@ export function MatchingCard({ block, onAnswer }: Props) {
 
     return (
         <View style={styles.container}>
-            {/* Instruction */}
+            {/* ── Instruction ── */}
             <Animated.View entering={FadeInDown.delay(100).duration(500)}>
-                <Text style={[typography.calloutBold, { color: colors.text, marginBottom: 20 }]}>
+                <Text style={[typography.title3, { color: colors.text, marginBottom: 20 }]}>
                     {block.instruction}
                 </Text>
             </Animated.View>
 
-            {/* Matching columns */}
+            {/* ── Matching columns ── */}
             <View style={styles.columns}>
                 {/* Left column */}
                 <View style={styles.column}>
@@ -85,29 +94,44 @@ export function MatchingCard({ block, onAnswer }: Props) {
                         const isMatched = matched.has(pair.left);
                         const isSelected = selectedLeft === pair.left;
                         const isWrong = wrongPair?.left === pair.left;
+
+                        let bg: string = isDark ? colors.surfaceSecondary : colors.surface;
+                        let border: string = isDark ? colors.surfaceTertiary : colors.separator;
+                        let textColor: string = colors.text;
+
+                        if (isMatched) {
+                            bg = colors.successMuted;
+                            border = colors.success;
+                            textColor = colors.success;
+                        } else if (isWrong) {
+                            bg = colors.errorMuted;
+                            border = colors.error;
+                            textColor = colors.error;
+                        } else if (isSelected) {
+                            bg = brand.primary + '12';
+                            border = brand.primary;
+                            textColor = brand.primary;
+                        }
+
                         return (
                             <Animated.View key={pair.left} entering={FadeInDown.delay(200 + i * 80).duration(400)}>
                                 <Pressable
                                     onPress={() => handleLeftTap(pair.left)}
                                     disabled={isMatched}
-                                    style={[
+                                    style={({ pressed }) => [
                                         styles.matchItem,
                                         {
-                                            backgroundColor: isMatched
-                                                ? '#E8F5E9'
-                                                : isWrong
-                                                    ? '#FFEBEE'
-                                                    : isSelected
-                                                        ? brand.primary + '15'
-                                                        : colors.surfaceSecondary,
-                                            borderColor: isMatched
-                                                ? colors.success
-                                                : isWrong
-                                                    ? colors.error
-                                                    : isSelected
-                                                        ? brand.primary
-                                                        : colors.separator,
+                                            backgroundColor: bg,
+                                            borderColor: border,
                                             borderRadius: radius.md,
+                                            borderLeftWidth: isSelected || isMatched ? 3 : 1.5,
+                                            borderLeftColor: isMatched
+                                                ? colors.success
+                                                : isSelected
+                                                    ? brand.primary
+                                                    : border,
+                                            ...shadows.subtle,
+                                            transform: [{ scale: pressed ? 0.97 : 1 }],
                                         },
                                     ]}
                                 >
@@ -115,12 +139,9 @@ export function MatchingCard({ block, onAnswer }: Props) {
                                         style={[
                                             typography.callout,
                                             {
-                                                color: isMatched
-                                                    ? colors.success
-                                                    : isSelected
-                                                        ? brand.primary
-                                                        : colors.text,
+                                                color: textColor,
                                                 fontWeight: isSelected ? '600' : '400',
+                                                flex: 1,
                                             },
                                         ]}
                                     >
@@ -128,7 +149,7 @@ export function MatchingCard({ block, onAnswer }: Props) {
                                     </Text>
                                     {isMatched && (
                                         <Animated.View entering={ZoomIn.duration(200)}>
-                                            <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                                            <Ionicons name="checkmark-circle" size={16} color={colors.success} />
                                         </Animated.View>
                                     )}
                                 </Pressable>
@@ -137,45 +158,71 @@ export function MatchingCard({ block, onAnswer }: Props) {
                     })}
                 </View>
 
+                {/* Connection indicator */}
+                <View style={styles.connectorCol}>
+                    {block.pairs.map((_, i) => (
+                        <View
+                            key={i}
+                            style={[
+                                styles.connectorDot,
+                                {
+                                    backgroundColor: matched.size > i
+                                        ? colors.success
+                                        : colors.textTertiary + '30',
+                                },
+                            ]}
+                        />
+                    ))}
+                </View>
+
                 {/* Right column */}
                 <View style={styles.column}>
                     {shuffledRight.map((right, i) => {
                         const isMatched = [...matched.values()].includes(right);
                         const isWrong = wrongPair?.right === right;
+
+                        let bg: string = isDark ? colors.surfaceSecondary : colors.surface;
+                        let border: string = isDark ? colors.surfaceTertiary : colors.separator;
+                        let textColor: string = colors.text;
+
+                        if (isMatched) {
+                            bg = colors.successMuted;
+                            border = colors.success;
+                            textColor = colors.success;
+                        } else if (isWrong) {
+                            bg = colors.errorMuted;
+                            border = colors.error;
+                            textColor = colors.error;
+                        }
+
                         return (
                             <Animated.View key={right} entering={FadeInDown.delay(300 + i * 80).duration(400)}>
                                 <Pressable
                                     onPress={() => handleRightTap(right)}
                                     disabled={isMatched || !selectedLeft}
-                                    style={[
+                                    style={({ pressed }) => [
                                         styles.matchItem,
                                         {
-                                            backgroundColor: isMatched
-                                                ? '#E8F5E9'
-                                                : isWrong
-                                                    ? '#FFEBEE'
-                                                    : colors.surfaceSecondary,
-                                            borderColor: isMatched
-                                                ? colors.success
-                                                : isWrong
-                                                    ? colors.error
-                                                    : colors.separator,
+                                            backgroundColor: bg,
+                                            borderColor: border,
                                             borderRadius: radius.md,
-                                            opacity: !selectedLeft && !isMatched ? 0.6 : 1,
+                                            opacity: !selectedLeft && !isMatched ? 0.5 : 1,
+                                            ...shadows.subtle,
+                                            transform: [{ scale: pressed ? 0.97 : 1 }],
                                         },
                                     ]}
                                 >
                                     <Text
                                         style={[
                                             typography.callout,
-                                            { color: isMatched ? colors.success : colors.text },
+                                            { color: textColor, flex: 1 },
                                         ]}
                                     >
                                         {right}
                                     </Text>
                                     {isMatched && (
                                         <Animated.View entering={ZoomIn.duration(200)}>
-                                            <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                                            <Ionicons name="checkmark-circle" size={16} color={colors.success} />
                                         </Animated.View>
                                     )}
                                 </Pressable>
@@ -185,26 +232,37 @@ export function MatchingCard({ block, onAnswer }: Props) {
                 </View>
             </View>
 
-            {/* Completion */}
+            {/* ── Completion explanation ── */}
             {allMatched && block.explanation && (
                 <Animated.View
                     entering={FadeIn.delay(400).duration(400)}
-                    style={[styles.explanation, { backgroundColor: '#E8F5E9', borderRadius: radius.md }]}
+                    style={[
+                        styles.explanation,
+                        {
+                            backgroundColor: colors.successMuted,
+                            borderRadius: radius.md,
+                            borderLeftWidth: 3,
+                            borderLeftColor: colors.success,
+                        },
+                    ]}
                 >
                     <Ionicons name="sparkles" size={18} color={colors.success} />
-                    <Text style={[typography.caption, { color: colors.text, flex: 1 }]}>
+                    <Text style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
                         {block.explanation}
                     </Text>
                 </Animated.View>
             )}
 
-            {/* Helper text */}
+            {/* ── Helper text ── */}
             {!allMatched && !selectedLeft && (
-                <Text
-                    style={[typography.caption, { color: colors.textTertiary, textAlign: 'center', marginTop: 16 }]}
-                >
-                    Tap an item on the left, then tap its match on the right
-                </Text>
+                <View style={styles.helperRow}>
+                    <Ionicons name="hand-left-outline" size={14} color={colors.textTertiary} />
+                    <Text
+                        style={[typography.bodySmall, { color: colors.textTertiary }]}
+                    >
+                        Tap left, then tap its match on the right
+                    </Text>
+                </View>
             )}
         </View>
     );
@@ -217,25 +275,43 @@ const styles = StyleSheet.create({
     },
     columns: {
         flexDirection: 'row',
-        gap: 12,
+        gap: 8,
     },
     column: {
         flex: 1,
         gap: 10,
     },
+    connectorCol: {
+        width: 16,
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        paddingVertical: 8,
+    },
+    connectorDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+    },
     matchItem: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: 14,
+        padding: 12,
         borderWidth: 1.5,
         minHeight: 50,
     },
     explanation: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         gap: 10,
         padding: 14,
         marginTop: 20,
+    },
+    helperRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        marginTop: 18,
     },
 });

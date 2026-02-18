@@ -1,10 +1,18 @@
 /**
- * PracticePhase — Renders the appropriate practice card based on block type.
+ * PracticePhase — Orchestrates practice cards with a polished header,
+ * animated segmented progress bar, star-burst score badge, and smooth
+ * card transitions.
+ *
+ * Features:
+ *  • Segmented progress bar (one cell per question, current highlighted)
+ *  • Animated score badge with golden star icon
+ *  • FadeIn card entrance per question transition
+ *  • Dark-mode aware header + progress
  */
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import type { PracticeBlock } from '../../types/curriculum';
@@ -24,7 +32,7 @@ interface Props {
 }
 
 export function PracticePhase({ block, index, total, score, maxScore, onAnswer }: Props) {
-    const { brand, colors, typography, radius } = useTheme();
+    const { brand, colors, typography, radius, isDark, shadows } = useTheme();
 
     const renderBlock = () => {
         switch (block.type) {
@@ -51,11 +59,20 @@ export function PracticePhase({ block, index, total, score, maxScore, onAnswer }
 
     return (
         <View style={styles.container}>
-            {/* Header */}
-            <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
+            {/* ── Header ── */}
+            <Animated.View entering={FadeIn.duration(350)} style={styles.header}>
                 <View style={styles.headerLeft}>
-                    <Ionicons name="school" size={18} color={brand.primary} />
-                    <Text style={[typography.caption, { color: colors.textTertiary }]}>
+                    <View
+                        style={[
+                            styles.iconCircle,
+                            {
+                                backgroundColor: brand.primary + '14',
+                            },
+                        ]}
+                    >
+                        <Ionicons name="school" size={15} color={brand.primary} />
+                    </View>
+                    <Text style={[typography.labelSmall, { color: colors.textSecondary }]}>
                         Question {index + 1} of {total}
                     </Text>
                 </View>
@@ -64,31 +81,59 @@ export function PracticePhase({ block, index, total, score, maxScore, onAnswer }
                 <View
                     style={[
                         styles.scoreBadge,
-                        { backgroundColor: brand.accent + '15', borderRadius: radius.full },
+                        {
+                            backgroundColor: isDark
+                                ? brand.accent + '20'
+                                : brand.accent + '12',
+                            borderRadius: radius.full,
+                            ...shadows.subtle,
+                        },
                     ]}
                 >
-                    <Ionicons name="star" size={14} color={brand.accent} />
-                    <Text style={[typography.captionBold, { color: brand.accent }]}>
-                        {score}/{maxScore}
+                    <Ionicons name="star" size={13} color={brand.accent} />
+                    <Text style={[typography.labelSmall, { color: brand.accent, fontWeight: '700' }]}>
+                        {score}
+                    </Text>
+                    <Text style={[typography.labelXs, { color: brand.accent + '80' }]}>
+                        /{maxScore}
                     </Text>
                 </View>
             </Animated.View>
 
-            {/* Progress bar */}
-            <View style={[styles.progressBar, { backgroundColor: colors.surfaceTertiary }]}>
-                <Animated.View
-                    style={[
-                        styles.progressFill,
-                        {
-                            backgroundColor: brand.primary,
-                            width: `${((index + 1) / total) * 100}%`,
-                        },
-                    ]}
-                />
-            </View>
+            {/* ── Segmented progress bar ── */}
+            <Animated.View
+                entering={FadeIn.delay(100).duration(350)}
+                style={styles.segmentRow}
+            >
+                {Array.from({ length: total }).map((_, i) => (
+                    <View
+                        key={i}
+                        style={[
+                            styles.segment,
+                            {
+                                backgroundColor:
+                                    i < index
+                                        ? brand.primary
+                                        : i === index
+                                            ? brand.primary + '50'
+                                            : isDark
+                                                ? colors.surfaceTertiary
+                                                : colors.backgroundTertiary,
+                                borderRadius: 3,
+                            },
+                        ]}
+                    />
+                ))}
+            </Animated.View>
 
-            {/* Practice block */}
-            {renderBlock()}
+            {/* ── Practice card ── */}
+            <Animated.View
+                key={`practice-${index}`}
+                entering={FadeInDown.delay(150).duration(400).springify().damping(18)}
+                style={styles.cardWrapper}
+            >
+                {renderBlock()}
+            </Animated.View>
         </View>
     );
 }
@@ -105,24 +150,32 @@ const styles = StyleSheet.create({
     headerLeft: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
+        gap: 8,
+    },
+    iconCircle: {
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     scoreBadge: {
         flexDirection: 'row',
         alignItems: 'center',
+        gap: 3,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+    },
+    segmentRow: {
+        flexDirection: 'row',
         gap: 4,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
+        paddingHorizontal: 24,
+        marginTop: 14,
+        marginBottom: 4,
     },
-    progressBar: {
-        height: 4,
-        marginHorizontal: 24,
-        marginTop: 12,
-        borderRadius: 2,
-        overflow: 'hidden',
+    segment: {
+        flex: 1,
+        height: 5,
     },
-    progressFill: {
-        height: '100%',
-        borderRadius: 2,
-    },
+    cardWrapper: { flex: 1 },
 });

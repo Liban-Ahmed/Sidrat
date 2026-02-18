@@ -1,12 +1,23 @@
 /**
- * TrueFalseCard — True/False practice component.
+ * TrueFalseCard — Premium true/false practice with large tactile buttons,
+ * themed feedback, haptic response, and animated icon transitions.
+ *
+ * Features:
+ *  • Full-width card buttons with icon + label
+ *  • Theme-token success/error/warning colors (no hardcoded hex)
+ *  • Colored glow shadow on feedback state
+ *  • Haptic feedback on tap
+ *  • Staggered entrance animation
+ *  • Explanation card with accent left border
+ *  • Dark mode aware
  */
 
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInUp, FadeIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
+import { haptics } from '../../utils/haptics';
 import type { PracticeTrueFalse } from '../../types/curriculum';
 
 interface Props {
@@ -15,7 +26,7 @@ interface Props {
 }
 
 export function TrueFalseCard({ block, onAnswer }: Props) {
-    const { brand, colors, typography, radius } = useTheme();
+    const { brand, colors, typography, radius, isDark } = useTheme();
     const [selected, setSelected] = useState<boolean | null>(null);
     const [showResult, setShowResult] = useState(false);
 
@@ -24,6 +35,7 @@ export function TrueFalseCard({ block, onAnswer }: Props) {
     const handleSelect = useCallback(
         (value: boolean) => {
             if (showResult) return;
+            haptics.medium();
             setSelected(value);
             setShowResult(true);
 
@@ -35,68 +47,129 @@ export function TrueFalseCard({ block, onAnswer }: Props) {
 
     const getButtonStyle = (value: boolean) => {
         const isSelected = selected === value;
-        if (!showResult || !isSelected) {
+        const base = {
+            bg: isDark ? colors.surfaceSecondary : colors.surface,
+            border: isDark ? colors.surfaceTertiary : colors.separator,
+            text: colors.text,
+            iconColor: value ? brand.secondary : brand.coral,
+            shadow: 'transparent',
+        };
+
+        if (!showResult) {
+            return isSelected
+                ? {
+                    ...base,
+                    bg: brand.primary + '10',
+                    border: brand.primary,
+                    shadow: brand.primary,
+                }
+                : base;
+        }
+
+        if (!isSelected) return base;
+
+        if (isCorrect) {
             return {
-                bg: isSelected ? brand.primary + '10' : colors.surfaceSecondary,
-                border: isSelected ? brand.primary : colors.separator,
-                text: colors.text,
+                bg: colors.successMuted,
+                border: colors.success,
+                text: colors.success,
+                iconColor: colors.success,
+                shadow: colors.success,
             };
         }
-        if (isCorrect) {
-            return { bg: '#E8F5E9', border: colors.success, text: colors.success };
-        }
-        return { bg: '#FFEBEE', border: colors.error, text: colors.error };
+        return {
+            bg: colors.errorMuted,
+            border: colors.error,
+            text: colors.error,
+            iconColor: colors.error,
+            shadow: colors.error,
+        };
     };
 
     return (
         <View style={styles.container}>
-            {/* Statement */}
+            {/* ── Statement ── */}
             <Animated.View entering={FadeInDown.delay(100).duration(500)}>
-                <Text style={[typography.title3, { color: colors.text, textAlign: 'center', marginBottom: 32 }]}>
+                <Text
+                    style={[
+                        typography.title3,
+                        {
+                            color: colors.text,
+                            textAlign: 'center',
+                            marginBottom: 32,
+                            lineHeight: 32,
+                        },
+                    ]}
+                >
                     {block.statement}
                 </Text>
             </Animated.View>
 
-            {/* True / False buttons */}
-            <Animated.View entering={FadeInDown.delay(300).duration(500)} style={styles.buttons}>
-                {[true, false].map((value) => {
-                    const style = getButtonStyle(value);
+            {/* ── True / False buttons ── */}
+            <View style={styles.buttons}>
+                {([true, false] as const).map((value, i) => {
+                    const s = getButtonStyle(value);
                     return (
-                        <Pressable
+                        <Animated.View
                             key={String(value)}
-                            onPress={() => handleSelect(value)}
-                            disabled={showResult}
-                            style={[
-                                styles.button,
-                                {
-                                    backgroundColor: style.bg,
-                                    borderColor: style.border,
-                                    borderRadius: radius.lg,
-                                },
-                            ]}
+                            entering={FadeInUp.delay(250 + i * 100).duration(450).springify().damping(16)}
+                            style={{ flex: 1 }}
                         >
-                            <Ionicons
-                                name={value ? 'checkmark-circle-outline' : 'close-circle-outline'}
-                                size={32}
-                                color={style.text}
-                            />
-                            <Text style={[typography.title3, { color: style.text }]}>
-                                {value ? 'True' : 'False'}
-                            </Text>
-                        </Pressable>
+                            <Pressable
+                                onPress={() => handleSelect(value)}
+                                disabled={showResult}
+                                style={({ pressed }) => [
+                                    styles.button,
+                                    {
+                                        backgroundColor: s.bg,
+                                        borderColor: s.border,
+                                        borderRadius: radius.xl,
+                                        shadowColor: s.shadow,
+                                        shadowOffset: { width: 0, height: 4 },
+                                        shadowOpacity: s.shadow !== 'transparent' ? 0.2 : 0,
+                                        shadowRadius: 10,
+                                        elevation: s.shadow !== 'transparent' ? 3 : 0,
+                                        transform: [{ scale: pressed ? 0.96 : 1 }],
+                                    },
+                                ]}
+                            >
+                                <View
+                                    style={[
+                                        styles.iconBg,
+                                        {
+                                            backgroundColor: s.iconColor + '14',
+                                            borderRadius: radius.full,
+                                        },
+                                    ]}
+                                >
+                                    <Ionicons
+                                        name={value ? 'checkmark-circle' : 'close-circle'}
+                                        size={30}
+                                        color={s.iconColor}
+                                    />
+                                </View>
+                                <Text style={[typography.title3, { color: s.text }]}>
+                                    {value ? 'True' : 'False'}
+                                </Text>
+                            </Pressable>
+                        </Animated.View>
                     );
                 })}
-            </Animated.View>
+            </View>
 
-            {/* Explanation */}
+            {/* ── Explanation ── */}
             {showResult && block.explanation && (
                 <Animated.View
                     entering={FadeIn.delay(400).duration(400)}
                     style={[
                         styles.explanation,
                         {
-                            backgroundColor: isCorrect ? '#E8F5E9' : '#FFF3E0',
+                            backgroundColor: isCorrect
+                                ? colors.successMuted
+                                : colors.warningMuted,
                             borderRadius: radius.md,
+                            borderLeftWidth: 3,
+                            borderLeftColor: isCorrect ? colors.success : brand.accent,
                         },
                     ]}
                 >
@@ -105,7 +178,7 @@ export function TrueFalseCard({ block, onAnswer }: Props) {
                         size={18}
                         color={isCorrect ? colors.success : brand.accent}
                     />
-                    <Text style={[typography.caption, { color: colors.text, flex: 1 }]}>
+                    <Text style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
                         {block.explanation}
                     </Text>
                 </Animated.View>
@@ -124,16 +197,21 @@ const styles = StyleSheet.create({
         gap: 14,
     },
     button: {
-        flex: 1,
-        height: 120,
+        height: 130,
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
+        gap: 10,
         borderWidth: 2,
+    },
+    iconBg: {
+        width: 52,
+        height: 52,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     explanation: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         gap: 10,
         padding: 14,
         marginTop: 20,
