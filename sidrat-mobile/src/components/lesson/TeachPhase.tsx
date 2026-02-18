@@ -1,18 +1,20 @@
 /**
  * TeachPhase — Premium teaching card with animated step dots, narration,
- * Arabic calligraphy showcase, and glossy key-term cards.
+ * Arabic calligraphy showcase, Quran recitation audio, and glossy key-term cards.
  *
  * Features:
  *  • Animated step indicator with filled-dot progress
  *  • Staggered content entrance per section
  *  • Pill-shaped narration button with waveform pulse
  *  • Arabic text on subtle gradient card with ornamental divider
+ *  • Quran recitation audio button (when quranRef is present)
+ *  • Coordinated TTS ↔ Quran audio (mutual exclusion)
  *  • Key terms rendered as glossy accent-bordered chips
  *  • Sticky footer with gradient fade + primary CTA
  *  • Full dark mode support
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import Animated, {
     FadeInDown,
@@ -29,8 +31,10 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
+import { useQuranAudio } from '../../hooks/useQuranAudio';
 import type { TeachBlock } from '../../types/curriculum';
 import { FormattedText } from './FormattedText';
+import { QuranAudioButton } from './QuranAudioButton';
 
 interface Props {
     block: TeachBlock;
@@ -38,18 +42,62 @@ interface Props {
     total: number;
     isNarrating: boolean;
     onNarrate: (text: string) => void;
+    /** Stop TTS narration (called before Quran audio plays) */
+    onStopNarration: () => void;
     onNext: () => void;
     isLast: boolean;
 }
 
-export function TeachPhase({ block, index, total, isNarrating, onNarrate, onNext, isLast }: Props) {
+export function TeachPhase({ block, index, total, isNarrating, onNarrate, onStopNarration, onNext, isLast }: Props) {
     const { brand, colors, typography, radius, isDark, shadows } = useTheme();
+
+    // ── Quran audio hook ──
+    const quranAudio = useQuranAudio();
 
     // Auto-narrate on mount
     useEffect(() => {
         const timer = setTimeout(() => onNarrate(block.narration), 400);
         return () => clearTimeout(timer);
     }, [block.narration, onNarrate]);
+
+    // Stop Quran audio when block changes (index changes)
+    useEffect(() => {
+        return () => {
+            quranAudio.stop();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [index]);
+
+    // Stop Quran audio when external TTS narration starts
+    useEffect(() => {
+        if (isNarrating && (quranAudio.isPlaying || quranAudio.isLoading)) {
+            quranAudio.stop();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isNarrating]);
+
+    // ── Narration + Quran audio coordination ──
+    const handleNarrate = useCallback((text: string) => {
+        // Stop Quran audio before starting TTS narration
+        if (quranAudio.isPlaying || quranAudio.isLoading) {
+            quranAudio.stop();
+        }
+        haptics.light();
+        onNarrate(text);
+    }, [quranAudio, onNarrate]);
+
+    const handleQuranPlayStart = useCallback(() => {
+        // Stop TTS narration before playing Quran audio
+        onStopNarration();
+    }, [onStopNarration]);
+
+    const handleQuranPlay = useCallback((globalAyahNumbers: number[]) => {
+        if (globalAyahNumbers.length === 1) {
+            quranAudio.play(globalAyahNumbers[0]!);
+        } else {
+            quranAudio.playSequence(globalAyahNumbers);
+        }
+    }, [quranAudio]);
 
     // ── Narration pulse ──
     const narratePulse = useSharedValue(1);
@@ -168,8 +216,7 @@ export function TeachPhase({ block, index, total, isNarrating, onNarrate, onNext
                 <Animated.View entering={FadeIn.delay(400).duration(400)} style={styles.speakerRow}>
                     <Pressable
                         onPress={() => {
-                            haptics.light();
-                            onNarrate(block.narration);
+                            handleNarrate(block.narration);
                         }}
                         style={styles.speakerOuter}
                     >
@@ -283,6 +330,20 @@ export function TeachPhase({ block, index, total, isNarrating, onNarrate, onNext
                         >
                             {block.arabic.translation}
                         </Text>
+
+                        {/* ── Quran recitation audio button ── */}
+                        {block.arabic.quranRef && (
+                            <QuranAudioButton
+                                quranRef={block.arabic.quranRef}
+                                isPlaying={quranAudio.isPlaying}
+                                isLoading={quranAudio.isLoading}
+                                playingAyah={quranAudio.playingAyah}
+                                onPlay={handleQuranPlay}
+                                onPause={quranAudio.pause}
+                                onResume={quranAudio.resume}
+                                onPlayStart={handleQuranPlayStart}
+                            />
+                        )}
                     </Animated.View>
                 )}
 

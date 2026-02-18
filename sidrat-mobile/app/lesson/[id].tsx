@@ -161,6 +161,7 @@ function LessonPlayerContent({
                         total={player.totalTeachBlocks}
                         isNarrating={player.state.isNarrating}
                         onNarrate={player.narrate}
+                        onStopNarration={player.stopNarration}
                         onNext={player.nextTeachBlock}
                         isLast={player.isLastTeachBlock}
                     />

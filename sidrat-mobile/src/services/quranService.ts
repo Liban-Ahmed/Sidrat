@@ -232,12 +232,36 @@ async function getAudioUri(globalAyahNumber: number): Promise<string> {
 // ── Audio Playback ─────────────────────────────────────────────
 
 let currentSound: Audio.Sound | null = null;
+let audioModeConfigured = false;
 
-async function playAyah(globalAyahNumber: number): Promise<void> {
+/**
+ * Configure the audio session for playback.
+ * Must be called before any audio plays — required on iOS for silent-mode support.
+ */
+async function ensureAudioMode(): Promise<void> {
+    if (audioModeConfigured) return;
+    try {
+        await Audio.setAudioModeAsync({
+            playsInSilentModeIOS: true,
+            staysActiveInBackground: false,
+            shouldDuckAndroid: true,
+        });
+        audioModeConfigured = true;
+    } catch (err) {
+        console.warn('[QuranService] Failed to set audio mode:', err);
+    }
+}
+
+async function playAyah(globalAyahNumber: number, onFinish?: () => void): Promise<void> {
+    // Configure audio session (one-time, required on iOS)
+    await ensureAudioMode();
+
     // Fully stop and unload any previous sound before creating a new one
     await stopAudio();
 
     const uri = await getAudioUri(globalAyahNumber);
+    console.log('[QuranService] Playing ayah', globalAyahNumber, 'from:', uri);
+
     const { sound } = await Audio.Sound.createAsync(
         { uri },
         { shouldPlay: true, volume: 1.0 },
@@ -251,6 +275,7 @@ async function playAyah(globalAyahNumber: number): Promise<void> {
                 currentSound = null;
             }
             sound.unloadAsync().catch(() => { });
+            onFinish?.();
         }
     });
 }

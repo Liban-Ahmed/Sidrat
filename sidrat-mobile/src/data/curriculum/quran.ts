@@ -138,6 +138,7 @@ export const quranLessons: CurriculumLesson[] = [
                     text: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
                     transliteration: 'Bismillahir-Rahmanir-Raheem',
                     translation: 'In the name of Allah, the Most Merciful, the Especially Merciful',
+                    quranRef: { surah: 1, ayah: 1, globalAyahNumbers: [1] },
                 },
                 keyTerms: [
                     { term: 'Al-Fatiha', definition: 'The Opening — the first and greatest surah' },
@@ -154,6 +155,7 @@ export const quranLessons: CurriculumLesson[] = [
                     text: 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ',
                     transliteration: "Iyyaka na'budu wa iyyaka nasta'een",
                     translation: 'You alone we worship, and You alone we ask for help',
+                    quranRef: { surah: 1, ayah: 5, globalAyahNumbers: [5] },
                 },
                 illustration: 'quran-fatiha-meaning',
             },
@@ -235,6 +237,7 @@ export const quranLessons: CurriculumLesson[] = [
                     text: 'قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ',
                     transliteration: 'Qul huwa Allahu ahad. Allahus-Samad.',
                     translation: 'Say: He is Allah, the One. Allah, the Self-Sufficient.',
+                    quranRef: { surah: 112, ayah: 1, endAyah: 2, globalAyahNumbers: [6222, 6223] },
                 },
                 keyTerms: [
                     { term: 'Al-Ikhlas', definition: 'The Sincerity — surah about Allah being One' },
@@ -251,6 +254,7 @@ export const quranLessons: CurriculumLesson[] = [
                     text: 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ',
                     transliteration: 'Qul a\'udhu bi Rabbin-Nas',
                     translation: 'Say: I seek refuge in the Lord of mankind',
+                    quranRef: { surah: 114, ayah: 1, globalAyahNumbers: [6231] },
                 },
                 keyTerms: [
                     { term: 'Al-Falaq', definition: 'The Daybreak — seeking protection from evil' },

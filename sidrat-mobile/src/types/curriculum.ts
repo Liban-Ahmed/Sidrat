@@ -57,6 +57,17 @@ export interface TeachBlock {
         text: string;
         transliteration: string;
         translation: string;
+        /** Quran reference for audio playback — if present, a recitation button is shown */
+        quranRef?: {
+            /** Surah number (1-114) */
+            surah: number;
+            /** Starting ayah number within the surah */
+            ayah: number;
+            /** Ending ayah number for multi-ayah ranges */
+            endAyah?: number;
+            /** Pre-computed global ayah numbers — avoids API call for resolution */
+            globalAyahNumbers?: number[];
+        };
     };
     /** Optional illustration key */
     illustration?: string;
