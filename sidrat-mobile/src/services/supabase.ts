@@ -43,20 +43,25 @@ const secureStoreAdapter = {
 function createSupabaseClient() {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
         // Return a stub client in dev when env vars aren't set
-        // This allows the app to run locally without Supabase
+        // This allows the app to run locally without Supabase.
+        // Use a non-existent localhost URL to prevent real network requests.
         console.warn(
             '[Supabase] Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_ANON_KEY. Running in offline-only mode.',
         );
     }
 
-    return createClient(SUPABASE_URL || 'https://placeholder.supabase.co', SUPABASE_ANON_KEY || 'placeholder', {
-        auth: {
-            storage: secureStoreAdapter,
-            autoRefreshToken: true,
-            persistSession: true,
-            detectSessionInUrl: false, // No browser redirects in RN
+    return createClient(
+        SUPABASE_URL || 'http://localhost:0/offline-stub',
+        SUPABASE_ANON_KEY || 'offline-stub-key',
+        {
+            auth: {
+                storage: secureStoreAdapter,
+                autoRefreshToken: !!SUPABASE_URL, // Don't try to refresh with stub
+                persistSession: true,
+                detectSessionInUrl: false, // No browser redirects in RN
+            },
         },
-    });
+    );
 }
 
 export const supabase = createSupabaseClient();

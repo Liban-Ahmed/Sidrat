@@ -3,7 +3,7 @@
  * home | learn | family | progress | settings
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/theme';
@@ -11,25 +11,28 @@ import { useTheme } from '../../src/theme';
 export default function TabLayout() {
     const { brand, colors, typography } = useTheme();
 
+    const screenOptions = useMemo(
+        () => ({
+            headerShown: false as const,
+            tabBarActiveTintColor: brand.primary,
+            tabBarInactiveTintColor: colors.textTertiary,
+            tabBarStyle: {
+                backgroundColor: colors.surface,
+                borderTopColor: colors.separator,
+                borderTopWidth: 0.5,
+                paddingBottom: 4,
+                height: 88,
+            },
+            tabBarLabelStyle: {
+                ...typography.captionBold,
+                marginTop: -2,
+            },
+        }),
+        [brand.primary, colors.textTertiary, colors.surface, colors.separator, typography],
+    );
+
     return (
-        <Tabs
-            screenOptions={{
-                headerShown: false,
-                tabBarActiveTintColor: brand.primary,
-                tabBarInactiveTintColor: colors.textTertiary,
-                tabBarStyle: {
-                    backgroundColor: colors.surface,
-                    borderTopColor: colors.separator,
-                    borderTopWidth: 0.5,
-                    paddingBottom: 4,
-                    height: 88,
-                },
-                tabBarLabelStyle: {
-                    ...typography.captionBold,
-                    marginTop: -2,
-                },
-            }}
-        >
+        <Tabs screenOptions={screenOptions}>
             <Tabs.Screen
                 name="index"
                 options={{

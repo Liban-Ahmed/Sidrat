@@ -152,6 +152,9 @@ export default function LearnScreen() {
                                         onPress={() => !isLocked && handleLessonPress(lesson.id)}
                                         disabled={isLocked}
                                         style={{ marginTop: spacing.xs }}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={`${lesson.title}${isCompleted ? ', completed' : isLocked ? ', locked' : ''}`}
+                                        accessibilityState={{ disabled: isLocked }}
                                     >
                                         <Card
                                             style={{

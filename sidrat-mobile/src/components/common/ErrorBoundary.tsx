@@ -11,9 +11,10 @@
  */
 
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Appearance } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { brand } from '../../theme/colors';
+import * as Sentry from '@sentry/react-native';
+import { brand, palette } from '../../theme/colors';
 
 interface Props {
     children: React.ReactNode;
@@ -37,7 +38,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         // Log to Sentry in production
-        // Sentry.captureException(error, { extra: { componentStack: errorInfo.componentStack } });
+        Sentry.captureException(error, { extra: { componentStack: errorInfo.componentStack } });
         console.error('[ErrorBoundary]', error, errorInfo.componentStack);
     }
 
@@ -51,13 +52,17 @@ export class ErrorBoundary extends Component<Props, State> {
                 return this.props.fallback;
             }
 
+            // Class components can't use hooks, so read scheme imperatively
+            const isDark = Appearance.getColorScheme() === 'dark';
+            const colors = isDark ? palette.dark : palette.light;
+
             return (
-                <View style={styles.container}>
+                <View style={[styles.container, { backgroundColor: colors.background }]}>
                     <View style={styles.iconContainer}>
                         <Ionicons name="cloudy-night-outline" size={64} color={brand.primary} />
                     </View>
-                    <Text style={styles.title}>Oops! Something went wrong</Text>
-                    <Text style={styles.message}>
+                    <Text style={[styles.title, { color: colors.text }]}>Oops! Something went wrong</Text>
+                    <Text style={[styles.message, { color: colors.textSecondary }]}>
                         Don&apos;t worry, let&apos;s try again InshaAllah
                     </Text>
                     <TouchableOpacity style={styles.button} onPress={this.handleRetry}>
@@ -77,7 +82,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 32,
-        backgroundColor: '#FFFFFF',
     },
     iconContainer: {
         width: 120,
@@ -91,13 +95,11 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 22,
         fontWeight: '700',
-        color: '#2C3E3F',
-        textAlign: 'center',
+        textAlign: 'center' as const,
     },
     message: {
         fontSize: 16,
-        color: '#6B7280',
-        textAlign: 'center',
+        textAlign: 'center' as const,
         marginTop: 8,
         lineHeight: 24,
     },

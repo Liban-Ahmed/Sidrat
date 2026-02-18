@@ -12,13 +12,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { mmkvStorage } from './persist';
 import type { Lesson, LessonProgress, LessonPhase } from '../types';
 import { sampleLessons } from '../data/lessons';
-
-function uuid(): string {
-    return (
-        Math.random().toString(36).substring(2, 15) +
-        Math.random().toString(36).substring(2, 15)
-    );
-}
+import { uuid } from '../utils/uuid';
 
 function progressKey(childId: string, lessonId: string) {
     return `${childId}:${lessonId}`;

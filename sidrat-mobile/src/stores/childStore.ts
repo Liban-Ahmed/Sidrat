@@ -10,6 +10,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { mmkvStorage } from './persist';
 import type { Child, CreateChild, AvatarId } from '../types';
+import { uuid } from '../utils/uuid';
 
 interface ChildStore {
     children: Child[];
@@ -25,13 +26,6 @@ interface ChildStore {
     // Progress
     recordLessonCompletion: (childId: string, xpEarned: number) => void;
     checkStreaks: () => void;
-}
-
-function uuid(): string {
-    return (
-        Math.random().toString(36).substring(2, 15) +
-        Math.random().toString(36).substring(2, 15)
-    );
 }
 
 export const useChildStore = create<ChildStore>()(
@@ -115,21 +109,27 @@ export const useChildStore = create<ChildStore>()(
                     }),
                 })),
 
-            checkStreaks: () =>
-                set((s) => ({
-                    children: s.children.map((c) => {
-                        if (!c.lastLessonCompletedDate) return c;
-                        const lastDay = new Date(c.lastLessonCompletedDate).toDateString();
-                        const today = new Date().toDateString();
-                        const yesterday = new Date();
-                        yesterday.setDate(yesterday.getDate() - 1);
+            checkStreaks: () => {
+                const { children } = get();
+                // Only call set() if at least one child's streak actually needs resetting
+                let hasChanges = false;
+                const updated = children.map((c) => {
+                    if (!c.lastLessonCompletedDate) return c;
+                    const lastDay = new Date(c.lastLessonCompletedDate).toDateString();
+                    const today = new Date().toDateString();
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
 
-                        if (lastDay !== today && lastDay !== yesterday.toDateString()) {
-                            return { ...c, currentStreak: 0 };
-                        }
-                        return c;
-                    }),
-                })),
+                    if (lastDay !== today && lastDay !== yesterday.toDateString()) {
+                        hasChanges = true;
+                        return { ...c, currentStreak: 0 };
+                    }
+                    return c;
+                });
+                if (hasChanges) {
+                    set({ children: updated });
+                }
+            },
         }),
         {
             name: 'sidrat-children',

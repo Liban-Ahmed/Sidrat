@@ -6,6 +6,7 @@
  * separate @Environment lookups.
  */
 
+import { useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 import { brand, palette, categoryColors, rarityColors } from './colors';
 import { typography } from './typography';
@@ -29,15 +30,18 @@ export function useTheme(): Theme {
     const scheme = useColorScheme();
     const mode: ThemeMode = scheme === 'dark' ? 'dark' : 'light';
 
-    return {
-        mode,
-        brand,
-        colors: palette[mode],
-        categoryColors,
-        rarityColors,
-        typography,
-        spacing,
-        radius,
-        shadows,
-    };
+    return useMemo(
+        () => ({
+            mode,
+            brand,
+            colors: palette[mode],
+            categoryColors,
+            rarityColors,
+            typography,
+            spacing,
+            radius,
+            shadows,
+        }),
+        [mode],
+    );
 }

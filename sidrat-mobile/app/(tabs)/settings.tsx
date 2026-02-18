@@ -2,54 +2,211 @@
  * Settings Screen
  *
  * Parent controls, profile management, parental gate.
- * Matches iOS SettingsView.
+ * All toggles wired to settingsStore.
  */
 
-import React from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, ScrollView, Pressable, Switch, Alert, StyleSheet, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useTheme } from '../../src/theme';
-import { useAppStore, useChildStore } from '../../src/stores';
+import { useAppStore, useChildStore, useSettingsStore } from '../../src/stores';
 import { Avatar } from '../../src/components';
+import { notificationService } from '../../src/services/notificationService';
+import { useParentalGate } from '../../src/hooks';
+import { ParentalGate } from '../../src/components/common/ParentalGate';
 
 export default function SettingsScreen() {
     const { brand, colors, typography, spacing, radius } = useTheme();
+    const router = useRouter();
+
     const children = useChildStore((s) => s.children);
+    const removeChild = useChildStore((s) => s.removeChild);
     const activeChildId = useAppStore((s) => s.activeChildId);
     const setActiveChild = useAppStore((s) => s.setActiveChild);
 
-    const sections = [
+    // Settings store
+    const soundEnabled = useSettingsStore((s) => s.soundEnabled);
+    const setSoundEnabled = useSettingsStore((s) => s.setSoundEnabled);
+    const hapticsEnabled = useSettingsStore((s) => s.hapticsEnabled);
+    const setHapticsEnabled = useSettingsStore((s) => s.setHapticsEnabled);
+    const narrationEnabled = useSettingsStore((s) => s.narrationEnabled);
+    const setNarrationEnabled = useSettingsStore((s) => s.setNarrationEnabled);
+    const dailyReminderEnabled = useSettingsStore((s) => s.dailyReminderEnabled);
+    const setDailyReminder = useSettingsStore((s) => s.setDailyReminder);
+    const themePreference = useSettingsStore((s) => s.themePreference);
+    const setThemePreference = useSettingsStore((s) => s.setThemePreference);
+
+    // Parental gate
+    const { isUnlocked, attemptUnlock } = useParentalGate();
+    const [gateVisible, setGateVisible] = useState(false);
+    const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+
+    const requireGate = useCallback(
+        (action: () => void) => {
+            if (isUnlocked) {
+                action();
+            } else {
+                const { showGate, onVerified } = attemptUnlock(action);
+                if (showGate) {
+                    setPendingAction(() => onVerified);
+                    setGateVisible(true);
+                } else {
+                    onVerified();
+                }
+            }
+        },
+        [isUnlocked, attemptUnlock],
+    );
+
+    const handleGateSuccess = useCallback(() => {
+        pendingAction?.();
+        setPendingAction(null);
+        setGateVisible(false);
+    }, [pendingAction]);
+
+    const handleGateCancel = useCallback(() => {
+        setPendingAction(null);
+        setGateVisible(false);
+    }, []);
+
+    // ── Handlers ──
+
+    const handleToggleSound = useCallback(
+        (value: boolean) => setSoundEnabled(value),
+        [setSoundEnabled],
+    );
+
+    const handleToggleHaptics = useCallback(
+        (value: boolean) => setHapticsEnabled(value),
+        [setHapticsEnabled],
+    );
+
+    const handleToggleNarration = useCallback(
+        (value: boolean) => setNarrationEnabled(value),
+        [setNarrationEnabled],
+    );
+
+    const handleToggleReminder = useCallback(
+        async (value: boolean) => {
+            if (value) {
+                const granted = await notificationService.requestPermissions();
+                if (granted) {
+                    await notificationService.scheduleDailyReminder();
+                    setDailyReminder(true);
+                } else {
+                    Alert.alert(
+                        'Notifications Disabled',
+                        'Please enable notifications in your device Settings to receive daily reminders.',
+                    );
+                }
+            } else {
+                await notificationService.cancelAll();
+                setDailyReminder(false);
+            }
+        },
+        [setDailyReminder],
+    );
+
+    const handleThemeChange = useCallback(() => {
+        const next =
+            themePreference === 'system'
+                ? 'light'
+                : themePreference === 'light'
+                    ? 'dark'
+                    : 'system';
+        setThemePreference(next);
+    }, [themePreference, setThemePreference]);
+
+    const themeLabel =
+        themePreference === 'system'
+            ? 'System'
+            : themePreference === 'light'
+                ? 'Light'
+                : 'Dark';
+
+    const handleAddChild = useCallback(() => {
+        requireGate(() => {
+            router.push('/onboarding/child-profile');
+        });
+    }, [requireGate, router]);
+
+    const handleRemoveChild = useCallback(
+        (id: string, name: string) => {
+            requireGate(() => {
+                Alert.alert(
+                    'Remove Profile',
+                    `Are you sure you want to remove ${name}'s profile? This cannot be undone.`,
+                    [
+                        { text: 'Cancel', style: 'cancel' },
+                        {
+                            text: 'Remove',
+                            style: 'destructive',
+                            onPress: () => {
+                                removeChild(id);
+                                if (activeChildId === id) {
+                                    const remaining = children.filter((c) => c.id !== id);
+                                    if (remaining.length > 0 && remaining[0]) {
+                                        setActiveChild(remaining[0].id);
+                                    }
+                                }
+                            },
+                        },
+                    ],
+                );
+            });
+        },
+        [requireGate, removeChild, activeChildId, children, setActiveChild],
+    );
+
+    // ── Toggle Items ──
+
+    interface ToggleItem {
+        icon: keyof typeof Ionicons.glyphMap;
+        label: string;
+        value: boolean;
+        onToggle: (v: boolean) => void;
+    }
+
+    interface ActionItem {
+        icon: keyof typeof Ionicons.glyphMap;
+        label: string;
+        action: () => void;
+        detail?: string;
+    }
+
+    const preferenceToggles: ToggleItem[] = [
+        { icon: 'volume-medium-outline', label: 'Sound Effects', value: soundEnabled, onToggle: handleToggleSound },
+        { icon: 'phone-portrait-outline', label: 'Haptic Feedback', value: hapticsEnabled, onToggle: handleToggleHaptics },
+        { icon: 'mic-outline', label: 'Voice Narration', value: narrationEnabled, onToggle: handleToggleNarration },
+        { icon: 'notifications-outline', label: 'Daily Reminder', value: dailyReminderEnabled, onToggle: handleToggleReminder },
+    ];
+
+    const parentActions: ActionItem[] = [
+        { icon: 'person-add-outline', label: 'Add Child Profile', action: handleAddChild },
+        { icon: 'color-palette-outline', label: 'Theme', action: handleThemeChange, detail: themeLabel },
+    ];
+
+    const aboutActions: ActionItem[] = [
         {
-            title: 'Profiles',
-            items: [
-                { icon: 'person-add-outline' as const, label: 'Add Child Profile', action: () => { } },
-                { icon: 'swap-horizontal-outline' as const, label: 'Switch Profile', action: () => { } },
-            ],
+            icon: 'information-circle-outline',
+            label: 'About Sidrat',
+            action: () =>
+                Alert.alert(
+                    'Sidrat',
+                    'Islamic learning for the whole family.\n\nVersion 1.0.0\n\nBuilt with love, Bismillah.',
+                ),
         },
         {
-            title: 'Preferences',
-            items: [
-                { icon: 'volume-medium-outline' as const, label: 'Sound Effects', action: () => { } },
-                { icon: 'musical-notes-outline' as const, label: 'Background Music', action: () => { } },
-                { icon: 'language-outline' as const, label: 'Language', action: () => { } },
-            ],
+            icon: 'shield-checkmark-outline',
+            label: 'Privacy Policy',
+            action: () => Linking.openURL('https://sidrat.app/privacy'),
         },
         {
-            title: 'Parent Zone',
-            items: [
-                { icon: 'lock-closed-outline' as const, label: 'Parental Controls', action: () => { } },
-                { icon: 'time-outline' as const, label: 'Screen Time Limits', action: () => { } },
-                { icon: 'analytics-outline' as const, label: 'Learning Reports', action: () => { } },
-            ],
-        },
-        {
-            title: 'About',
-            items: [
-                { icon: 'information-circle-outline' as const, label: 'About Sidrat', action: () => { } },
-                { icon: 'shield-checkmark-outline' as const, label: 'Privacy Policy', action: () => { } },
-                { icon: 'document-text-outline' as const, label: 'Terms of Service', action: () => { } },
-            ],
+            icon: 'document-text-outline',
+            label: 'Terms of Service',
+            action: () => Linking.openURL('https://sidrat.app/terms'),
         },
     ];
 
@@ -68,13 +225,14 @@ export default function SettingsScreen() {
                     Settings
                 </Text>
 
-                {/* Active Profile */}
+                {/* Active Profile Selector */}
                 {children.length > 0 && (
-                    <View style={[styles.profileRow, { marginTop: spacing.lg }]}>
+                    <View style={[styles.profileRow, { marginTop: spacing.lg, gap: spacing.sm }]}>
                         {children.map((child) => (
                             <Pressable
                                 key={child.id}
                                 onPress={() => setActiveChild(child.id)}
+                                onLongPress={() => handleRemoveChild(child.id, child.name)}
                                 style={[
                                     styles.profileItem,
                                     {
@@ -109,59 +267,132 @@ export default function SettingsScreen() {
                     </View>
                 )}
 
-                {/* Setting Sections */}
-                {sections.map((section) => (
-                    <View key={section.title} style={{ marginTop: spacing.xl }}>
-                        <Text
+                {/* Preferences — Toggles */}
+                <SectionTitle title="Preferences" typography={typography} colors={colors} spacing={spacing} />
+                <View
+                    style={{
+                        backgroundColor: colors.surfaceSecondary,
+                        borderRadius: radius.lg,
+                        overflow: 'hidden',
+                    }}
+                >
+                    {preferenceToggles.map((item, i) => (
+                        <View
+                            key={item.label}
                             style={[
-                                typography.labelSmall,
+                                styles.settingRow,
                                 {
-                                    color: colors.textTertiary,
-                                    textTransform: 'uppercase',
-                                    letterSpacing: 1,
-                                    marginBottom: spacing.xs,
+                                    paddingVertical: spacing.md,
+                                    paddingHorizontal: spacing.md,
+                                    borderBottomWidth: i < preferenceToggles.length - 1 ? 0.5 : 0,
+                                    borderBottomColor: colors.separator,
                                 },
                             ]}
                         >
-                            {section.title}
-                        </Text>
-                        <View
-                            style={{
-                                backgroundColor: colors.surfaceSecondary,
-                                borderRadius: radius.lg,
-                                overflow: 'hidden',
-                            }}
+                            <Ionicons name={item.icon} size={20} color={brand.primary} />
+                            <Text
+                                style={[
+                                    typography.body,
+                                    { color: colors.text, flex: 1, marginLeft: spacing.sm },
+                                ]}
+                            >
+                                {item.label}
+                            </Text>
+                            <Switch
+                                value={item.value}
+                                onValueChange={item.onToggle}
+                                trackColor={{ false: colors.surfaceTertiary, true: brand.primary + '60' }}
+                                thumbColor={item.value ? brand.primary : colors.textTertiary}
+                            />
+                        </View>
+                    ))}
+                </View>
+
+                {/* Parent Zone — Actions */}
+                <SectionTitle title="Parent Zone" typography={typography} colors={colors} spacing={spacing} />
+                <View
+                    style={{
+                        backgroundColor: colors.surfaceSecondary,
+                        borderRadius: radius.lg,
+                        overflow: 'hidden',
+                    }}
+                >
+                    {parentActions.map((item, i) => (
+                        <Pressable
+                            key={item.label}
+                            onPress={item.action}
+                            style={({ pressed }) => [
+                                styles.settingRow,
+                                {
+                                    paddingVertical: spacing.md,
+                                    paddingHorizontal: spacing.md,
+                                    backgroundColor: pressed ? colors.surfaceTertiary : 'transparent',
+                                    borderBottomWidth: i < parentActions.length - 1 ? 0.5 : 0,
+                                    borderBottomColor: colors.separator,
+                                },
+                            ]}
                         >
-                            {section.items.map((item, i) => (
-                                <Pressable
-                                    key={item.label}
-                                    onPress={item.action}
-                                    style={({ pressed }) => [
-                                        styles.settingRow,
-                                        {
-                                            paddingVertical: spacing.md,
-                                            paddingHorizontal: spacing.md,
-                                            backgroundColor: pressed ? colors.surfaceTertiary : 'transparent',
-                                            borderBottomWidth: i < section.items.length - 1 ? 0.5 : 0,
-                                            borderBottomColor: colors.separator,
-                                        },
+                            <Ionicons name={item.icon} size={20} color={brand.primary} />
+                            <Text
+                                style={[
+                                    typography.body,
+                                    { color: colors.text, flex: 1, marginLeft: spacing.sm },
+                                ]}
+                            >
+                                {item.label}
+                            </Text>
+                            {item.detail && (
+                                <Text
+                                    style={[
+                                        typography.bodySmall,
+                                        { color: colors.textTertiary, marginRight: spacing.xxs },
                                     ]}
                                 >
-                                    <Ionicons name={item.icon} size={20} color={brand.primary} />
-                                    <Text
-                                        style={[
-                                            typography.body,
-                                            { color: colors.text, flex: 1, marginLeft: spacing.sm },
-                                        ]}
-                                    >
-                                        {item.label}
-                                    </Text>
-                                    <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
-                                </Pressable>
-                            ))}
-                        </View>
-                    </View>
-                ))}
+                                    {item.detail}
+                                </Text>
+                            )}
+                            <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
+                        </Pressable>
+                    ))}
+                </View>
+
+                {/* About */}
+                <SectionTitle title="About" typography={typography} colors={colors} spacing={spacing} />
+                <View
+                    style={{
+                        backgroundColor: colors.surfaceSecondary,
+                        borderRadius: radius.lg,
+                        overflow: 'hidden',
+                    }}
+                >
+                    {aboutActions.map((item, i) => (
+                        <Pressable
+                            key={item.label}
+                            onPress={item.action}
+                            style={({ pressed }) => [
+                                styles.settingRow,
+                                {
+                                    paddingVertical: spacing.md,
+                                    paddingHorizontal: spacing.md,
+                                    backgroundColor: pressed ? colors.surfaceTertiary : 'transparent',
+                                    borderBottomWidth: i < aboutActions.length - 1 ? 0.5 : 0,
+                                    borderBottomColor: colors.separator,
+                                },
+                            ]}
+                        >
+                            <Ionicons name={item.icon} size={20} color={brand.primary} />
+                            <Text
+                                style={[
+                                    typography.body,
+                                    { color: colors.text, flex: 1, marginLeft: spacing.sm },
+                                ]}
+                            >
+                                {item.label}
+                            </Text>
+                            <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
+                        </Pressable>
+                    ))}
+                </View>
 
                 {/* Version */}
                 <Text
@@ -177,13 +408,44 @@ export default function SettingsScreen() {
                     Sidrat v1.0.0
                 </Text>
             </ScrollView>
+
+            {gateVisible && <ParentalGate visible={gateVisible} onSuccess={handleGateSuccess} onCancel={handleGateCancel} />}
         </SafeAreaView>
+    );
+}
+
+function SectionTitle({
+    title,
+    typography,
+    colors,
+    spacing,
+}: {
+    title: string;
+    typography: ReturnType<typeof useTheme>['typography'];
+    colors: ReturnType<typeof useTheme>['colors'];
+    spacing: ReturnType<typeof useTheme>['spacing'];
+}) {
+    return (
+        <Text
+            style={[
+                typography.labelSmall,
+                {
+                    color: colors.textTertiary,
+                    textTransform: 'uppercase',
+                    letterSpacing: 1,
+                    marginTop: spacing.xl,
+                    marginBottom: spacing.xs,
+                },
+            ]}
+        >
+            {title}
+        </Text>
     );
 }
 
 const styles = StyleSheet.create({
     safe: { flex: 1 },
-    profileRow: { flexDirection: 'row', gap: 12 },
+    profileRow: { flexDirection: 'row', flexWrap: 'wrap' },
     profileItem: { alignItems: 'center', minWidth: 80 },
     settingRow: { flexDirection: 'row', alignItems: 'center' },
 });

@@ -65,7 +65,7 @@ export default function WelcomeScreen() {
                 setAuthenticated(result.user.id, true);
             }
         } catch {
-            // Offline mode — proceed without auth
+            // Offline mode — proceed without auth (data stored locally)
         }
         router.push('/onboarding/parent-setup');
     };
@@ -81,12 +81,14 @@ export default function WelcomeScreen() {
                 const result = await authService.signInWithApple(credential.identityToken);
                 if (result.user) {
                     setAuthenticated(result.user.id, false);
+                    router.push('/onboarding/parent-setup');
+                    return;
                 }
             }
         } catch {
-            // Apple Sign-In failed or cancelled
+            // Apple Sign-In failed or cancelled — don't navigate
+            return;
         }
-        router.push('/onboarding/parent-setup');
     };
 
     return (

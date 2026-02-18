@@ -3,7 +3,7 @@
  * Shows score, fun fact, bonus du'a, and confetti animation.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import Animated, {
     FadeInDown,
@@ -54,6 +54,7 @@ export function RewardPhase({
 
     // Trophy bouncing in
     const trophyScale = useSharedValue(0);
+    const hasCompleted = useRef(false);
     useEffect(() => {
         trophyScale.value = withDelay(
             300,
@@ -62,8 +63,11 @@ export function RewardPhase({
                 withTiming(1, { duration: 200, easing: Easing.out(Easing.ease) }),
             ),
         );
-        // Complete the lesson on mount
-        onComplete();
+        // Complete the lesson only once — guard against remount / dep changes
+        if (!hasCompleted.current) {
+            hasCompleted.current = true;
+            onComplete();
+        }
     }, [trophyScale, onComplete]);
 
     const trophyStyle = useAnimatedStyle(() => ({

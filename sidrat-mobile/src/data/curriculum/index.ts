@@ -8,12 +8,19 @@
 import type { CurriculumLesson, CurriculumUnit, CurriculumIndex } from '../../types/curriculum';
 import { wuduUnit, wuduLessons } from './wudu';
 import { aqeedahUnit, aqeedahLessons } from './aqeedah';
+import { salahUnit, salahLessons } from './salah';
+import { quranUnit, quranLessons } from './quran';
 
 // ── Aggregate all units ────────────────────────────────────────
 
-export const allUnits: CurriculumUnit[] = [aqeedahUnit, wuduUnit];
+export const allUnits: CurriculumUnit[] = [aqeedahUnit, wuduUnit, salahUnit, quranUnit];
 
-export const allCurriculumLessons: CurriculumLesson[] = [...aqeedahLessons, ...wuduLessons];
+export const allCurriculumLessons: CurriculumLesson[] = [
+    ...aqeedahLessons,
+    ...wuduLessons,
+    ...salahLessons,
+    ...quranLessons,
+];
 
 /** Lookup a lesson by ID in O(1) */
 const lessonMap = new Map<string, CurriculumLesson>();
@@ -38,4 +45,4 @@ export const curriculumIndex: CurriculumIndex = {
 };
 
 // Re-export unit data
-export { wuduUnit, wuduLessons, aqeedahUnit, aqeedahLessons };
+export { wuduUnit, wuduLessons, aqeedahUnit, aqeedahLessons, salahUnit, salahLessons, quranUnit, quranLessons };
