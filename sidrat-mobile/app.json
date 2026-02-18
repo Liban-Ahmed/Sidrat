@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "Sidrat",
+    "slug": "sidrat",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "scheme": "sidrat",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0C7489"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sidrat.app",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSCalendarsUsageDescription": "Sidrat uses calendars to schedule daily learning reminders.",
+        "UIBackgroundModes": []
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0C7489"
+      },
+      "package": "com.sidrat.app",
+      "edgeToEdgeEnabled": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-secure-store",
+      "expo-sqlite",
+      "expo-notifications",
+      [
+        "expo-updates",
+        {
+          "username": "sidrat"
+        }
+      ]
+    ],
+    "updates": {
+      "url": "https://u.expo.dev/sidrat"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
+  }
+}
