@@ -24,9 +24,9 @@ import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme, brand as brandTokens } from '../../src/theme';
+import { useTheme } from '../../src/theme';
 import { useAppStore, useLessonStore } from '../../src/stores';
-import { ProgressRing, IslamicDivider, MiniStatPill } from '../../src/components';
+import { MiniStatPill } from '../../src/components';
 import { allUnits, allCurriculumLessons } from '../../src/data/curriculum';
 import { categoryColors } from '../../src/theme/colors';
 import type { CurriculumUnit, CurriculumLesson } from '../../src/types/curriculum';
@@ -42,12 +42,6 @@ const CATEGORY_SUBTITLES: Record<string, string> = {
     adab: 'Islamic manners',
     duaa: 'Supplications and remembrance',
     stories: 'Prophets and companions',
-};
-
-const DIFFICULTY_META: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
-    beginner: { label: 'Beginner', icon: 'leaf-outline', color: brandTokens.secondaryLight },
-    intermediate: { label: 'Intermediate', icon: 'trending-up-outline', color: brandTokens.accent },
-    advanced: { label: 'Advanced', icon: 'diamond-outline', color: brandTokens.coralLight },
 };
 
 const ROADMAP_HINTS = [
@@ -299,330 +293,269 @@ export default function LearnScreen() {
                     </View>
                 </Animated.View>
 
-                {/* ── Section divider ── */}
-                <View style={{ paddingHorizontal: spacing.lg }}>
-                    <IslamicDivider spacing={12} variant="rich" />
-                </View>
-
-                {/* ── Section label ── */}
-                <Animated.View entering={FadeIn.delay(300).duration(400)}>
-                    <View style={{ paddingHorizontal: spacing.lg, marginBottom: spacing.xs, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                        <Ionicons name="layers-outline" size={18} color={brand.primary} />
-                        <Text style={[typography.title3, { color: colors.text }]}>
-                            Units
-                        </Text>
-                    </View>
-                </Animated.View>
-
                 {/* ── Unit Cards ── */}
-                {allUnits.map((unit, ui) => {
-                    const unitProgress = getUnitProgress(unit);
-                    const unitLessons = allCurriculumLessons
-                        .filter((l) => l.unitId === unit.id)
-                        .sort((a, b) => a.order - b.order);
-                    const cat = categoryColors[unit.category];
-                    const catColor = cat?.solid ?? brand.primary;
-                    const catMuted = cat?.muted ?? brand.primaryMuted;
-                    const unitComplete = unitProgress.completed === unitProgress.total;
-                    const pct = unitProgress.total > 0
-                        ? unitProgress.completed / unitProgress.total
-                        : 0;
+                <View style={{ marginTop: spacing.lg }}>
+                    {allUnits.map((unit, ui) => {
+                        const unitProgress = getUnitProgress(unit);
+                        const unitLessons = allCurriculumLessons
+                            .filter((l) => l.unitId === unit.id)
+                            .sort((a, b) => a.order - b.order);
+                        const cat = categoryColors[unit.category];
+                        const catColor = cat?.solid ?? brand.primary;
+                        const catMuted = cat?.muted ?? brand.primaryMuted;
+                        const unitComplete = unitProgress.completed === unitProgress.total;
+                        const pct = unitProgress.total > 0
+                            ? unitProgress.completed / unitProgress.total
+                            : 0;
 
-                    return (
-                        <Animated.View
-                            key={unit.id}
-                            entering={FadeInDown.delay(320 + ui * 90).duration(500)}
-                            style={{ paddingHorizontal: spacing.lg, marginTop: spacing.md }}
-                        >
-                            <View
-                                style={[
-                                    styles.unitCard,
-                                    {
-                                        backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
-                                        borderRadius: radius.xl,
-                                        borderWidth: StyleSheet.hairlineWidth,
-                                        borderColor: isDark ? colors.border : catColor + '15',
-                                        ...shadows.cardPremium,
-                                        ...shadows.softGlow(catColor),
-                                    },
-                                ]}
+                        return (
+                            <Animated.View
+                                key={unit.id}
+                                entering={FadeInDown.delay(320 + ui * 90).duration(500)}
+                                style={{ paddingHorizontal: spacing.lg, marginTop: ui === 0 ? 0 : spacing.md }}
                             >
-                                {/* ── Tinted header wash ── */}
                                 <View
                                     style={[
-                                        styles.unitHeaderWash,
+                                        styles.unitCard,
                                         {
-                                            backgroundColor: catColor + (isDark ? '0A' : '06'),
-                                            borderTopLeftRadius: radius.xl,
-                                            borderTopRightRadius: radius.xl,
-                                            padding: spacing.md,
-                                            paddingBottom: spacing.sm,
+                                            backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
+                                            borderRadius: radius.xl,
+                                            borderWidth: StyleSheet.hairlineWidth,
+                                            borderColor: isDark ? colors.border : catColor + '15',
+                                            ...shadows.cardPremium,
                                         },
                                     ]}
                                 >
-                                    {/* Accent strip at very top — gradient */}
-                                    <LinearGradient
-                                        colors={[catColor, catColor + '60']}
-                                        start={{ x: 0, y: 0 }}
-                                        end={{ x: 1, y: 0 }}
+                                    {/* ── Clean unit header ── */}
+                                    <View
                                         style={[
-                                            styles.unitAccent,
+                                            styles.unitHeaderWash,
                                             {
+                                                backgroundColor: catColor + (isDark ? '08' : '04'),
                                                 borderTopLeftRadius: radius.xl,
                                                 borderTopRightRadius: radius.xl,
-                                                position: 'absolute',
-                                                top: 0,
-                                                left: 0,
-                                                right: 0,
+                                                padding: spacing.md,
                                             },
                                         ]}
-                                    />
-
-                                    <View style={styles.unitHeader}>
-                                        <View style={styles.unitHeaderLeft}>
-                                            <View
-                                                style={[
-                                                    styles.unitIconWrap,
-                                                    {
-                                                        backgroundColor: isDark ? catColor + '25' : catMuted,
-                                                        borderRadius: radius.md,
-                                                        borderWidth: 1,
-                                                        borderColor: catColor + '25',
-                                                    },
-                                                ]}
-                                            >
-                                                <Ionicons
-                                                    name={unit.icon as keyof typeof Ionicons.glyphMap}
-                                                    size={20}
-                                                    color={catColor}
-                                                />
-                                            </View>
-                                            <View style={{ marginLeft: spacing.sm, flex: 1 }}>
-                                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                                    <Text style={[typography.title3, { color: colors.text }]}>
-                                                        {unit.title}
-                                                    </Text>
-                                                    {unitComplete && (
-                                                        <View style={[styles.completedBadge, { backgroundColor: colors.successMuted, borderRadius: radius.full, marginLeft: spacing.xs }]}>
-                                                            <Ionicons name="checkmark-circle" size={12} color={colors.success} />
-                                                            <Text style={[styles.completedBadgeText, { color: colors.success }]}>Completed</Text>
-                                                        </View>
-                                                    )}
-                                                </View>
-                                                <Text
-                                                    style={[typography.caption, { color: colors.textSecondary, marginTop: 1 }]}
-                                                    numberOfLines={1}
+                                    >
+                                        <View style={styles.unitHeader}>
+                                            <View style={styles.unitHeaderLeft}>
+                                                <View
+                                                    style={[
+                                                        styles.unitIconWrap,
+                                                        {
+                                                            backgroundColor: unitComplete
+                                                                ? colors.successMuted
+                                                                : (isDark ? catColor + '20' : catMuted),
+                                                            borderRadius: radius.md,
+                                                        },
+                                                    ]}
                                                 >
-                                                    {CATEGORY_SUBTITLES[unit.category] ?? unit.description}
-                                                </Text>
-                                            </View>
-                                        </View>
-
-                                        <ProgressRing
-                                            progress={pct}
-                                            size={44}
-                                            strokeWidth={3.5}
-                                            color={unitComplete ? colors.success : catColor}
-                                            glow={unitComplete}
-                                        >
-                                            {unitComplete ? (
-                                                <Ionicons name="checkmark" size={16} color={colors.success} />
-                                            ) : (
-                                                <Text style={{ color: catColor, fontWeight: '700', fontSize: 11 }}>
-                                                    {unitProgress.completed}/{unitProgress.total}
-                                                </Text>
-                                            )}
-                                        </ProgressRing>
-                                    </View>
-
-                                    {/* Thin progress bar */}
-                                    <View style={[styles.unitProgressTrack, { backgroundColor: catColor + '15', borderRadius: radius.full, marginTop: spacing.sm }]}>
-                                        <View
-                                            style={[
-                                                styles.unitProgressFill,
-                                                {
-                                                    backgroundColor: unitComplete ? colors.success : catColor,
-                                                    borderRadius: radius.full,
-                                                    width: `${pct * 100}%` as `${number}%`,
-                                                },
-                                            ]}
-                                        />
-                                    </View>
-                                </View>
-
-                                {/* ── Lesson timeline ── */}
-                                <View style={{ paddingTop: spacing.xs, paddingBottom: spacing.sm }}>
-                                    {unitLessons.map((lesson, li) => {
-                                        const isCompleted = getIsCompleted(lesson.id);
-                                        const prevCompleted = li === 0 || getIsCompleted(unitLessons[li - 1]?.id ?? '');
-                                        const isLocked = li > 0 && !prevCompleted;
-                                        const isNext = !isCompleted && !isLocked;
-                                        const isLast = li === unitLessons.length - 1;
-                                        const diff = DIFFICULTY_META[lesson.difficulty];
-
-                                        return (
-                                            <Pressable
-                                                key={lesson.id}
-                                                onPress={() => !isLocked && handleLessonPress(lesson.id)}
-                                                disabled={isLocked}
-                                                accessibilityRole="button"
-                                                accessibilityLabel={`${lesson.title}${isCompleted ? ', completed' : isLocked ? ', locked' : ''}`}
-                                                accessibilityState={{ disabled: isLocked }}
-                                                style={({ pressed }) => [
-                                                    styles.lessonRow,
-                                                    {
-                                                        paddingRight: spacing.md,
-                                                        paddingVertical: spacing.xs,
-                                                        backgroundColor: pressed && !isLocked
-                                                            ? catColor + '08'
-                                                            : isNext
-                                                                ? (isDark ? catColor + '06' : catColor + '04')
-                                                                : 'transparent',
-                                                        opacity: isLocked ? 0.4 : 1,
-                                                    },
-                                                ]}
-                                            >
-                                                {/* ── Timeline track (left column) ── */}
-                                                <View style={styles.timelineTrack}>
-                                                    {/* Top connector */}
-                                                    {li > 0 && (
-                                                        <View
-                                                            style={[
-                                                                styles.timelineLineTop,
-                                                                {
-                                                                    backgroundColor: getIsCompleted(unitLessons[li - 1]?.id ?? '')
-                                                                        ? colors.success + '50'
-                                                                        : colors.surfaceTertiary,
-                                                                },
-                                                            ]}
+                                                    {unitComplete ? (
+                                                        <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+                                                    ) : (
+                                                        <Ionicons
+                                                            name={unit.icon as keyof typeof Ionicons.glyphMap}
+                                                            size={18}
+                                                            color={catColor}
                                                         />
                                                     )}
-
-                                                    {/* Step circle */}
-                                                    <View
-                                                        style={[
-                                                            styles.stepCircle,
-                                                            {
-                                                                backgroundColor: isCompleted
-                                                                    ? colors.success
-                                                                    : isNext
-                                                                        ? catColor
-                                                                        : isDark ? colors.surfaceTertiary : colors.surfaceTertiary,
-                                                                borderWidth: isNext ? 2.5 : 0,
-                                                                borderColor: isNext ? catColor + '35' : 'transparent',
-                                                            },
-                                                        ]}
+                                                </View>
+                                                <View style={{ marginLeft: spacing.sm, flex: 1 }}>
+                                                    <Text style={[typography.label, { color: colors.text }]} numberOfLines={1}>
+                                                        {unit.title}
+                                                    </Text>
+                                                    <Text
+                                                        style={[typography.caption, { color: colors.textTertiary, marginTop: 1 }]}
+                                                        numberOfLines={1}
                                                     >
-                                                        {isCompleted ? (
-                                                            <Ionicons name="checkmark" size={14} color="#FFF" />
-                                                        ) : isLocked ? (
-                                                            <Ionicons name="lock-closed" size={11} color={colors.textTertiary} />
-                                                        ) : (
-                                                            <Text style={[styles.stepNum, { color: isNext ? '#FFF' : colors.textTertiary }]}>
-                                                                {lesson.order}
-                                                            </Text>
+                                                        {CATEGORY_SUBTITLES[unit.category] ?? unit.description}
+                                                    </Text>
+                                                </View>
+                                            </View>
+
+                                            {/* Simple fraction counter */}
+                                            <Text style={[typography.caption, { color: unitComplete ? colors.success : catColor, fontWeight: '600' }]}>
+                                                {unitProgress.completed}/{unitProgress.total}
+                                            </Text>
+                                        </View>
+
+                                        {/* Thin progress bar */}
+                                        <View style={[styles.unitProgressTrack, { backgroundColor: catColor + '12', borderRadius: radius.full, marginTop: spacing.sm }]}>
+                                            <View
+                                                style={[
+                                                    styles.unitProgressFill,
+                                                    {
+                                                        backgroundColor: unitComplete ? colors.success : catColor,
+                                                        borderRadius: radius.full,
+                                                        width: `${pct * 100}%` as `${number}%`,
+                                                    },
+                                                ]}
+                                            />
+                                        </View>
+                                    </View>
+
+                                    {/* ── Lesson timeline ── */}
+                                    <View style={{ paddingTop: spacing.xs, paddingBottom: spacing.sm }}>
+                                        {unitLessons.map((lesson, li) => {
+                                            const isCompleted = getIsCompleted(lesson.id);
+                                            const prevCompleted = li === 0 || getIsCompleted(unitLessons[li - 1]?.id ?? '');
+                                            const isLocked = li > 0 && !prevCompleted;
+                                            const isNext = !isCompleted && !isLocked;
+                                            const isLast = li === unitLessons.length - 1;
+
+                                            return (
+                                                <Pressable
+                                                    key={lesson.id}
+                                                    onPress={() => !isLocked && handleLessonPress(lesson.id)}
+                                                    disabled={isLocked}
+                                                    accessibilityRole="button"
+                                                    accessibilityLabel={`${lesson.title}${isCompleted ? ', completed' : isLocked ? ', locked' : ''}`}
+                                                    accessibilityState={{ disabled: isLocked }}
+                                                    style={({ pressed }) => [
+                                                        styles.lessonRow,
+                                                        {
+                                                            paddingRight: spacing.md,
+                                                            paddingVertical: spacing.xs,
+                                                            backgroundColor: pressed && !isLocked
+                                                                ? catColor + '08'
+                                                                : isNext
+                                                                    ? (isDark ? catColor + '06' : catColor + '04')
+                                                                    : 'transparent',
+                                                            opacity: isLocked ? 0.4 : 1,
+                                                        },
+                                                    ]}
+                                                >
+                                                    {/* ── Timeline track (left column) ── */}
+                                                    <View style={styles.timelineTrack}>
+                                                        {/* Top connector */}
+                                                        {li > 0 && (
+                                                            <View
+                                                                style={[
+                                                                    styles.timelineLineTop,
+                                                                    {
+                                                                        backgroundColor: getIsCompleted(unitLessons[li - 1]?.id ?? '')
+                                                                            ? colors.success + '50'
+                                                                            : colors.surfaceTertiary,
+                                                                    },
+                                                                ]}
+                                                            />
+                                                        )}
+
+                                                        {/* Step circle */}
+                                                        <View
+                                                            style={[
+                                                                styles.stepCircle,
+                                                                {
+                                                                    backgroundColor: isCompleted
+                                                                        ? colors.success
+                                                                        : isNext
+                                                                            ? catColor
+                                                                            : isDark ? colors.surfaceTertiary : colors.surfaceTertiary,
+                                                                    borderWidth: isNext ? 2.5 : 0,
+                                                                    borderColor: isNext ? catColor + '35' : 'transparent',
+                                                                },
+                                                            ]}
+                                                        >
+                                                            {isCompleted ? (
+                                                                <Ionicons name="checkmark" size={14} color="#FFF" />
+                                                            ) : isLocked ? (
+                                                                <Ionicons name="lock-closed" size={11} color={colors.textTertiary} />
+                                                            ) : (
+                                                                <Text style={[styles.stepNum, { color: isNext ? '#FFF' : colors.textTertiary }]}>
+                                                                    {lesson.order}
+                                                                </Text>
+                                                            )}
+                                                        </View>
+
+                                                        {/* Bottom connector */}
+                                                        {!isLast && (
+                                                            <View
+                                                                style={[
+                                                                    styles.timelineLineBottom,
+                                                                    {
+                                                                        backgroundColor: isCompleted
+                                                                            ? colors.success + '50'
+                                                                            : colors.surfaceTertiary,
+                                                                    },
+                                                                ]}
+                                                            />
                                                         )}
                                                     </View>
 
-                                                    {/* Bottom connector */}
-                                                    {!isLast && (
-                                                        <View
-                                                            style={[
-                                                                styles.timelineLineBottom,
-                                                                {
-                                                                    backgroundColor: isCompleted
-                                                                        ? colors.success + '50'
-                                                                        : colors.surfaceTertiary,
-                                                                },
-                                                            ]}
-                                                        />
-                                                    )}
-                                                </View>
+                                                    {/* ── Content ── */}
+                                                    <View style={[styles.lessonContent, { paddingVertical: spacing.xs }]}>
+                                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                            <Text
+                                                                style={[
+                                                                    typography.label,
+                                                                    {
+                                                                        color: isLocked
+                                                                            ? colors.textTertiary
+                                                                            : isCompleted
+                                                                                ? colors.textSecondary
+                                                                                : colors.text,
+                                                                        flex: 1,
+                                                                    },
+                                                                ]}
+                                                                numberOfLines={1}
+                                                            >
+                                                                {lesson.title}
+                                                            </Text>
 
-                                                {/* ── Content ── */}
-                                                <View style={[styles.lessonContent, { paddingVertical: spacing.xs }]}>
-                                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                                        <Text
-                                                            style={[
-                                                                typography.label,
-                                                                {
-                                                                    color: isLocked
-                                                                        ? colors.textTertiary
-                                                                        : isCompleted
-                                                                            ? colors.textSecondary
-                                                                            : colors.text,
-                                                                    flex: 1,
-                                                                },
-                                                            ]}
-                                                            numberOfLines={1}
-                                                        >
-                                                            {lesson.title}
-                                                        </Text>
+                                                            {/* Action */}
+                                                            {isCompleted ? (
+                                                                <View style={[styles.statusPill, { backgroundColor: colors.successMuted, borderRadius: radius.full }]}>
+                                                                    <Ionicons name="checkmark" size={10} color={colors.success} />
+                                                                    <Text style={[styles.statusText, { color: colors.success }]}>Done</Text>
+                                                                </View>
+                                                            ) : isNext ? (
+                                                                <View style={[styles.playBtn, { backgroundColor: catColor, borderRadius: radius.full }]}>
+                                                                    <Ionicons name="play" size={12} color="#FFF" />
+                                                                </View>
+                                                            ) : !isLocked ? (
+                                                                <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+                                                            ) : null}
+                                                        </View>
 
-                                                        {/* Action */}
-                                                        {isCompleted ? (
-                                                            <View style={[styles.statusPill, { backgroundColor: colors.successMuted, borderRadius: radius.full }]}>
-                                                                <Ionicons name="checkmark" size={10} color={colors.success} />
-                                                                <Text style={[styles.statusText, { color: colors.success }]}>Done</Text>
-                                                            </View>
-                                                        ) : isNext ? (
-                                                            <View style={[styles.playBtn, { backgroundColor: catColor, borderRadius: radius.full }]}>
-                                                                <Ionicons name="play" size={12} color="#FFF" />
-                                                            </View>
-                                                        ) : !isLocked ? (
-                                                            <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
-                                                        ) : null}
-                                                    </View>
+                                                        {/* Description — show for next/unlocked only */}
+                                                        {!isCompleted && (
+                                                            <Text
+                                                                style={[
+                                                                    typography.caption,
+                                                                    { color: colors.textTertiary, marginTop: 2, lineHeight: 16 },
+                                                                ]}
+                                                                numberOfLines={isNext ? 2 : 1}
+                                                            >
+                                                                {isNext ? lesson.hook.prompt : lesson.description}
+                                                            </Text>
+                                                        )}
 
-                                                    {/* Description — show hook for next lesson, description otherwise */}
-                                                    <Text
-                                                        style={[
-                                                            typography.caption,
-                                                            { color: colors.textTertiary, marginTop: 2, lineHeight: 16 },
-                                                        ]}
-                                                        numberOfLines={isNext ? 2 : 1}
-                                                    >
-                                                        {isNext ? lesson.hook.prompt : lesson.description}
-                                                    </Text>
-
-                                                    {/* Meta row: difficulty + duration + XP */}
-                                                    <View style={[styles.metaRow, { marginTop: spacing.xxs }]}>
-                                                        {diff && (
-                                                            <View style={[styles.chip, { backgroundColor: diff.color + '10', borderRadius: radius.xs }]}>
-                                                                <Ionicons name={diff.icon} size={9} color={diff.color} />
-                                                                <Text style={[styles.chipText, { color: diff.color }]}>
-                                                                    {diff.label}
+                                                        {/* Meta: duration + XP — only for incomplete, unlocked lessons */}
+                                                        {!isLocked && !isCompleted && (
+                                                            <View style={[styles.metaRow, { marginTop: spacing.xxs }]}>
+                                                                <Ionicons name="time-outline" size={10} color={colors.textTertiary} />
+                                                                <Text style={[styles.chipText, { color: colors.textTertiary, marginLeft: 3 }]}>
+                                                                    {lesson.durationMinutes}m
+                                                                </Text>
+                                                                <Text style={[styles.chipText, { color: colors.textTertiary, marginLeft: 2, marginRight: 2 }]}>\u00b7</Text>
+                                                                <Ionicons name="sparkles-outline" size={10} color={brand.accent} />
+                                                                <Text style={[styles.chipText, { color: brand.accent, marginLeft: 3 }]}>
+                                                                    {lesson.xpReward} XP
                                                                 </Text>
                                                             </View>
                                                         )}
-                                                        <View style={[styles.chip, { backgroundColor: colors.surfaceTertiary, borderRadius: radius.xs, marginLeft: 4 }]}>
-                                                            <Ionicons name="time-outline" size={9} color={colors.textTertiary} />
-                                                            <Text style={[styles.chipText, { color: colors.textTertiary }]}>
-                                                                {lesson.durationMinutes}m
-                                                            </Text>
-                                                        </View>
-                                                        <View style={[styles.chip, { backgroundColor: brand.accent + '10', borderRadius: radius.xs, marginLeft: 4 }]}>
-                                                            <Ionicons name="sparkles-outline" size={9} color={brand.accent} />
-                                                            <Text style={[styles.chipText, { color: brand.accent }]}>
-                                                                {lesson.xpReward} XP
-                                                            </Text>
-                                                        </View>
-                                                        <View style={[styles.chip, { backgroundColor: brand.primary + '10', borderRadius: radius.xs, marginLeft: 4 }]}>
-                                                            <Ionicons name="help-circle-outline" size={9} color={brand.primary} />
-                                                            <Text style={[styles.chipText, { color: brand.primary }]}>
-                                                                {lesson.practice.length}Q
-                                                            </Text>
-                                                        </View>
                                                     </View>
-                                                </View>
-                                            </Pressable>
-                                        );
-                                    })}
+                                                </Pressable>
+                                            );
+                                        })}
+                                    </View>
                                 </View>
-                            </View>
-                        </Animated.View>
-                    );
-                })}
+                            </Animated.View>
+                        );
+                    })
+                    }
+                </View>
 
                 {/* ── Coming Soon Roadmap ── */}
                 <Animated.View
@@ -676,10 +609,11 @@ export default function LearnScreen() {
                                     </Text>
                                 </Animated.View>
                             ))}
-                            <IslamicDivider spacing={8} variant="rich" color={brand.lavender + '30'} />
-                            <Text style={[typography.caption, { color: colors.textTertiary, textAlign: 'center', fontStyle: 'italic' }]}>
-                                In sha Allah
-                            </Text>
+                            <View style={{ marginTop: spacing.sm }}>
+                                <Text style={[typography.caption, { color: colors.textTertiary, textAlign: 'center', fontStyle: 'italic' }]}>
+                                    In sha Allah
+                                </Text>
+                            </View>
                         </View>
                     </View>
                 </Animated.View>
@@ -739,11 +673,9 @@ const styles = StyleSheet.create({
     unitAccent: { height: 3 },
     unitHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     unitHeaderLeft: { flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 12 },
-    unitIconWrap: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+    unitIconWrap: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
     unitProgressTrack: { height: 3, overflow: 'hidden' },
     unitProgressFill: { height: '100%' },
-    completedBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, paddingVertical: 2 },
-    completedBadgeText: { fontSize: 10, fontWeight: '700', marginLeft: 3 },
 
     // Timeline layout
     lessonRow: { flexDirection: 'row', alignItems: 'stretch' },
@@ -755,9 +687,8 @@ const styles = StyleSheet.create({
     lessonContent: { flex: 1 },
 
     // Meta
-    metaRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
-    chip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 5, paddingVertical: 2 },
-    chipText: { fontSize: 10, fontWeight: '600', marginLeft: 2 },
+    metaRow: { flexDirection: 'row', alignItems: 'center' },
+    chipText: { fontSize: 10, fontWeight: '600' },
 
     // Status
     statusPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 3, gap: 3 },

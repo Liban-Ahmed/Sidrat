@@ -12,13 +12,14 @@
  * subtle gradient borders, gentle entrance animation.
  */
 
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useCallback, useMemo } from 'react';
+import { View, Text, StyleSheet, Share, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme';
 import { getDuaOfTheDay, type Dua } from '../../data/duas';
+import { ScalePress } from '../ScalePress';
 
 const CATEGORY_META: Record<Dua['category'], { icon: string; label: string }> = {
     morning: { icon: 'sunny-outline', label: 'Morning' },
@@ -36,6 +37,17 @@ export function DuaOfTheDay() {
 
     const dua = useMemo(() => getDuaOfTheDay(), []);
     const meta = CATEGORY_META[dua.category];
+
+    const handleShare = useCallback(async () => {
+        const message = `${dua.arabic}\n\n"${dua.translation}"\n\n— ${dua.source}\n\nShared from Sidrat 🌿`;
+        try {
+            await Share.share(
+                Platform.OS === 'ios'
+                    ? { message }
+                    : { message, title: 'Dua of the Day' },
+            );
+        } catch { /* user cancelled */ }
+    }, [dua]);
 
     return (
         <Animated.View entering={FadeInDown.duration(600).springify().damping(16)}>
@@ -94,6 +106,19 @@ export function DuaOfTheDay() {
                                 {meta.label}
                             </Text>
                         </View>
+                        <ScalePress
+                            onPress={handleShare}
+                            accessibilityLabel="Share this dua"
+                            style={{
+                                width: 32,
+                                height: 32,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginLeft: spacing.xs,
+                            }}
+                        >
+                            <Ionicons name="share-outline" size={18} color={brand.lavender + '80'} />
+                        </ScalePress>
                     </View>
 
                     {/* Arabic text */}

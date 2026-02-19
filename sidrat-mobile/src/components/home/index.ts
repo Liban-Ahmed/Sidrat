@@ -3,6 +3,7 @@ export { AnimatedStatCard } from './AnimatedStatCard';
 export { AyahOfTheDay } from './AyahOfTheDay';
 export { DailyProgressRing } from './DailyProgressRing';
 export { DuaOfTheDay } from './DuaOfTheDay';
+export { HomeSkeletonLoader } from './SkeletonLoader';
 export { MiniCrescent } from './MiniCrescent';
 export { QuickAction } from './QuickAction';
 export { SalahReminder } from './SalahReminder';

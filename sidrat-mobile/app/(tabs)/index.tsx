@@ -39,7 +39,7 @@ import Animated, {
 import { useTheme } from '../../src/theme';
 import { useAppStore, useChildStore, useLessonStore } from '../../src/stores';
 import { Avatar, Badge, BismillahHeader, Button, Card, ScalePress, SectionHeader, ProgressBar } from '../../src/components';
-import { AyahOfTheDay, DuaOfTheDay, SalahReminder } from '../../src/components/home';
+import { AyahOfTheDay, DuaOfTheDay, HomeSkeletonLoader, SalahReminder } from '../../src/components/home';
 import { categoryMeta } from '../../src/types';
 import { allCurriculumLessons } from '../../src/data/curriculum';
 import { useReviewQueue } from '../../src/hooks/useReviewQueue';
@@ -79,6 +79,21 @@ function getMotivationalSubtitle(child: { currentStreak: number; totalLessonsCom
     if (child.currentStreak >= 3) return `Keep your ${child.currentStreak}-day streak going!`;
     if (child.currentStreak === 1) return 'Great start — keep it up!';
     return "Let's learn something new today";
+}
+
+/**
+ * Returns a hero gradient pair that shifts with the time of day.
+ * Dawn → warm amber/gold, Morning → teal/sky, Afternoon → golden/teal,
+ * Evening → purple/coral, Night → deep indigo/navy.
+ */
+function getTimeBasedHeroGradient(): [string, string] {
+    const hour = new Date().getHours();
+    if (hour >= 4 && hour < 7) return ['#8A5E10', '#055F6E']; // Fajr — warm amber → teal
+    if (hour >= 7 && hour < 12) return ['#055F6E', '#1A7AB5']; // Morning — teal → sky blue
+    if (hour >= 12 && hour < 16) return ['#055F6E', '#0A3F5C']; // Afternoon — teal → deep navy (default feel)
+    if (hour >= 16 && hour < 19) return ['#8A5E10', '#9E3844']; // Sunset — gold → soft coral
+    if (hour >= 19 && hour < 21) return ['#3D2B7A', '#9E3844']; // Evening — purple → coral
+    return ['#0F1A28', '#1A3A5C'];                              // Night — deep indigo → navy
 }
 
 // ── Main Component ──────────────────────────────────────────────
@@ -183,6 +198,28 @@ export default function HomeScreen() {
         borderBottomWidth: scrollY.value > 40 ? StyleSheet.hairlineWidth : 0,
     }));
 
+    // ── Parallax orb transforms (each orb moves at a different rate) ──
+    const orbLargeStyle = useAnimatedStyle(() => ({
+        transform: [
+            { translateY: interpolate(scrollY.value, [0, 200], [0, -30], Extrapolation.CLAMP) },
+            { translateX: interpolate(scrollY.value, [0, 200], [0, 12], Extrapolation.CLAMP) },
+            { scale: interpolate(scrollY.value, [0, 200], [1, 1.15], Extrapolation.CLAMP) },
+        ],
+    }));
+    const orbSmallStyle = useAnimatedStyle(() => ({
+        transform: [
+            { translateY: interpolate(scrollY.value, [0, 200], [0, -15], Extrapolation.CLAMP) },
+            { translateX: interpolate(scrollY.value, [0, 200], [0, -8], Extrapolation.CLAMP) },
+        ],
+    }));
+    const orbMediumStyle = useAnimatedStyle(() => ({
+        transform: [
+            { translateY: interpolate(scrollY.value, [0, 200], [0, -22], Extrapolation.CLAMP) },
+            { scale: interpolate(scrollY.value, [0, 200], [1, 0.9], Extrapolation.CLAMP) },
+        ],
+        opacity: interpolate(scrollY.value, [0, 150], [1, 0.4], Extrapolation.CLAMP),
+    }));
+
     // ── Pulsing CTA ──
     const ctaPulse = useSharedValue(1);
     useEffect(() => {
@@ -202,6 +239,7 @@ export default function HomeScreen() {
     const greeting = useMemo(getGreeting, []);
     const greetingIcon = useMemo(getGreetingIcon, []);
     const subtitle = useMemo(() => getMotivationalSubtitle(child), [child?.currentStreak, child?.totalLessonsCompleted]);
+    const heroGradient = useMemo(getTimeBasedHeroGradient, []);
 
     // ── Navigate to lesson player ──
     const navigateToLesson = useCallback((lessonId: string) => {
@@ -245,6 +283,15 @@ export default function HomeScreen() {
         );
     }
 
+    // ── Skeleton loading state: child exists but data hydrating ──
+    if (!child) {
+        return (
+            <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['left', 'right']}>
+                <HomeSkeletonLoader />
+            </SafeAreaView>
+        );
+    }
+
     return (
         <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['left', 'right']}>
             {/* ── Translucent header bar on scroll ── */}
@@ -281,7 +328,7 @@ export default function HomeScreen() {
                 {/* ── Gradient Hero Greeting ──────────────────── */}
                 <Animated.View entering={FadeInDown.duration(500).springify().damping(18)}>
                     <LinearGradient
-                        colors={gradients.homeHero as unknown as [string, string]}
+                        colors={heroGradient}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
                         style={[
@@ -295,10 +342,10 @@ export default function HomeScreen() {
                             },
                         ]}
                     >
-                        {/* Decorative orbs */}
-                        <View style={[styles.heroOrb, styles.heroOrbLarge]} />
-                        <View style={[styles.heroOrb, styles.heroOrbSmall]} />
-                        <View style={[styles.heroOrb, styles.heroOrbMedium]} />
+                        {/* Decorative parallax orbs */}
+                        <Animated.View style={[styles.heroOrb, styles.heroOrbLarge, orbLargeStyle]} />
+                        <Animated.View style={[styles.heroOrb, styles.heroOrbSmall, orbSmallStyle]} />
+                        <Animated.View style={[styles.heroOrb, styles.heroOrbMedium, orbMediumStyle]} />
 
                         <View style={styles.header}>
                             <View style={styles.headerLeft}>

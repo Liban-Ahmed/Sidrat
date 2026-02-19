@@ -11,18 +11,30 @@
  * warm typography hierarchy, and gentle fade-in animation.
  */
 
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useCallback, useMemo } from 'react';
+import { View, Text, StyleSheet, Share, Platform } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme';
 import { getAyahOfTheDay } from '../../data/ayahs';
+import { ScalePress } from '../ScalePress';
 
 export function AyahOfTheDay() {
     const { brand, colors, typography, spacing, radius, shadows, isDark } = useTheme();
 
     const ayah = useMemo(() => getAyahOfTheDay(), []);
+
+    const handleShare = useCallback(async () => {
+        const message = `بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ\n\n${ayah.arabic}\n\n"${ayah.translation}"\n\n— ${ayah.surahName} ${ayah.ayahNumber}\n\nShared from Sidrat 🌿`;
+        try {
+            await Share.share(
+                Platform.OS === 'ios'
+                    ? { message }
+                    : { message, title: 'Ayah of the Day' },
+            );
+        } catch { /* user cancelled */ }
+    }, [ayah]);
 
     return (
         <Animated.View entering={FadeInDown.duration(600).springify().damping(16)}>
@@ -75,6 +87,19 @@ export function AyahOfTheDay() {
                                 {ayah.surahName} {ayah.ayahNumber}
                             </Text>
                         </View>
+                        <ScalePress
+                            onPress={handleShare}
+                            accessibilityLabel="Share this ayah"
+                            style={{
+                                width: 32,
+                                height: 32,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginLeft: spacing.xs,
+                            }}
+                        >
+                            <Ionicons name="share-outline" size={18} color={brand.secondary + '80'} />
+                        </ScalePress>
                     </View>
 
                     {/* Arabic text */}
