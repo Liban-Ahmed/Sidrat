@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { MMKV } from 'react-native-mmkv';
 import { useTheme } from '../../src/theme';
 import { useAppStore } from '../../src/stores';
-import { Card, Button } from '../../src/components';
+import { Card, Button, ScreenHeader, IslamicDivider, BismillahHeader } from '../../src/components';
 import { analyticsService } from '../../src/services/analyticsService';
 import { ANALYTICS_EVENTS } from '../../src/constants/config';
 
@@ -149,6 +149,15 @@ const ACTIVITIES: FamilyActivity[] = [
     },
 ];
 
+const ACTIVITY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+    'wudu-together': 'water-outline',
+    'bedtime-dua': 'moon-outline',
+    'quran-listening': 'musical-notes-outline',
+    'kindness-tracker': 'heart-outline',
+    'prophet-stories': 'book-outline',
+    'morning-adhkar': 'sunny-outline',
+};
+
 // ── Helpers ──
 
 function getWeekOfYear(): number {
@@ -198,16 +207,11 @@ export default function FamilyScreen() {
                 contentContainerStyle={{ paddingHorizontal: spacing.md, paddingBottom: spacing.xxl }}
                 showsVerticalScrollIndicator={false}
             >
-                <Text
-                    style={[typography.largeTitle, { color: colors.text, paddingTop: spacing.sm }]}
-                >
-                    Family
-                </Text>
-                <Text
-                    style={[typography.bodySmall, { color: colors.textSecondary, marginTop: spacing.xxs }]}
-                >
-                    Weekly activities to do together
-                </Text>
+                <ScreenHeader
+                    title="Family"
+                    subtitle="Weekly activities to do together"
+                    accentColor={brand.accent}
+                />
 
                 {/* This Week's Activity */}
                 <Card style={{ marginTop: spacing.lg }}>
@@ -230,7 +234,27 @@ export default function FamilyScreen() {
                         </View>
                     </View>
 
-                    <Text style={{ fontSize: 40, marginTop: spacing.sm }}>{activity.emoji}</Text>
+                    <BismillahHeader size="sm" color={CATEGORY_COLORS[activity.category] + '40'} align="left" />
+
+                    <View
+                        style={{
+                            width: 56,
+                            height: 56,
+                            borderRadius: 28,
+                            backgroundColor: CATEGORY_COLORS[activity.category] + '15',
+                            borderWidth: 1.5,
+                            borderColor: CATEGORY_COLORS[activity.category] + '25',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginTop: spacing.sm,
+                        }}
+                    >
+                        <Ionicons
+                            name={ACTIVITY_ICONS[activity.id] ?? 'sparkles-outline'}
+                            size={26}
+                            color={CATEGORY_COLORS[activity.category]}
+                        />
+                    </View>
                     <Text style={[typography.title1, { color: colors.text, marginTop: spacing.xs }]}>
                         {activity.title}
                     </Text>
@@ -277,9 +301,13 @@ export default function FamilyScreen() {
                 </Card>
 
                 {/* Parent Tips */}
-                <Text style={[typography.title3, { color: colors.text, marginTop: spacing.xl }]}>
-                    Parent Tips 💡
-                </Text>
+                <IslamicDivider spacing={12} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Ionicons name="leaf" size={18} color={brand.secondary} />
+                    <Text style={[typography.title3, { color: colors.text }]}>
+                        Parent Tips
+                    </Text>
+                </View>
                 {activity.tips.map((tip, i) => (
                     <View key={i} style={[styles.tipRow, { marginTop: spacing.sm }]}>
                         <Ionicons name="leaf" size={16} color={brand.secondary} />
@@ -295,9 +323,13 @@ export default function FamilyScreen() {
                 ))}
 
                 {/* Conversation Starters */}
-                <Text style={[typography.title3, { color: colors.text, marginTop: spacing.xl }]}>
-                    Conversation Starters 💬
-                </Text>
+                <IslamicDivider spacing={12} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={18} color={brand.primary} />
+                    <Text style={[typography.title3, { color: colors.text }]}>
+                        Conversation Starters
+                    </Text>
+                </View>
                 {activity.prompts.map((prompt, i) => (
                     <Card key={i} style={{ marginTop: spacing.sm, backgroundColor: colors.surfaceSecondary }}>
                         <Text style={[typography.body, { color: colors.text }]}>
@@ -307,9 +339,13 @@ export default function FamilyScreen() {
                 ))}
 
                 {/* Coming Next */}
-                <Text style={[typography.title3, { color: colors.text, marginTop: spacing.xl }]}>
-                    Coming Next Week
-                </Text>
+                <IslamicDivider spacing={12} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Ionicons name="calendar-outline" size={18} color={brand.lavender} />
+                    <Text style={[typography.title3, { color: colors.text }]}>
+                        Coming Next Week
+                    </Text>
+                </View>
                 {(() => {
                     const next = ACTIVITIES[(weekNum + 1) % ACTIVITIES.length]!;
                     return (
@@ -321,7 +357,22 @@ export default function FamilyScreen() {
                                 backgroundColor: colors.surfaceSecondary,
                             }}
                         >
-                            <Text style={{ fontSize: 28 }}>{next.emoji}</Text>
+                            <View
+                                style={{
+                                    width: 44,
+                                    height: 44,
+                                    borderRadius: 22,
+                                    backgroundColor: CATEGORY_COLORS[next.category] + '15',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <Ionicons
+                                    name={ACTIVITY_ICONS[next.id] ?? 'sparkles-outline'}
+                                    size={20}
+                                    color={CATEGORY_COLORS[next.category]}
+                                />
+                            </View>
                             <View style={{ marginLeft: spacing.sm, flex: 1 }}>
                                 <Text style={[typography.label, { color: colors.text }]}>
                                     {next.title}

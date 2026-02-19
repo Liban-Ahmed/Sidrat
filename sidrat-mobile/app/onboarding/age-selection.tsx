@@ -11,7 +11,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/theme';
-import { Button } from '../../src/components/ui';
+import { Button, BismillahHeader } from '../../src/components/ui';
 import { useChildStore, useAppStore } from '../../src/stores';
 import { ageToGroup, AGE_GROUP_RANGES } from '../../src/types/curriculum';
 import type { AvatarId } from '../../src/types';
@@ -65,6 +65,7 @@ export default function AgeSelectionScreen() {
                     <Text style={[typography.title1, { color: colors.text }]}>
                         How old is {params.name}?
                     </Text>
+                    <BismillahHeader size="sm" color={brand.primary + '30'} align="left" />
                     <Text style={[typography.body, { color: colors.textSecondary, marginTop: 4 }]}>
                         This helps us pick the right lessons
                     </Text>

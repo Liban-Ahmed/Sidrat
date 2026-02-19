@@ -1,0 +1,68 @@
+/**
+ * IslamicDivider — Decorative section divider with Islamic motif.
+ *
+ * A thin line with a small diamond/star accent in the center,
+ * reminiscent of Islamic geometric patterns found in manuscripts.
+ */
+
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { useTheme } from '../../theme';
+
+interface IslamicDividerProps {
+    /** Color of the divider line and accent */
+    color?: string;
+    /** Vertical margin around the divider */
+    spacing?: number;
+}
+
+export function IslamicDivider({ color, spacing: vertSpacing }: IslamicDividerProps) {
+    const { colors, brand, spacing } = useTheme();
+    const lineColor = color ?? colors.separator;
+    const accentColor = color ?? brand.accent;
+    const vMargin = vertSpacing ?? spacing.lg;
+
+    return (
+        <View style={[styles.container, { marginVertical: vMargin }]}>
+            <View style={[styles.line, { backgroundColor: lineColor }]} />
+            {/* Center diamond accent */}
+            <View style={styles.accentContainer}>
+                <View style={[styles.diamond, { backgroundColor: accentColor }]} />
+                <View style={[styles.diamondSmall, styles.diamondLeft, { backgroundColor: accentColor + '60' }]} />
+                <View style={[styles.diamondSmall, styles.diamondRight, { backgroundColor: accentColor + '60' }]} />
+            </View>
+            <View style={[styles.line, { backgroundColor: lineColor }]} />
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    line: {
+        flex: 1,
+        height: StyleSheet.hairlineWidth,
+    },
+    accentContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 12,
+        gap: 6,
+    },
+    diamond: {
+        width: 6,
+        height: 6,
+        borderRadius: 1,
+        transform: [{ rotate: '45deg' }],
+    },
+    diamondSmall: {
+        width: 4,
+        height: 4,
+        borderRadius: 1,
+        transform: [{ rotate: '45deg' }],
+    },
+    diamondLeft: {},
+    diamondRight: {},
+});

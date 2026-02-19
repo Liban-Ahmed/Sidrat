@@ -37,7 +37,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '../../src/theme';
 import { useAppStore, useChildStore, useLessonStore } from '../../src/stores';
-import { Avatar, Badge, Button, ScalePress, SectionHeader, ProgressBar } from '../../src/components';
+import { Avatar, Badge, Button, ScalePress, SectionHeader, ProgressBar, IslamicDivider, BismillahHeader } from '../../src/components';
 import { WeekStreak, AnimatedStatCard } from '../../src/components/home';
 import { categoryMeta } from '../../src/types';
 import { allCurriculumLessons } from '../../src/data/curriculum';
@@ -70,7 +70,7 @@ function getGreetingIcon(): keyof typeof Ionicons.glyphMap {
 // ── Main Component ──────────────────────────────────────────────
 
 export default function HomeScreen() {
-    const { brand, colors, typography, spacing, radius, shadows } = useTheme();
+    const { brand, colors, typography, spacing, radius, shadows, isDark } = useTheme();
     const router = useRouter();
 
     // ── Store selectors ──
@@ -196,6 +196,7 @@ export default function HomeScreen() {
                     <Text style={[typography.title2, { color: colors.text, marginTop: spacing.lg, textAlign: 'center' }]}>
                         Welcome to Sidrat!
                     </Text>
+                    <BismillahHeader size="sm" color={brand.primary + '50'} />
                     <Text
                         style={[
                             typography.bodySmall,
@@ -294,6 +295,9 @@ export default function HomeScreen() {
                         ]} />
                     </ScalePress>
                 </Animated.View>
+
+                {/* ── Decorative Divider ───────────────────── */}
+                <IslamicDivider spacing={8} />
 
                 {/* ── Streak Card ──────────────────────────── */}
                 {child && (
@@ -448,7 +452,9 @@ export default function HomeScreen() {
                                     {
                                         marginTop: spacing.sm,
                                         backgroundColor: colors.surface,
-                                        borderRadius: radius.lg,
+                                        borderRadius: radius.xl,
+                                        borderWidth: 1,
+                                        borderColor: isDark ? colors.border : brand.primary + '12',
                                         ...shadows.card,
                                     },
                                 ]}
@@ -576,7 +582,7 @@ export default function HomeScreen() {
                             <View
                                 style={[
                                     styles.emptyIcon,
-                                    { backgroundColor: brand.secondary + '15', borderRadius: radius.full },
+                                    { backgroundColor: brand.secondary + '12', borderRadius: radius.full, borderWidth: 1.5, borderColor: brand.secondary + '25' },
                                 ]}
                             >
                                 <Ionicons name="checkmark-circle" size={36} color={brand.secondary} />
@@ -601,6 +607,7 @@ export default function HomeScreen() {
                     <Animated.View
                         entering={FadeInDown.delay(STAGGER * 4).duration(600).springify().damping(16)}
                     >
+                        <IslamicDivider spacing={12} />
                         <SectionHeader
                             title="Your Progress"
                             onSeeAll={() => router.push('/progress' as any)}

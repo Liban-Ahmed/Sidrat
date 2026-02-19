@@ -10,7 +10,7 @@ import { useRouter } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/theme';
-import { Button } from '../../src/components/ui';
+import { Button, BismillahHeader, IslamicDivider } from '../../src/components/ui';
 import { ParentalGate } from '../../src/components/common';
 import { useAppStore } from '../../src/stores';
 
@@ -50,6 +50,7 @@ export default function ParentSetupScreen() {
                     <View style={[styles.iconCircle, { backgroundColor: brand.primary + '15' }]}>
                         <Ionicons name="shield-checkmark" size={40} color={brand.primary} />
                     </View>
+                    <BismillahHeader size="sm" color={brand.primary + '50'} />
                     <Text style={[typography.title1, { color: colors.text, textAlign: 'center' }]}>
                         For Parents
                     </Text>
@@ -64,6 +65,7 @@ export default function ParentSetupScreen() {
                 </Animated.View>
 
                 {/* Safety features */}
+                <IslamicDivider spacing={16} />
                 <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.features}>
                     {[
                         {

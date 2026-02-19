@@ -22,7 +22,8 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/theme';
 import { useAppStore, useChildStore, useLessonStore, useAchievementStore, ACHIEVEMENTS } from '../../src/stores';
-import { Card, Avatar, ProgressRing } from '../../src/components';
+import { Card, Avatar, ProgressRing, ScreenHeader, IslamicDivider, MiniStatPill, BismillahHeader } from '../../src/components';
+import { LinearGradient } from 'expo-linear-gradient';
 import { CategoryBreakdownChart } from '../../src/components/progress';
 import { getAge } from '../../src/types';
 import { allCurriculumLessons } from '../../src/data/curriculum';
@@ -197,7 +198,8 @@ export default function ProgressScreen() {
                     >
                         <Ionicons name="analytics-outline" size={36} color={brand.primary} />
                     </View>
-                    <Text style={[typography.title2, { color: colors.text, marginTop: spacing.lg, textAlign: 'center' }]}>
+                    <BismillahHeader size="sm" color={brand.primary + '40'} />
+                    <Text style={[typography.title2, { color: colors.text, marginTop: spacing.sm, textAlign: 'center' }]}>
                         No profile selected
                     </Text>
                     <Text style={[typography.body, { color: colors.textSecondary, marginTop: spacing.xs, textAlign: 'center' }]}>
@@ -222,22 +224,24 @@ export default function ProgressScreen() {
             >
                 {/* ── Hero Section ── */}
                 <Animated.View entering={FadeIn.duration(500)}>
-                    <View style={{ paddingHorizontal: spacing.md, paddingTop: spacing.sm }}>
-                        <Text style={[typography.largeTitle, { color: colors.text }]}>
-                            Progress
-                        </Text>
-                    </View>
+                    <ScreenHeader
+                        title="Progress"
+                        subtitle="Track your learning journey"
+                        accentColor={brand.secondary}
+                    />
 
                     {/* Profile header with gradient accent */}
                     <View style={{ paddingHorizontal: spacing.md, marginTop: spacing.md }}>
                         <Card variant="elevated" noPadding>
                             {/* Gradient accent strip */}
-                            <View
+                            <LinearGradient
+                                colors={[brand.primaryDark, brand.primaryLight]}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
                                 style={{
                                     height: 4,
                                     borderTopLeftRadius: radius.md,
                                     borderTopRightRadius: radius.md,
-                                    backgroundColor: brand.primary,
                                 }}
                             />
 
@@ -308,11 +312,11 @@ export default function ProgressScreen() {
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={{ gap: spacing.sm }}
                     >
-                        <MiniStat icon="flame" value={child.currentStreak} label="Streak" color={brand.coral} />
-                        <MiniStat icon="trophy" value={child.longestStreak} label="Best" color={brand.accent} />
-                        <MiniStat icon="book" value={child.totalLessonsCompleted} label="Lessons" color={brand.primary} />
-                        <MiniStat icon="ribbon" value={unlockedCount} label="Badges" color={brand.lavender} />
-                        <MiniStat icon="sparkles" value={child.totalXP} label="XP" color={brand.secondary} />
+                        <MiniStatPill icon="flame" value={child.currentStreak} label="Streak" color={brand.coral} />
+                        <MiniStatPill icon="trophy" value={child.longestStreak} label="Best" color={brand.accent} />
+                        <MiniStatPill icon="book" value={child.totalLessonsCompleted} label="Lessons" color={brand.primary} />
+                        <MiniStatPill icon="ribbon" value={unlockedCount} label="Badges" color={brand.lavender} />
+                        <MiniStatPill icon="sparkles" value={child.totalXP} label="XP" color={brand.secondary} />
                     </ScrollView>
                 </Animated.View>
 
@@ -321,6 +325,7 @@ export default function ProgressScreen() {
                     entering={FadeInDown.delay(220).duration(500)}
                     style={{ paddingHorizontal: spacing.md, marginTop: spacing.lg }}
                 >
+                    <IslamicDivider spacing={4} />
                     <SectionHeader icon="calendar-outline" title="This Week" color={brand.primary} />
                     <Card style={{ marginTop: spacing.sm }}>
                         {/* Day circles */}
@@ -404,6 +409,7 @@ export default function ProgressScreen() {
                     entering={FadeInDown.delay(320).duration(500)}
                     style={{ paddingHorizontal: spacing.md, marginTop: spacing.lg }}
                 >
+                    <IslamicDivider spacing={4} />
                     <SectionHeader icon="analytics-outline" title="Overall Progress" color={brand.secondary} />
                     <Card style={{ marginTop: spacing.sm }}>
                         <View style={styles.overallRow}>
@@ -461,6 +467,7 @@ export default function ProgressScreen() {
                     entering={FadeInDown.delay(420).duration(500)}
                     style={{ paddingHorizontal: spacing.md, marginTop: spacing.lg }}
                 >
+                    <IslamicDivider spacing={4} />
                     <SectionHeader icon="grid-outline" title="Lessons by Category" color={brand.primary} />
                     <Card style={{ marginTop: spacing.sm }}>
                         <CategoryBreakdownChart
@@ -475,6 +482,7 @@ export default function ProgressScreen() {
                     entering={FadeInDown.delay(520).duration(500)}
                     style={{ paddingHorizontal: spacing.md, marginTop: spacing.lg }}
                 >
+                    <IslamicDivider spacing={4} />
                     <View style={styles.achHeader}>
                         <SectionHeader icon="ribbon-outline" title="Achievements" color={brand.lavender} />
                         <View
@@ -657,54 +665,6 @@ function SectionHeader({
     );
 }
 
-// ── Mini Stat (horizontal scroll pill) ──
-
-function MiniStat({
-    icon,
-    value,
-    label,
-    color,
-}: {
-    icon: keyof typeof Ionicons.glyphMap;
-    value: number;
-    label: string;
-    color: string;
-}) {
-    const { colors, typography, spacing, radius, shadows, isDark } = useTheme();
-
-    return (
-        <View
-            style={[
-                styles.miniStat,
-                {
-                    backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
-                    borderRadius: radius.lg,
-                    borderWidth: 1,
-                    borderColor: isDark ? colors.border : color + '15',
-                    paddingHorizontal: spacing.md,
-                    paddingVertical: spacing.sm,
-                    ...shadows.subtle,
-                },
-            ]}
-        >
-            <View
-                style={[
-                    styles.miniStatIcon,
-                    { backgroundColor: color + '12', borderRadius: radius.sm },
-                ]}
-            >
-                <Ionicons name={icon} size={15} color={color} />
-            </View>
-            <Text style={[typography.title3, { color: colors.text, marginTop: 6 }]}>
-                {value}
-            </Text>
-            <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 1 }]}>
-                {label}
-            </Text>
-        </View>
-    );
-}
-
 const styles = StyleSheet.create({
     safe: { flex: 1 },
     empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 },
@@ -717,10 +677,6 @@ const styles = StyleSheet.create({
     levelBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 3 },
     xpBar: { width: '100%', height: 5, overflow: 'hidden' },
     xpFill: { height: '100%' },
-
-    // Mini stats
-    miniStat: { alignItems: 'center', minWidth: 80 },
-    miniStatIcon: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center' },
 
     // Section header
     sectionHeader: { flexDirection: 'row', alignItems: 'center' },

@@ -20,8 +20,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import * as AppleAuthentication from 'expo-apple-authentication';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../src/theme';
-import { Button } from '../src/components/ui';
+import { Button, BismillahHeader } from '../src/components/ui';
 import { authService } from '../src/services/auth';
 import { useAppStore, useAuthStore } from '../src/stores';
 
@@ -92,92 +93,100 @@ export default function WelcomeScreen() {
     };
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: brand.primary }]}>
-            <View style={styles.content}>
-                {/* App Icon / Crescent */}
-                <Animated.View
-                    entering={FadeInDown.delay(200).duration(800)}
-                    style={[styles.iconContainer, floatStyle]}
-                >
-                    <View style={[styles.iconCircle, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
-                        <Ionicons name="moon" size={64} color="#FFD700" />
-                    </View>
-                </Animated.View>
-
-                {/* Title */}
-                <Animated.View entering={FadeInDown.delay(400).duration(800)}>
-                    <Text style={[styles.title, typography.largeTitle, { color: '#FFFFFF' }]}>Sidrat</Text>
-                    <Text style={[styles.subtitle, typography.body, { color: 'rgba(255,255,255,0.85)' }]}>
-                        Islamic Learning for Young Hearts
-                    </Text>
-                </Animated.View>
-
-                {/* Feature highlights */}
-                <Animated.View entering={FadeInDown.delay(600).duration(800)} style={styles.features}>
-                    {[
-                        { icon: 'book-outline' as const, text: 'Fun, interactive lessons' },
-                        { icon: 'people-outline' as const, text: 'Family activities together' },
-                        { icon: 'shield-checkmark-outline' as const, text: 'Safe & ad-free' },
-                    ].map((feature, i) => (
-                        <View key={i} style={styles.featureRow}>
-                            <View style={[styles.featureDot, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-                                <Ionicons name={feature.icon} size={20} color="#FFD700" />
-                            </View>
-                            <Text style={[typography.callout, { color: 'rgba(255,255,255,0.9)' }]}>
-                                {feature.text}
-                            </Text>
+        <LinearGradient
+            colors={['#066570', '#0A7E8C', '#12A4B4']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.container}
+        >
+            <SafeAreaView style={styles.container}>
+                <View style={styles.content}>
+                    {/* App Icon / Crescent */}
+                    <Animated.View
+                        entering={FadeInDown.delay(200).duration(800)}
+                        style={[styles.iconContainer, floatStyle]}
+                    >
+                        <View style={[styles.iconCircle, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+                            <Ionicons name="moon" size={64} color="#FFD700" />
                         </View>
-                    ))}
-                </Animated.View>
+                    </Animated.View>
 
-                {/* Spacer */}
-                <View style={styles.spacer} />
+                    {/* Title */}
+                    <Animated.View entering={FadeInDown.delay(400).duration(800)}>
+                        <BismillahHeader size="sm" color="rgba(255,255,255,0.5)" />
+                        <Text style={[styles.title, typography.displayMedium, { color: '#FFFFFF' }]}>Sidrat</Text>
+                        <Text style={[styles.subtitle, typography.body, { color: 'rgba(255,255,255,0.85)' }]}>
+                            Islamic Learning for Young Hearts
+                        </Text>
+                    </Animated.View>
 
-                {/* CTA Buttons */}
-                <Animated.View entering={FadeInUp.delay(800).duration(800)} style={styles.buttons}>
-                    <Button
-                        title="Get Started"
-                        onPress={handleGetStarted}
-                        style={[
-                            styles.primaryButton,
-                            {
-                                backgroundColor: '#FFFFFF',
-                                borderRadius: radius.lg,
-                            },
-                        ]}
-                        textStyle={[typography.headlineBold, { color: brand.primary }]}
-                    />
+                    {/* Feature highlights */}
+                    <Animated.View entering={FadeInDown.delay(600).duration(800)} style={styles.features}>
+                        {[
+                            { icon: 'book-outline' as const, text: 'Fun, interactive lessons' },
+                            { icon: 'people-outline' as const, text: 'Family activities together' },
+                            { icon: 'shield-checkmark-outline' as const, text: 'Safe & ad-free' },
+                        ].map((feature, i) => (
+                            <View key={i} style={styles.featureRow}>
+                                <View style={[styles.featureDot, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+                                    <Ionicons name={feature.icon} size={20} color="#FFD700" />
+                                </View>
+                                <Text style={[typography.callout, { color: 'rgba(255,255,255,0.9)' }]}>
+                                    {feature.text}
+                                </Text>
+                            </View>
+                        ))}
+                    </Animated.View>
 
-                    {Platform.OS === 'ios' && (
+                    {/* Spacer */}
+                    <View style={styles.spacer} />
+
+                    {/* CTA Buttons */}
+                    <Animated.View entering={FadeInUp.delay(800).duration(800)} style={styles.buttons}>
                         <Button
-                            title=" Sign in with Apple"
-                            onPress={handleSignIn}
+                            title="Get Started"
+                            onPress={handleGetStarted}
                             style={[
-                                styles.secondaryButton,
+                                styles.primaryButton,
                                 {
-                                    borderColor: 'rgba(255,255,255,0.4)',
+                                    backgroundColor: '#FFFFFF',
                                     borderRadius: radius.lg,
                                 },
                             ]}
-                            textStyle={[typography.callout, { color: '#FFFFFF' }]}
+                            textStyle={[typography.headlineBold, { color: brand.primary }]}
                         />
-                    )}
 
-                    <Text
-                        style={[
-                            typography.caption,
-                            {
-                                color: 'rgba(255,255,255,0.5)',
-                                textAlign: 'center',
-                                marginTop: spacing.sm,
-                            },
-                        ]}
-                    >
-                        No account needed • 100% free to start
-                    </Text>
-                </Animated.View>
-            </View>
-        </SafeAreaView>
+                        {Platform.OS === 'ios' && (
+                            <Button
+                                title=" Sign in with Apple"
+                                onPress={handleSignIn}
+                                style={[
+                                    styles.secondaryButton,
+                                    {
+                                        borderColor: 'rgba(255,255,255,0.4)',
+                                        borderRadius: radius.lg,
+                                    },
+                                ]}
+                                textStyle={[typography.callout, { color: '#FFFFFF' }]}
+                            />
+                        )}
+
+                        <Text
+                            style={[
+                                typography.caption,
+                                {
+                                    color: 'rgba(255,255,255,0.5)',
+                                    textAlign: 'center',
+                                    marginTop: spacing.sm,
+                                },
+                            ]}
+                        >
+                            No account needed • 100% free to start
+                        </Text>
+                    </Animated.View>
+                </View>
+            </SafeAreaView>
+        </LinearGradient>
     );
 }
 

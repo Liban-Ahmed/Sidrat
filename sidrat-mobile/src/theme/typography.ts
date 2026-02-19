@@ -20,6 +20,10 @@ const fontFamily = Platform.select({
     default: 'System',
 });
 
+/** Amiri — Arabic-inspired serif for display text, giving Sidrat its identity */
+const amiriFamily = 'Amiri-Regular';
+const amiriBoldFamily = 'Amiri-Bold';
+
 // ── Text Style Factory ────────────────────────────────────────────
 
 function text(
@@ -37,17 +41,33 @@ function text(
     };
 }
 
+/** Display text factory using Amiri — for brand-distinctive headers */
+function displayText(
+    size: number,
+    bold: boolean,
+    lineHeight: number,
+    letterSpacing: number = 0,
+): TextStyle {
+    return {
+        fontSize: size,
+        fontFamily: bold ? amiriBoldFamily : amiriFamily,
+        fontWeight: bold ? '700' : '400',
+        lineHeight,
+        letterSpacing,
+    };
+}
+
 // ── Typography Scale ──────────────────────────────────────────────
 
 export const typography = {
-    // ── Display — splash, celebrations ────────────────────────────
+    // ── Display — splash, celebrations (Amiri serif for brand identity) ──
 
-    /** 44pt bold — Splash hero, big celebration numbers */
-    displayLarge: text(44, '800', 52, -0.5),
-    /** 36pt bold — Section hero text */
-    displayMedium: text(36, '700', 44, -0.3),
-    /** 28pt bold — Smaller display text */
-    displaySmall: text(28, '700', 36, -0.2),
+    /** 44pt Amiri Bold — Splash hero, big celebration numbers */
+    displayLarge: displayText(44, true, 56, -0.3),
+    /** 36pt Amiri Bold — Section hero text */
+    displayMedium: displayText(36, true, 48, -0.2),
+    /** 28pt Amiri Bold — Smaller display text */
+    displaySmall: displayText(28, true, 38, -0.1),
 
     // ── Hero Numbers — XP counters, streak numbers ───────────────
 
@@ -58,8 +78,8 @@ export const typography = {
 
     // ── Titles ───────────────────────────────────────────────────
 
-    /** 32pt bold — Screen titles */
-    largeTitle: text(32, '700', 40, -0.3),
+    /** 32pt Amiri Bold — Screen titles (distinctive brand feel) */
+    largeTitle: displayText(32, true, 42, -0.2),
     /** 26pt bold — Card titles, major headings */
     title1: text(26, '700', 34, -0.2),
     /** 22pt bold — Section headers */

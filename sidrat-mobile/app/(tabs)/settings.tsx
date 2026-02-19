@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../src/theme';
 import { useAppStore, useChildStore, useSettingsStore } from '../../src/stores';
-import { Avatar } from '../../src/components';
+import { Avatar, ScreenHeader, IslamicDivider } from '../../src/components';
 import { notificationService } from '../../src/services/notificationService';
 import { useParentalGate } from '../../src/hooks';
 import { ParentalGate } from '../../src/components/common/ParentalGate';
@@ -216,14 +216,11 @@ export default function SettingsScreen() {
                 contentContainerStyle={{ paddingHorizontal: spacing.md, paddingBottom: spacing.xxl }}
                 showsVerticalScrollIndicator={false}
             >
-                <Text
-                    style={[
-                        typography.largeTitle,
-                        { color: colors.text, paddingTop: spacing.sm },
-                    ]}
-                >
-                    Settings
-                </Text>
+                <ScreenHeader
+                    title="Settings"
+                    accent={true}
+                    accentColor={brand.primary}
+                />
 
                 {/* Active Profile Selector */}
                 {children.length > 0 && (
@@ -268,7 +265,13 @@ export default function SettingsScreen() {
                 )}
 
                 {/* Preferences — Toggles */}
-                <SectionTitle title="Preferences" typography={typography} colors={colors} spacing={spacing} />
+                <IslamicDivider spacing={12} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.xs }}>
+                    <Ionicons name="options-outline" size={15} color={brand.primary} />
+                    <Text style={[typography.labelSmall, { color: colors.textTertiary, textTransform: 'uppercase', letterSpacing: 1 }]}>
+                        Preferences
+                    </Text>
+                </View>
                 <View
                     style={{
                         backgroundColor: colors.surfaceSecondary,
@@ -309,7 +312,13 @@ export default function SettingsScreen() {
                 </View>
 
                 {/* Parent Zone — Actions */}
-                <SectionTitle title="Parent Zone" typography={typography} colors={colors} spacing={spacing} />
+                <IslamicDivider spacing={12} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.xs }}>
+                    <Ionicons name="shield-outline" size={15} color={brand.accent} />
+                    <Text style={[typography.labelSmall, { color: colors.textTertiary, textTransform: 'uppercase', letterSpacing: 1 }]}>
+                        Parent Zone
+                    </Text>
+                </View>
                 <View
                     style={{
                         backgroundColor: colors.surfaceSecondary,
@@ -357,7 +366,13 @@ export default function SettingsScreen() {
                 </View>
 
                 {/* About */}
-                <SectionTitle title="About" typography={typography} colors={colors} spacing={spacing} />
+                <IslamicDivider spacing={12} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.xs }}>
+                    <Ionicons name="information-circle-outline" size={15} color={brand.lavender} />
+                    <Text style={[typography.labelSmall, { color: colors.textTertiary, textTransform: 'uppercase', letterSpacing: 1 }]}>
+                        About
+                    </Text>
+                </View>
                 <View
                     style={{
                         backgroundColor: colors.surfaceSecondary,
@@ -395,13 +410,15 @@ export default function SettingsScreen() {
                 </View>
 
                 {/* Version */}
+                <IslamicDivider spacing={16} />
                 <Text
                     style={[
                         typography.caption,
                         {
                             color: colors.textTertiary,
                             textAlign: 'center',
-                            marginTop: spacing.xl,
+                            fontFamily: 'Amiri-Regular',
+                            fontSize: 14,
                         },
                     ]}
                 >
@@ -414,34 +431,6 @@ export default function SettingsScreen() {
     );
 }
 
-function SectionTitle({
-    title,
-    typography,
-    colors,
-    spacing,
-}: {
-    title: string;
-    typography: ReturnType<typeof useTheme>['typography'];
-    colors: ReturnType<typeof useTheme>['colors'];
-    spacing: ReturnType<typeof useTheme>['spacing'];
-}) {
-    return (
-        <Text
-            style={[
-                typography.labelSmall,
-                {
-                    color: colors.textTertiary,
-                    textTransform: 'uppercase',
-                    letterSpacing: 1,
-                    marginTop: spacing.xl,
-                    marginBottom: spacing.xs,
-                },
-            ]}
-        >
-            {title}
-        </Text>
-    );
-}
 
 const styles = StyleSheet.create({
     safe: { flex: 1 },

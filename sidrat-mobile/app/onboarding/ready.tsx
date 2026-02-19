@@ -19,7 +19,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/theme';
-import { Button } from '../../src/components/ui';
+import { Button, BismillahHeader } from '../../src/components/ui';
 import { useChildStore, useAppStore } from '../../src/stores';
 
 export default function ReadyScreen() {
@@ -60,7 +60,8 @@ export default function ReadyScreen() {
 
                 {/* Message */}
                 <Animated.View entering={FadeInDown.delay(600).duration(800)} style={styles.textBlock}>
-                    <Text style={[typography.largeTitle, { color: colors.text, textAlign: 'center' }]}>
+                    <BismillahHeader size="lg" color={brand.accent + '60'} />
+                    <Text style={[typography.displayMedium, { color: colors.text, textAlign: 'center' }]}>
                         Bismillah!
                     </Text>
                     <Text
