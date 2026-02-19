@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { View, StyleSheet, ViewStyle, StatusBar as RNStatusBar, Platform } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { SafeAreaView, SafeAreaViewProps } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../../theme';
@@ -33,11 +33,11 @@ export function ScreenWrapper({
     edges = ['top', 'left', 'right', 'bottom'], // Default edges from safe-area-context
     ...props
 }: ScreenWrapperProps) {
-    const { colors, mode } = useTheme();
+    const { colors, brand, mode } = useTheme();
 
     const containerStyle = [
         styles.container,
-        { backgroundColor: useGradientBackground ? colors.primary : colors.background },
+        { backgroundColor: useGradientBackground ? brand.primary : colors.background },
         style,
     ];
 

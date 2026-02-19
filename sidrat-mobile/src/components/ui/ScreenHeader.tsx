@@ -1,13 +1,17 @@
 /**
- * ScreenHeader — Unified screen header component.
+ * ScreenHeader — Premium screen header with gradient hero option.
  *
- * Provides a consistent header pattern across all tab screens
- * with the Amiri display font, optional subtitle, and optional
- * decorative accent line with Islamic diamond motif.
+ * Two modes:
+ *  • Standard — Amiri title with decorative accent motif
+ *  • Hero — Full-width gradient header with light text, decorative orbs
+ *
+ * The hero variant gives each screen a distinctive branded feel
+ * inspired by Apple Health / Headspace warm headers.
  */
 
 import React from 'react';
 import { View, Text, StyleSheet, type ViewStyle } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme';
 
 interface ScreenHeaderProps {
@@ -23,6 +27,12 @@ interface ScreenHeaderProps {
     rightAccessory?: React.ReactNode;
     /** Additional styles */
     style?: ViewStyle;
+    /** Enable gradient hero mode */
+    hero?: boolean;
+    /** Gradient colors for hero mode — defaults to theme primary gradient */
+    heroColors?: readonly string[] | string[];
+    /** Hero mode: emit indicator icon (e.g. a crescent or star) */
+    heroIcon?: React.ReactNode;
 }
 
 export function ScreenHeader({
@@ -32,10 +42,57 @@ export function ScreenHeader({
     accentColor,
     rightAccessory,
     style,
+    hero = false,
+    heroColors,
+    heroIcon,
 }: ScreenHeaderProps) {
-    const { colors, brand, typography, spacing } = useTheme();
+    const { colors, brand, typography, spacing, gradients } = useTheme();
     const barColor = accentColor ?? brand.primary;
 
+    if (hero) {
+        const gradientPalette = (heroColors ?? gradients.primary) as [string, string, ...string[]];
+        return (
+            <View style={[styles.heroContainer, style]}>
+                <LinearGradient
+                    colors={gradientPalette}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={StyleSheet.absoluteFill}
+                />
+                {/* Decorative orbs for depth */}
+                <View style={styles.orbContainer}>
+                    <View style={[styles.orb, styles.orbLarge]} />
+                    <View style={[styles.orb, styles.orbMedium]} />
+                    <View style={[styles.orb, styles.orbSmall]} />
+                </View>
+                <View style={[styles.heroContent, { paddingHorizontal: spacing.lg }]}>
+                    <View style={styles.heroRow}>
+                        <View style={styles.textArea}>
+                            <Text style={[typography.largeTitle, { color: '#FFFFFF' }]}>
+                                {title}
+                            </Text>
+                            {subtitle && (
+                                <Text
+                                    style={[
+                                        typography.body,
+                                        { color: 'rgba(255,255,255,0.75)', marginTop: 2 },
+                                    ]}
+                                >
+                                    {subtitle}
+                                </Text>
+                            )}
+                        </View>
+                        {rightAccessory && <View style={styles.heroRight}>{rightAccessory}</View>}
+                        {heroIcon && !rightAccessory && <View style={styles.heroRight}>{heroIcon}</View>}
+                    </View>
+                </View>
+                {/* Bottom curve for smooth transition */}
+                <View style={[styles.heroCurve, { backgroundColor: colors.background }]} />
+            </View>
+        );
+    }
+
+    // Standard mode
     return (
         <View
             style={[
@@ -106,5 +163,42 @@ const styles = StyleSheet.create({
         borderRadius: 2,
         marginLeft: 4,
         transform: [{ rotate: '45deg' }],
+    },
+    // Hero mode styles
+    heroContainer: {
+        overflow: 'hidden',
+        paddingTop: 16,
+        paddingBottom: 28,
+    },
+    orbContainer: {
+        ...StyleSheet.absoluteFillObject,
+        overflow: 'hidden',
+    },
+    orb: {
+        position: 'absolute',
+        borderRadius: 999,
+        backgroundColor: 'rgba(255,255,255,0.06)',
+    },
+    orbLarge: { width: 200, height: 200, top: -80, right: -50 },
+    orbMedium: { width: 120, height: 120, bottom: -30, left: -30 },
+    orbSmall: { width: 60, height: 60, top: 20, right: 80 },
+    heroContent: {
+        paddingTop: 8,
+        paddingBottom: 12,
+    },
+    heroRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    heroRight: { marginLeft: 12 },
+    heroCurve: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 16,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
     },
 });

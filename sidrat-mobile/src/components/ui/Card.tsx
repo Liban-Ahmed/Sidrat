@@ -6,13 +6,16 @@
  *  • elevated — Higher elevation, prominent shadow + subtle border glow
  *  • filled — Tinted background (pass `accentColor` for the tint)
  *  • outline — Transparent with border
+ *  • premium — Warm gradient border accent + deeper shadow
+ *  • glass — Frosted glass surface with subtle border
  */
 
 import React from 'react';
 import { View, type ViewStyle, type ViewProps } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme';
 
-type CardVariant = 'default' | 'elevated' | 'filled' | 'outline';
+type CardVariant = 'default' | 'elevated' | 'filled' | 'outline' | 'premium' | 'glass';
 
 interface CardProps extends ViewProps {
     variant?: CardVariant;
@@ -32,7 +35,7 @@ export function Card({
     children,
     ...rest
 }: CardProps) {
-    const { colors, radius, shadows, spacing, isDark } = useTheme();
+    const { colors, radius, shadows, spacing, isDark, brand } = useTheme();
 
     const variantStyles: Record<CardVariant, ViewStyle> = {
         default: {
@@ -55,7 +58,46 @@ export function Card({
             borderWidth: 1.5,
             borderColor: colors.border,
         },
+        premium: {
+            backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
+            ...shadows.cardPremium,
+            borderWidth: 1,
+            borderColor: isDark ? brand.primary + '20' : brand.accent + '15',
+        },
+        glass: {
+            backgroundColor: isDark ? 'rgba(28,31,34,0.65)' : 'rgba(255,255,255,0.72)',
+            borderWidth: 1,
+            borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(10,126,140,0.08)',
+            ...shadows.subtle,
+        },
     };
+
+    if (variant === 'premium') {
+        return (
+            <View
+                style={[
+                    {
+                        borderRadius: radius.xl,
+                        overflow: 'hidden',
+                    },
+                    variantStyles[variant],
+                    style,
+                ]}
+                {...rest}
+            >
+                {/* Top gradient accent strip */}
+                <LinearGradient
+                    colors={[brand.accent + '40', brand.primary + '40', brand.accent + '40']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={{ height: 2.5 }}
+                />
+                <View style={{ padding: noPadding ? 0 : spacing.md }}>
+                    {children}
+                </View>
+            </View>
+        );
+    }
 
     return (
         <View

@@ -22,7 +22,7 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/theme';
 import { useAppStore, useChildStore, useLessonStore, useAchievementStore, ACHIEVEMENTS } from '../../src/stores';
-import { Card, Avatar, ProgressRing, ScreenHeader, IslamicDivider, MiniStatPill, BismillahHeader } from '../../src/components';
+import { Card, Avatar, ProgressRing, IslamicDivider, MiniStatPill, BismillahHeader } from '../../src/components';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CategoryBreakdownChart } from '../../src/components/progress';
 import { getAge } from '../../src/types';
@@ -85,7 +85,7 @@ function getMotivation(child: { currentStreak: number; totalLessonsCompleted: nu
 }
 
 export default function ProgressScreen() {
-    const { brand, colors, typography, spacing, radius, shadows, isDark } = useTheme();
+    const { brand, colors, typography, spacing, radius, shadows, gradients, isDark } = useTheme();
 
     const activeChildId = useAppStore((s) => s.activeChildId);
     const child = useChildStore((s) =>
@@ -217,37 +217,72 @@ export default function ProgressScreen() {
     const overallProgress = totalLessons > 0 ? child.totalLessonsCompleted / totalLessons : 0;
 
     return (
-        <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['left', 'right']}>
             <ScrollView
-                contentContainerStyle={{ paddingBottom: spacing.huge }}
+                contentContainerStyle={{ paddingBottom: 100 }}
                 showsVerticalScrollIndicator={false}
             >
-                {/* ── Hero Section ── */}
+                {/* ── Gradient Hero Header ── */}
                 <Animated.View entering={FadeIn.duration(500)}>
-                    <ScreenHeader
-                        title="Progress"
-                        subtitle="Track your learning journey"
-                        accentColor={brand.secondary}
-                    />
+                    <LinearGradient
+                        colors={gradients.progressHero as readonly [string, string]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={{
+                            paddingTop: 56,
+                            paddingBottom: 60,
+                            paddingHorizontal: spacing.lg,
+                            borderBottomLeftRadius: 24,
+                            borderBottomRightRadius: 24,
+                            overflow: 'hidden',
+                        }}
+                    >
+                        {/* Decorative orbs */}
+                        <View style={{
+                            position: 'absolute', top: -30, right: -30,
+                            width: 120, height: 120, borderRadius: 60,
+                            backgroundColor: 'rgba(255,255,255,0.08)',
+                        }} />
+                        <View style={{
+                            position: 'absolute', bottom: 10, left: -20,
+                            width: 80, height: 80, borderRadius: 40,
+                            backgroundColor: 'rgba(255,255,255,0.06)',
+                        }} />
+                        <View style={{
+                            position: 'absolute', top: 40, left: '45%' as any,
+                            width: 50, height: 50, borderRadius: 25,
+                            backgroundColor: 'rgba(255,255,255,0.04)',
+                        }} />
 
-                    {/* Profile header with gradient accent */}
-                    <View style={{ paddingHorizontal: spacing.md, marginTop: spacing.md }}>
-                        <Card variant="elevated" noPadding>
-                            {/* Gradient accent strip */}
-                            <LinearGradient
-                                colors={[brand.primaryDark, brand.primaryLight]}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 0 }}
-                                style={{
-                                    height: 4,
-                                    borderTopLeftRadius: radius.md,
-                                    borderTopRightRadius: radius.md,
-                                }}
-                            />
+                        <Text style={[typography.largeTitle, { color: '#FFFFFF' }]}>
+                            Progress
+                        </Text>
+                        <Text style={[typography.body, { color: 'rgba(255,255,255,0.75)', marginTop: 4 }]}>
+                            Track your learning journey
+                        </Text>
+                    </LinearGradient>
 
+                    {/* Profile card floating into the hero */}
+                    <View style={{ paddingHorizontal: spacing.md, marginTop: -36 }}>
+                        <Card variant="premium" noPadding style={shadows.cardPremium}>
                             <View style={{ padding: spacing.lg }}>
                                 <View style={styles.profileRow}>
-                                    <Avatar avatarId={child.avatarId} size={64} showRing ringColor={brand.primary} />
+                                    {/* Gradient ring behind the avatar */}
+                                    <View style={{ position: 'relative' }}>
+                                        <LinearGradient
+                                            colors={gradients.primary as readonly [string, string]}
+                                            start={{ x: 0, y: 0 }}
+                                            end={{ x: 1, y: 1 }}
+                                            style={{
+                                                width: 70, height: 70, borderRadius: 35,
+                                                alignItems: 'center', justifyContent: 'center',
+                                            }}
+                                        >
+                                            <View style={{ width: 64, height: 64, borderRadius: 32, overflow: 'hidden' }}>
+                                                <Avatar avatarId={child.avatarId} size={64} />
+                                            </View>
+                                        </LinearGradient>
+                                    </View>
                                     <View style={{ marginLeft: spacing.md, flex: 1 }}>
                                         <Text style={[typography.title2, { color: colors.text }]}>
                                             {child.name}
@@ -302,7 +337,7 @@ export default function ProgressScreen() {
                     </View>
                 </Animated.View>
 
-                {/* ── Mini Stats Row ── */}
+                {/* ── Stats Row with glow shadows ── */}
                 <Animated.View
                     entering={FadeInDown.delay(120).duration(500)}
                     style={{ paddingHorizontal: spacing.md, marginTop: spacing.md }}
@@ -312,11 +347,21 @@ export default function ProgressScreen() {
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={{ gap: spacing.sm }}
                     >
-                        <MiniStatPill icon="flame" value={child.currentStreak} label="Streak" color={brand.coral} />
-                        <MiniStatPill icon="trophy" value={child.longestStreak} label="Best" color={brand.accent} />
-                        <MiniStatPill icon="book" value={child.totalLessonsCompleted} label="Lessons" color={brand.primary} />
-                        <MiniStatPill icon="ribbon" value={unlockedCount} label="Badges" color={brand.lavender} />
-                        <MiniStatPill icon="sparkles" value={child.totalXP} label="XP" color={brand.secondary} />
+                        <View style={shadows.softGlow(brand.coral)}>
+                            <MiniStatPill icon="flame" value={child.currentStreak} label="Streak" color={brand.coral} />
+                        </View>
+                        <View style={shadows.softGlow(brand.accent)}>
+                            <MiniStatPill icon="trophy" value={child.longestStreak} label="Best" color={brand.accent} />
+                        </View>
+                        <View style={shadows.softGlow(brand.primary)}>
+                            <MiniStatPill icon="book" value={child.totalLessonsCompleted} label="Lessons" color={brand.primary} />
+                        </View>
+                        <View style={shadows.softGlow(brand.lavender)}>
+                            <MiniStatPill icon="ribbon" value={unlockedCount} label="Badges" color={brand.lavender} />
+                        </View>
+                        <View style={shadows.softGlow(brand.secondary)}>
+                            <MiniStatPill icon="sparkles" value={child.totalXP} label="XP" color={brand.secondary} />
+                        </View>
                     </ScrollView>
                 </Animated.View>
 
@@ -325,10 +370,10 @@ export default function ProgressScreen() {
                     entering={FadeInDown.delay(220).duration(500)}
                     style={{ paddingHorizontal: spacing.md, marginTop: spacing.lg }}
                 >
-                    <IslamicDivider spacing={4} />
+                    <IslamicDivider variant="rich" spacing={4} />
                     <SectionHeader icon="calendar-outline" title="This Week" color={brand.primary} />
-                    <Card style={{ marginTop: spacing.sm }}>
-                        {/* Day circles */}
+                    <Card variant="premium" style={{ marginTop: spacing.sm }}>
+                        {/* Day circles with gradient active state */}
                         <View style={styles.streakRow}>
                             {streakDays.map((day, i) => (
                                 <View key={i} style={styles.streakDayCol}>
@@ -344,30 +389,38 @@ export default function ProgressScreen() {
                                     >
                                         {day.label}
                                     </Text>
-                                    <View
-                                        style={[
-                                            styles.streakDot,
-                                            {
-                                                backgroundColor: day.active
-                                                    ? brand.coral
-                                                    : isDark ? colors.surfaceSecondary : colors.surfaceTertiary,
-                                                borderRadius: radius.full,
-                                                borderWidth: day.isToday && !day.active ? 2 : 0,
-                                                borderColor: day.isToday ? brand.primary + '50' : 'transparent',
-                                            },
-                                        ]}
-                                    >
-                                        {day.active && (
+                                    {day.active ? (
+                                        <LinearGradient
+                                            colors={gradients.coral as readonly [string, string]}
+                                            start={{ x: 0, y: 0 }}
+                                            end={{ x: 1, y: 1 }}
+                                            style={[
+                                                styles.streakDot,
+                                                { borderRadius: radius.full },
+                                            ]}
+                                        >
                                             <Ionicons name="checkmark" size={14} color="#FFF" />
-                                        )}
-                                    </View>
+                                        </LinearGradient>
+                                    ) : (
+                                        <View
+                                            style={[
+                                                styles.streakDot,
+                                                {
+                                                    backgroundColor: isDark ? colors.surfaceSecondary : colors.surfaceTertiary,
+                                                    borderRadius: radius.full,
+                                                    borderWidth: day.isToday ? 2 : 0,
+                                                    borderColor: day.isToday ? brand.primary + '50' : 'transparent',
+                                                },
+                                            ]}
+                                        />
+                                    )}
                                 </View>
                             ))}
                         </View>
 
                         <View style={[styles.divider, { backgroundColor: colors.separator, marginVertical: spacing.md }]} />
 
-                        {/* Weekly goal with dynamic messaging */}
+                        {/* Weekly goal with gradient progress bar */}
                         <View style={styles.weekRow}>
                             <ProgressRing
                                 progress={weekProgress}
@@ -384,7 +437,16 @@ export default function ProgressScreen() {
                                 <Text style={[typography.label, { color: colors.text }]}>
                                     Weekly Goal
                                 </Text>
-                                <Text style={[typography.bodySmall, { color: colors.textSecondary, marginTop: 2 }]}>
+                                {/* Gradient progress bar */}
+                                <View style={{ height: 6, borderRadius: radius.full, backgroundColor: colors.surfaceTertiary, marginTop: spacing.xs, overflow: 'hidden' }}>
+                                    <LinearGradient
+                                        colors={gradients.heroCta as readonly [string, string]}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 1, y: 0 }}
+                                        style={{ height: '100%', width: `${weekProgress * 100}%` as `${number}%`, borderRadius: radius.full }}
+                                    />
+                                </View>
+                                <Text style={[typography.bodySmall, { color: colors.textSecondary, marginTop: 4 }]}>
                                     {weekProgress >= 1
                                         ? "Masha'Allah! All done this week."
                                         : weekProgress >= 0.6
@@ -401,6 +463,23 @@ export default function ProgressScreen() {
                                 )}
                             </View>
                         </View>
+
+                        {/* Gradient CTA button */}
+                        <LinearGradient
+                            colors={gradients.heroCta as readonly [string, string]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={{
+                                marginTop: spacing.md,
+                                borderRadius: radius.full,
+                                paddingVertical: 10,
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Text style={[typography.captionBold, { color: '#FFFFFF', letterSpacing: 0.4 }]}>
+                                {weekProgress >= 1 ? 'Goal Complete!' : 'Keep Going!'}
+                            </Text>
+                        </LinearGradient>
                     </Card>
                 </Animated.View>
 
@@ -409,9 +488,9 @@ export default function ProgressScreen() {
                     entering={FadeInDown.delay(320).duration(500)}
                     style={{ paddingHorizontal: spacing.md, marginTop: spacing.lg }}
                 >
-                    <IslamicDivider spacing={4} />
+                    <IslamicDivider variant="rich" spacing={4} />
                     <SectionHeader icon="analytics-outline" title="Overall Progress" color={brand.secondary} />
-                    <Card style={{ marginTop: spacing.sm }}>
+                    <Card variant="premium" style={{ marginTop: spacing.sm }}>
                         <View style={styles.overallRow}>
                             <ProgressRing
                                 progress={overallProgress}
@@ -467,9 +546,9 @@ export default function ProgressScreen() {
                     entering={FadeInDown.delay(420).duration(500)}
                     style={{ paddingHorizontal: spacing.md, marginTop: spacing.lg }}
                 >
-                    <IslamicDivider spacing={4} />
+                    <IslamicDivider variant="rich" spacing={4} />
                     <SectionHeader icon="grid-outline" title="Lessons by Category" color={brand.primary} />
-                    <Card style={{ marginTop: spacing.sm }}>
+                    <Card variant="premium" style={{ marginTop: spacing.sm }}>
                         <CategoryBreakdownChart
                             data={completedByCategory ?? { aqeedah: 0, salah: 0, wudu: 0, quran: 0, seerah: 0, adab: 0, duaa: 0, stories: 0 }}
                             totalPerCategory={totalPerCategory}
@@ -482,7 +561,7 @@ export default function ProgressScreen() {
                     entering={FadeInDown.delay(520).duration(500)}
                     style={{ paddingHorizontal: spacing.md, marginTop: spacing.lg }}
                 >
-                    <IslamicDivider spacing={4} />
+                    <IslamicDivider variant="rich" spacing={4} />
                     <View style={styles.achHeader}>
                         <SectionHeader icon="ribbon-outline" title="Achievements" color={brand.lavender} />
                         <View
@@ -534,7 +613,9 @@ export default function ProgressScreen() {
                                     key={ach.id}
                                     entering={FadeInDown.delay(560 + i * 30).duration(350)}
                                 >
-                                    <View
+                                    <Card
+                                        variant={isUnlocked ? 'premium' : 'glass'}
+                                        noPadding
                                         style={[
                                             styles.achCard,
                                             {
@@ -549,9 +630,9 @@ export default function ProgressScreen() {
                                                     ? rarityColor + '30'
                                                     : colors.border,
                                                 opacity: isUnlocked ? 1 : 0.5,
-                                                ...(isUnlocked ? shadows.subtle : {}),
+                                                ...(isUnlocked ? shadows.softGlow(rarityColor) : {}),
                                             },
-                                        ]}
+                                        ] as any}
                                     >
                                         {/* Icon circle */}
                                         <View
@@ -630,7 +711,7 @@ export default function ProgressScreen() {
                                                 <Ionicons name="lock-closed-outline" size={14} color={colors.textTertiary} />
                                             )}
                                         </View>
-                                    </View>
+                                    </Card>
                                 </Animated.View>
                             );
                         });

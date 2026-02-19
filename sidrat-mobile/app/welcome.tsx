@@ -94,11 +94,16 @@ export default function WelcomeScreen() {
 
     return (
         <LinearGradient
-            colors={['#066570', '#0A7E8C', '#12A4B4']}
+            colors={['#044B54', '#066570', '#0A7E8C', '#12A4B4']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.container}
         >
+            {/* Decorative orbs */}
+            <View style={{ position: 'absolute', top: -40, right: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(255,255,255,0.06)' }} />
+            <View style={{ position: 'absolute', bottom: 120, left: -80, width: 260, height: 260, borderRadius: 130, backgroundColor: 'rgba(255,255,255,0.04)' }} />
+            <View style={{ position: 'absolute', top: '40%', right: -30, width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(255,255,255,0.05)' }} />
+
             <SafeAreaView style={styles.container}>
                 <View style={styles.content}>
                     {/* App Icon / Crescent */}
@@ -106,8 +111,10 @@ export default function WelcomeScreen() {
                         entering={FadeInDown.delay(200).duration(800)}
                         style={[styles.iconContainer, floatStyle]}
                     >
-                        <View style={[styles.iconCircle, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
-                            <Ionicons name="moon" size={64} color="#FFD700" />
+                        <View style={[styles.iconOuterRing, { borderWidth: 2, borderColor: 'rgba(255,255,255,0.1)' }]}>
+                            <View style={[styles.iconCircle, { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
+                                <Ionicons name="moon" size={64} color="#FFD700" />
+                            </View>
                         </View>
                     </Animated.View>
 
@@ -128,7 +135,7 @@ export default function WelcomeScreen() {
                             { icon: 'shield-checkmark-outline' as const, text: 'Safe & ad-free' },
                         ].map((feature, i) => (
                             <View key={i} style={styles.featureRow}>
-                                <View style={[styles.featureDot, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+                                <View style={[styles.featureDot, { backgroundColor: 'rgba(255,255,255,0.2)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' }]}>
                                     <Ionicons name={feature.icon} size={20} color="#FFD700" />
                                 </View>
                                 <Text style={[typography.callout, { color: 'rgba(255,255,255,0.9)' }]}>
@@ -151,6 +158,11 @@ export default function WelcomeScreen() {
                                 {
                                     backgroundColor: '#FFFFFF',
                                     borderRadius: radius.lg,
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: 8 },
+                                    shadowOpacity: 0.15,
+                                    shadowRadius: 20,
+                                    elevation: 8,
                                 },
                             ]}
                             textStyle={[typography.headlineBold, { color: brand.primary }]}
@@ -163,8 +175,9 @@ export default function WelcomeScreen() {
                                 style={[
                                     styles.secondaryButton,
                                     {
-                                        borderColor: 'rgba(255,255,255,0.4)',
+                                        borderColor: 'rgba(255,255,255,0.5)',
                                         borderRadius: radius.lg,
+                                        backgroundColor: 'rgba(255,255,255,0.08)',
                                     },
                                 ]}
                                 textStyle={[typography.callout, { color: '#FFFFFF' }]}
@@ -204,6 +217,13 @@ const styles = StyleSheet.create({
     iconContainer: {
         marginBottom: 32,
     },
+    iconOuterRing: {
+        width: 136,
+        height: 136,
+        borderRadius: 68,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     iconCircle: {
         width: 120,
         height: 120,
@@ -232,9 +252,9 @@ const styles = StyleSheet.create({
         gap: 14,
     },
     featureDot: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
         alignItems: 'center',
         justifyContent: 'center',
     },

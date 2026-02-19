@@ -88,6 +88,14 @@ export const shadows = {
         shadowRadius: 12,
         elevation: 3,
     },
+    /** Premium card — deeper, warmer shadow with slight spread */
+    cardPremium: {
+        shadowColor: '#0A7E8C',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.10,
+        shadowRadius: 20,
+        elevation: 5,
+    },
     /** Floating elements — modals, FABs */
     elevated: {
         shadowColor: '#1A2B2D',
@@ -95,6 +103,14 @@ export const shadows = {
         shadowOpacity: 0.12,
         shadowRadius: 24,
         elevation: 8,
+    },
+    /** Luxury elevated — deeper with warm tint */
+    luxuryElevated: {
+        shadowColor: '#0A7E8C',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.15,
+        shadowRadius: 32,
+        elevation: 10,
     },
     /** Pressed / inset feel */
     inner: {
@@ -111,6 +127,14 @@ export const shadows = {
         shadowOpacity: 0.3,
         shadowRadius: 12,
         elevation: 6,
+    }),
+    /** Soft colored glow — for hero sections and featured content */
+    softGlow: (color: string) => ({
+        shadowColor: color,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.18,
+        shadowRadius: 24,
+        elevation: 8,
     }),
 } as const;
 

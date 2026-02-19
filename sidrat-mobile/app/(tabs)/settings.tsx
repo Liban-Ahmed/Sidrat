@@ -6,19 +6,20 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, Pressable, Switch, Alert, StyleSheet, Linking } from 'react-native';
+import { View, Text, ScrollView, Pressable, Switch, Alert, StyleSheet, Linking, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../src/theme';
 import { useAppStore, useChildStore, useSettingsStore } from '../../src/stores';
-import { Avatar, ScreenHeader, IslamicDivider } from '../../src/components';
+import { Avatar, IslamicDivider, Card } from '../../src/components';
 import { notificationService } from '../../src/services/notificationService';
 import { useParentalGate } from '../../src/hooks';
 import { ParentalGate } from '../../src/components/common/ParentalGate';
 
 export default function SettingsScreen() {
-    const { brand, colors, typography, spacing, radius } = useTheme();
+    const { brand, colors, typography, spacing, radius, gradients, shadows } = useTheme();
     const router = useRouter();
 
     const children = useChildStore((s) => s.children);
@@ -211,74 +212,96 @@ export default function SettingsScreen() {
     ];
 
     return (
-        <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['left', 'right']}>
+            {/* ── Gradient Hero Header ── */}
+            <LinearGradient
+                colors={gradients.settingsHero}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.heroGradient}
+            >
+                {/* Decorative orbs */}
+                <View style={[styles.orb, styles.orbTopRight, { backgroundColor: 'rgba(255,255,255,0.06)' }]} />
+                <View style={[styles.orb, styles.orbBottomLeft, { backgroundColor: 'rgba(212,152,42,0.08)' }]} />
+                <View style={{ paddingTop: Platform.OS === 'ios' ? 56 : 40, paddingBottom: spacing.xl, paddingHorizontal: spacing.lg }}>
+                    <Text style={[typography.caption, { color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: spacing.xxs }]}>
+                        Customize
+                    </Text>
+                    <Text style={[typography.largeTitle, { color: '#FFFFFF', fontSize: 32, fontWeight: '700' }]}>
+                        Settings
+                    </Text>
+                </View>
+            </LinearGradient>
+
             <ScrollView
-                contentContainerStyle={{ paddingHorizontal: spacing.md, paddingBottom: spacing.xxl }}
+                contentContainerStyle={{ paddingHorizontal: spacing.md, paddingBottom: 100 }}
                 showsVerticalScrollIndicator={false}
             >
-                <ScreenHeader
-                    title="Settings"
-                    accent={true}
-                    accentColor={brand.primary}
-                />
 
                 {/* Active Profile Selector */}
                 {children.length > 0 && (
                     <View style={[styles.profileRow, { marginTop: spacing.lg, gap: spacing.sm }]}>
-                        {children.map((child) => (
-                            <Pressable
-                                key={child.id}
-                                onPress={() => setActiveChild(child.id)}
-                                onLongPress={() => handleRemoveChild(child.id, child.name)}
-                                style={[
-                                    styles.profileItem,
-                                    {
-                                        backgroundColor:
-                                            child.id === activeChildId
+                        {children.map((child) => {
+                            const isActive = child.id === activeChildId;
+                            return (
+                                <Pressable
+                                    key={child.id}
+                                    onPress={() => setActiveChild(child.id)}
+                                    onLongPress={() => handleRemoveChild(child.id, child.name)}
+                                    style={[
+                                        styles.profileItem,
+                                        {
+                                            backgroundColor: isActive
                                                 ? brand.primary + '15'
                                                 : colors.surfaceSecondary,
-                                        borderRadius: radius.lg,
-                                        padding: spacing.md,
-                                        borderWidth: child.id === activeChildId ? 2 : 0,
-                                        borderColor: brand.primary,
-                                    },
-                                ]}
-                            >
-                                <Avatar avatarId={child.avatarId} size={40} />
-                                <Text
-                                    style={[
-                                        typography.labelSmall,
-                                        {
-                                            color:
-                                                child.id === activeChildId
-                                                    ? brand.primary
-                                                    : colors.textSecondary,
-                                            marginTop: spacing.xxs,
+                                            borderRadius: radius.lg,
+                                            padding: spacing.md,
+                                            borderWidth: isActive ? 2 : 0,
+                                            borderColor: brand.primary,
+                                            ...(isActive ? shadows.cardPremium : {}),
                                         },
                                     ]}
                                 >
-                                    {child.name}
-                                </Text>
-                            </Pressable>
-                        ))}
+                                    {isActive && (
+                                        <View style={styles.profileAccentStrip}>
+                                            <LinearGradient
+                                                colors={gradients.primary}
+                                                start={{ x: 0, y: 0 }}
+                                                end={{ x: 1, y: 0 }}
+                                                style={StyleSheet.absoluteFill}
+                                            />
+                                        </View>
+                                    )}
+                                    <Avatar avatarId={child.avatarId} size={40} />
+                                    <Text
+                                        style={[
+                                            typography.labelSmall,
+                                            {
+                                                color: isActive
+                                                    ? brand.primary
+                                                    : colors.textSecondary,
+                                                marginTop: spacing.xxs,
+                                                fontWeight: isActive ? '600' : '400',
+                                            },
+                                        ]}
+                                    >
+                                        {child.name}
+                                    </Text>
+                                </Pressable>
+                            );
+                        })}
                     </View>
                 )}
 
                 {/* Preferences — Toggles */}
-                <IslamicDivider spacing={12} />
+                <IslamicDivider spacing={12} variant="rich" />
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.xs }}>
-                    <Ionicons name="options-outline" size={15} color={brand.primary} />
-                    <Text style={[typography.labelSmall, { color: colors.textTertiary, textTransform: 'uppercase', letterSpacing: 1 }]}>
+                    <Ionicons name="options-outline" size={16} color={brand.primary} />
+                    <Text style={[typography.labelSmall, { color: brand.primary, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: '700' }]}>
                         Preferences
                     </Text>
                 </View>
-                <View
-                    style={{
-                        backgroundColor: colors.surfaceSecondary,
-                        borderRadius: radius.lg,
-                        overflow: 'hidden',
-                    }}
-                >
+                <Card variant="glass" noPadding>
                     {preferenceToggles.map((item, i) => (
                         <View
                             key={item.label}
@@ -287,7 +310,7 @@ export default function SettingsScreen() {
                                 {
                                     paddingVertical: spacing.md,
                                     paddingHorizontal: spacing.md,
-                                    borderBottomWidth: i < preferenceToggles.length - 1 ? 0.5 : 0,
+                                    borderBottomWidth: i < preferenceToggles.length - 1 ? StyleSheet.hairlineWidth : 0,
                                     borderBottomColor: colors.separator,
                                 },
                             ]}
@@ -309,23 +332,17 @@ export default function SettingsScreen() {
                             />
                         </View>
                     ))}
-                </View>
+                </Card>
 
                 {/* Parent Zone — Actions */}
-                <IslamicDivider spacing={12} />
+                <IslamicDivider spacing={12} variant="rich" />
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.xs }}>
-                    <Ionicons name="shield-outline" size={15} color={brand.accent} />
-                    <Text style={[typography.labelSmall, { color: colors.textTertiary, textTransform: 'uppercase', letterSpacing: 1 }]}>
+                    <Ionicons name="shield-outline" size={16} color={brand.accent} />
+                    <Text style={[typography.labelSmall, { color: brand.accent, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: '700' }]}>
                         Parent Zone
                     </Text>
                 </View>
-                <View
-                    style={{
-                        backgroundColor: colors.surfaceSecondary,
-                        borderRadius: radius.lg,
-                        overflow: 'hidden',
-                    }}
-                >
+                <Card variant="premium" noPadding>
                     {parentActions.map((item, i) => (
                         <Pressable
                             key={item.label}
@@ -336,7 +353,7 @@ export default function SettingsScreen() {
                                     paddingVertical: spacing.md,
                                     paddingHorizontal: spacing.md,
                                     backgroundColor: pressed ? colors.surfaceTertiary : 'transparent',
-                                    borderBottomWidth: i < parentActions.length - 1 ? 0.5 : 0,
+                                    borderBottomWidth: i < parentActions.length - 1 ? StyleSheet.hairlineWidth : 0,
                                     borderBottomColor: colors.separator,
                                 },
                             ]}
@@ -363,23 +380,17 @@ export default function SettingsScreen() {
                             <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
                         </Pressable>
                     ))}
-                </View>
+                </Card>
 
                 {/* About */}
-                <IslamicDivider spacing={12} />
+                <IslamicDivider spacing={12} variant="rich" />
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.xs }}>
-                    <Ionicons name="information-circle-outline" size={15} color={brand.lavender} />
-                    <Text style={[typography.labelSmall, { color: colors.textTertiary, textTransform: 'uppercase', letterSpacing: 1 }]}>
+                    <Ionicons name="information-circle-outline" size={16} color={brand.lavender} />
+                    <Text style={[typography.labelSmall, { color: brand.lavender, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: '700' }]}>
                         About
                     </Text>
                 </View>
-                <View
-                    style={{
-                        backgroundColor: colors.surfaceSecondary,
-                        borderRadius: radius.lg,
-                        overflow: 'hidden',
-                    }}
-                >
+                <Card variant="glass" noPadding>
                     {aboutActions.map((item, i) => (
                         <Pressable
                             key={item.label}
@@ -390,7 +401,7 @@ export default function SettingsScreen() {
                                     paddingVertical: spacing.md,
                                     paddingHorizontal: spacing.md,
                                     backgroundColor: pressed ? colors.surfaceTertiary : 'transparent',
-                                    borderBottomWidth: i < aboutActions.length - 1 ? 0.5 : 0,
+                                    borderBottomWidth: i < aboutActions.length - 1 ? StyleSheet.hairlineWidth : 0,
                                     borderBottomColor: colors.separator,
                                 },
                             ]}
@@ -407,23 +418,25 @@ export default function SettingsScreen() {
                             <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
                         </Pressable>
                     ))}
-                </View>
+                </Card>
 
                 {/* Version */}
-                <IslamicDivider spacing={16} />
-                <Text
-                    style={[
-                        typography.caption,
-                        {
-                            color: colors.textTertiary,
-                            textAlign: 'center',
-                            fontFamily: 'Amiri-Regular',
-                            fontSize: 14,
-                        },
-                    ]}
-                >
-                    Sidrat v1.0.0
-                </Text>
+                <IslamicDivider spacing={16} variant="rich" />
+                <Card variant="glass" style={{ alignItems: 'center' }}>
+                    <Text
+                        style={[
+                            typography.caption,
+                            {
+                                color: colors.textTertiary,
+                                textAlign: 'center',
+                                fontFamily: 'Amiri-Regular',
+                                fontSize: 14,
+                            },
+                        ]}
+                    >
+                        Sidrat v1.0.0
+                    </Text>
+                </Card>
             </ScrollView>
 
             {gateVisible && <ParentalGate visible={gateVisible} onSuccess={handleGateSuccess} onCancel={handleGateCancel} />}
@@ -434,7 +447,38 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
     safe: { flex: 1 },
+    heroGradient: {
+        borderBottomLeftRadius: 28,
+        borderBottomRightRadius: 28,
+        overflow: 'hidden',
+    },
+    orb: {
+        position: 'absolute',
+        borderRadius: 9999,
+    },
+    orbTopRight: {
+        width: 180,
+        height: 180,
+        top: -40,
+        right: -50,
+    },
+    orbBottomLeft: {
+        width: 140,
+        height: 140,
+        bottom: -30,
+        left: -30,
+    },
     profileRow: { flexDirection: 'row', flexWrap: 'wrap' },
-    profileItem: { alignItems: 'center', minWidth: 80 },
+    profileItem: { alignItems: 'center', minWidth: 80, overflow: 'hidden' },
+    profileAccentStrip: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 3,
+        borderTopLeftRadius: 18,
+        borderTopRightRadius: 18,
+        overflow: 'hidden',
+    },
     settingRow: { flexDirection: 'row', alignItems: 'center' },
 });

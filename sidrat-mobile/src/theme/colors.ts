@@ -62,6 +62,32 @@ export const gradients = {
     sunset: ['#D4982A', '#E8636F'] as const,
     /** Card shimmer overlay */
     shimmer: ['rgba(255,255,255,0)', 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0)'] as const,
+
+    // ── Screen Hero Gradients (warm luxury feel) ───────────────
+
+    /** Home screen — warm teal to deep teal */
+    homeHero: ['#0A7E8C', '#066570'] as const,
+    /** Learn screen — deep emerald to teal */
+    learnHero: ['#1E6B42', '#0A7E8C'] as const,
+    /** Family screen — warm gold to coral */
+    familyHero: ['#B07D1E', '#D4982A'] as const,
+    /** Progress screen — deep teal to lavender */
+    progressHero: ['#066570', '#5B4FA0'] as const,
+    /** Settings screen — warm charcoal to teal */
+    settingsHero: ['#1A2B2D', '#066570'] as const,
+
+    // ── Card & Surface Gradients ──────────────────────────────
+
+    /** Glass-like frosted overlay (light mode) */
+    glassLight: ['rgba(255,255,255,0.85)', 'rgba(255,255,255,0.65)'] as const,
+    /** Glass-like frosted overlay (dark mode) */
+    glassDark: ['rgba(28,31,34,0.88)', 'rgba(28,31,34,0.72)'] as const,
+    /** Premium card border shimmer */
+    borderShimmer: ['rgba(212,152,42,0.3)', 'rgba(10,126,140,0.3)', 'rgba(212,152,42,0.3)'] as const,
+    /** Warm surface wash for card backgrounds */
+    warmSurface: ['rgba(212,152,42,0.04)', 'rgba(10,126,140,0.04)'] as const,
+    /** Hero card — teal to emerald for CTAs */
+    heroCta: ['#0A7E8C', '#2E8B57'] as const,
 } as const;
 
 // ── Semantic Palette ──────────────────────────────────────────────

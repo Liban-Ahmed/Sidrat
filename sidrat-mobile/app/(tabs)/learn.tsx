@@ -23,9 +23,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../src/theme';
 import { useAppStore, useLessonStore } from '../../src/stores';
-import { ProgressRing, ScreenHeader, IslamicDivider, MiniStatPill } from '../../src/components';
+import { ProgressRing, IslamicDivider, MiniStatPill } from '../../src/components';
 import { allUnits, allCurriculumLessons } from '../../src/data/curriculum';
 import { categoryColors } from '../../src/theme/colors';
 import type { CurriculumUnit, CurriculumLesson } from '../../src/types/curriculum';
@@ -58,7 +59,7 @@ const ROADMAP_HINTS = [
 
 
 export default function LearnScreen() {
-    const { brand, colors, typography, spacing, radius, shadows, isDark } = useTheme();
+    const { brand, colors, typography, spacing, radius, shadows, gradients, isDark } = useTheme();
     const router = useRouter();
     const activeChildId = useAppStore((s) => s.activeChildId);
     const progress = useLessonStore((s) => s.progress);
@@ -112,18 +113,38 @@ export default function LearnScreen() {
     };
 
     return (
-        <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['left', 'right']}>
             <ScrollView
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: spacing.huge }}
+                contentContainerStyle={{ paddingBottom: 100 }}
             >
-                {/* ── Header ── */}
+                {/* ── Gradient Hero Header ── */}
                 <Animated.View entering={FadeIn.duration(400)}>
-                    <ScreenHeader
-                        title="Learn"
-                        subtitle="Your Islamic learning journey"
-                        accentColor={brand.primary}
-                    />
+                    <LinearGradient
+                        colors={gradients.learnHero as unknown as [string, string]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={[
+                            styles.heroGradient,
+                            {
+                                paddingHorizontal: spacing.lg,
+                                paddingTop: spacing.xl + 54,
+                                paddingBottom: spacing.xxl,
+                                borderBottomLeftRadius: radius.xl,
+                                borderBottomRightRadius: radius.xl,
+                            },
+                        ]}
+                    >
+                        {/* Decorative orbs */}
+                        <View style={[styles.heroOrb, styles.heroOrbLarge]} />
+                        <View style={[styles.heroOrb, styles.heroOrbSmall]} />
+                        <View style={[styles.heroOrb, styles.heroOrbMedium]} />
+
+                        <Text style={[typography.title1, { color: '#FFFFFF' }]}>Learn</Text>
+                        <Text style={[typography.body, { color: 'rgba(255,255,255,0.75)', marginTop: spacing.xxs }]}>
+                            Your Islamic learning journey
+                        </Text>
+                    </LinearGradient>
                 </Animated.View>
 
                 {/* ── Continue Learning Hero ── */}
@@ -135,15 +156,12 @@ export default function LearnScreen() {
                                 styles.heroCard,
                                 {
                                     marginHorizontal: spacing.lg,
-                                    marginTop: spacing.md,
-                                    backgroundColor: isDark
-                                        ? (categoryColors[nextLesson.unit.category]?.solid ?? brand.primary) + '15'
-                                        : (categoryColors[nextLesson.unit.category]?.solid ?? brand.primary) + '08',
+                                    marginTop: -spacing.lg,
+                                    backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
                                     borderRadius: radius.xl,
-                                    borderWidth: 1,
-                                    borderColor: (categoryColors[nextLesson.unit.category]?.solid ?? brand.primary) + '20',
-                                    padding: spacing.lg,
+                                    overflow: 'hidden',
                                     opacity: pressed ? 0.92 : 1,
+                                    ...shadows.cardPremium,
                                 },
                             ]}
                         >
@@ -152,58 +170,73 @@ export default function LearnScreen() {
                                 const unitProg = getUnitProgress(nextLesson.unit);
                                 return (
                                     <>
-                                        {/* Top: unit context */}
-                                        <View style={styles.heroContext}>
-                                            <View style={[styles.heroBadge, { backgroundColor: heroColor + '18', borderRadius: radius.xs }]}>
-                                                <Ionicons
-                                                    name={nextLesson.unit.icon as keyof typeof Ionicons.glyphMap}
-                                                    size={11}
-                                                    color={heroColor}
-                                                />
-                                                <Text style={[styles.heroBadgeText, { color: heroColor }]}>
-                                                    {nextLesson.unit.title}
+                                        {/* Gradient accent strip at top */}
+                                        <LinearGradient
+                                            colors={[heroColor, heroColor + '80']}
+                                            start={{ x: 0, y: 0 }}
+                                            end={{ x: 1, y: 0 }}
+                                            style={{ height: 4 }}
+                                        />
+
+                                        <View style={{ padding: spacing.lg }}>
+                                            {/* Top: unit context */}
+                                            <View style={styles.heroContext}>
+                                                <View style={[styles.heroBadge, { backgroundColor: heroColor + '18', borderRadius: radius.xs }]}>
+                                                    <Ionicons
+                                                        name={nextLesson.unit.icon as keyof typeof Ionicons.glyphMap}
+                                                        size={11}
+                                                        color={heroColor}
+                                                    />
+                                                    <Text style={[styles.heroBadgeText, { color: heroColor }]}>
+                                                        {nextLesson.unit.title}
+                                                    </Text>
+                                                </View>
+                                                <Text style={[typography.caption, { color: colors.textTertiary }]}>
+                                                    Lesson {nextLesson.lesson.order} of {unitProg.total}
                                                 </Text>
                                             </View>
-                                            <Text style={[typography.caption, { color: colors.textTertiary }]}>
-                                                Lesson {nextLesson.lesson.order} of {unitProg.total}
+
+                                            {/* Lesson title */}
+                                            <Text style={[typography.title2, { color: colors.text, marginTop: spacing.sm }]}>
+                                                {nextLesson.lesson.title}
                                             </Text>
-                                        </View>
 
-                                        {/* Lesson title */}
-                                        <Text style={[typography.title2, { color: colors.text, marginTop: spacing.sm }]}>
-                                            {nextLesson.lesson.title}
-                                        </Text>
+                                            {/* Hook prompt (the engaging question) */}
+                                            <Text
+                                                style={[
+                                                    typography.body,
+                                                    { color: colors.textSecondary, marginTop: spacing.xxs, lineHeight: 22 },
+                                                ]}
+                                                numberOfLines={2}
+                                            >
+                                                {nextLesson.lesson.hook.prompt}
+                                            </Text>
 
-                                        {/* Hook prompt (the engaging question) */}
-                                        <Text
-                                            style={[
-                                                typography.body,
-                                                { color: colors.textSecondary, marginTop: spacing.xxs, lineHeight: 22 },
-                                            ]}
-                                            numberOfLines={2}
-                                        >
-                                            {nextLesson.lesson.hook.prompt}
-                                        </Text>
-
-                                        {/* Bottom row: meta + CTA */}
-                                        <View style={[styles.heroBottom, { marginTop: spacing.md }]}>
-                                            <View style={styles.heroMeta}>
-                                                <View style={styles.heroMetaItem}>
-                                                    <Ionicons name="time-outline" size={13} color={colors.textTertiary} />
-                                                    <Text style={[styles.heroMetaText, { color: colors.textTertiary }]}>
-                                                        {nextLesson.lesson.durationMinutes} min
-                                                    </Text>
+                                            {/* Bottom row: meta + CTA */}
+                                            <View style={[styles.heroBottom, { marginTop: spacing.md }]}>
+                                                <View style={styles.heroMeta}>
+                                                    <View style={styles.heroMetaItem}>
+                                                        <Ionicons name="time-outline" size={13} color={colors.textTertiary} />
+                                                        <Text style={[styles.heroMetaText, { color: colors.textTertiary }]}>
+                                                            {nextLesson.lesson.durationMinutes} min
+                                                        </Text>
+                                                    </View>
+                                                    <View style={[styles.heroMetaItem, { marginLeft: spacing.sm }]}>
+                                                        <Ionicons name="sparkles-outline" size={13} color={brand.accent} />
+                                                        <Text style={[styles.heroMetaText, { color: brand.accent }]}>
+                                                            +{nextLesson.lesson.xpReward} XP
+                                                        </Text>
+                                                    </View>
                                                 </View>
-                                                <View style={[styles.heroMetaItem, { marginLeft: spacing.sm }]}>
-                                                    <Ionicons name="sparkles-outline" size={13} color={brand.accent} />
-                                                    <Text style={[styles.heroMetaText, { color: brand.accent }]}>
-                                                        +{nextLesson.lesson.xpReward} XP
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                            <View style={[styles.heroCta, { backgroundColor: heroColor, borderRadius: radius.lg }]}>
-                                                <Ionicons name="play" size={16} color="#FFF" />
-                                                <Text style={styles.heroCtaText}>Continue</Text>
+                                                <LinearGradient
+                                                    colors={gradients.heroCta as unknown as [string, string]}
+                                                    start={{ x: 0, y: 0 }}
+                                                    end={{ x: 1, y: 0 }}
+                                                    style={[styles.heroCta, { borderRadius: radius.lg }]}
+                                                >
+                                                    <Ionicons name="play" size={16} color="#FFF" />
+                                                    <Text style={styles.heroCtaText}>Continue</Text>
+                                                </LinearGradient>
                                             </View>
                                         </View>
                                     </>
@@ -215,49 +248,60 @@ export default function LearnScreen() {
 
                 {/* ── Quick Stats ── */}
                 <Animated.View entering={FadeInDown.delay(200).duration(450)}>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{
-                            paddingHorizontal: spacing.lg,
-                            paddingTop: spacing.lg,
-                            gap: spacing.xs,
-                        }}
-                    >
-                        <MiniStatPill
-                            icon="school-outline"
-                            value={`${overallStats.completed}`}
-                            label="done"
-                            color={brand.primary}
-                            layout="horizontal"
-                        />
-                        <MiniStatPill
-                            icon="library-outline"
-                            value={`${overallStats.total - overallStats.completed}`}
-                            label="remaining"
-                            color={brand.lavender}
-                            layout="horizontal"
-                        />
-                        <MiniStatPill
-                            icon="sparkles-outline"
-                            value={`${overallStats.xp}`}
-                            label="XP earned"
-                            color={brand.accent}
-                            layout="horizontal"
-                        />
-                        <MiniStatPill
-                            icon="layers-outline"
-                            value={`${allUnits.length}`}
-                            label="units"
-                            color={brand.secondary}
-                            layout="horizontal"
-                        />
-                    </ScrollView>
+                    <View style={{ marginHorizontal: spacing.lg, marginTop: spacing.lg, borderRadius: radius.xl, overflow: 'hidden' }}>
+                        <LinearGradient
+                            colors={
+                                isDark
+                                    ? ['rgba(10,126,140,0.08)', 'rgba(6,101,112,0.04)']
+                                    : ['rgba(10,126,140,0.04)', 'rgba(212,152,42,0.03)']
+                            }
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={{ borderRadius: radius.xl, padding: spacing.sm }}
+                        >
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={{
+                                    gap: spacing.xs,
+                                }}
+                            >
+                                <MiniStatPill
+                                    icon="school-outline"
+                                    value={`${overallStats.completed}`}
+                                    label="done"
+                                    color={brand.primary}
+                                    layout="horizontal"
+                                />
+                                <MiniStatPill
+                                    icon="library-outline"
+                                    value={`${overallStats.total - overallStats.completed}`}
+                                    label="remaining"
+                                    color={brand.lavender}
+                                    layout="horizontal"
+                                />
+                                <MiniStatPill
+                                    icon="sparkles-outline"
+                                    value={`${overallStats.xp}`}
+                                    label="XP earned"
+                                    color={brand.accent}
+                                    layout="horizontal"
+                                />
+                                <MiniStatPill
+                                    icon="layers-outline"
+                                    value={`${allUnits.length}`}
+                                    label="units"
+                                    color={brand.secondary}
+                                    layout="horizontal"
+                                />
+                            </ScrollView>
+                        </LinearGradient>
+                    </View>
                 </Animated.View>
 
                 {/* ── Section divider ── */}
                 <View style={{ paddingHorizontal: spacing.lg }}>
-                    <IslamicDivider spacing={12} />
+                    <IslamicDivider spacing={12} variant="rich" />
                 </View>
 
                 {/* ── Section label ── */}
@@ -297,7 +341,8 @@ export default function LearnScreen() {
                                         borderRadius: radius.xl,
                                         borderWidth: StyleSheet.hairlineWidth,
                                         borderColor: isDark ? colors.border : catColor + '15',
-                                        ...shadows.card,
+                                        ...shadows.cardPremium,
+                                        ...shadows.softGlow(catColor),
                                     },
                                 ]}
                             >
@@ -314,12 +359,14 @@ export default function LearnScreen() {
                                         },
                                     ]}
                                 >
-                                    {/* Accent strip at very top */}
-                                    <View
+                                    {/* Accent strip at very top — gradient */}
+                                    <LinearGradient
+                                        colors={[catColor, catColor + '60']}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 1, y: 0 }}
                                         style={[
                                             styles.unitAccent,
                                             {
-                                                backgroundColor: catColor,
                                                 borderTopLeftRadius: radius.xl,
                                                 borderTopRightRadius: radius.xl,
                                                 position: 'absolute',
@@ -590,42 +637,49 @@ export default function LearnScreen() {
                             {
                                 backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
                                 borderRadius: radius.xl,
-                                borderWidth: StyleSheet.hairlineWidth,
-                                borderColor: colors.border,
-                                padding: spacing.lg,
-                                ...shadows.subtle,
+                                overflow: 'hidden',
+                                ...shadows.cardPremium,
                             },
                         ]}
                     >
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
-                            <Ionicons name="telescope-outline" size={18} color={brand.lavender} />
-                            <Text style={[typography.label, { color: colors.text, marginLeft: spacing.xs }]}>
-                                Coming Soon
+                        {/* Premium gradient accent strip */}
+                        <LinearGradient
+                            colors={gradients.primary as unknown as [string, string]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={{ height: 3 }}
+                        />
+                        <View style={{ padding: spacing.lg }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
+                                <Ionicons name="telescope-outline" size={18} color={brand.lavender} />
+                                <Text style={[typography.label, { color: colors.text, marginLeft: spacing.xs }]}>
+                                    Coming Soon
+                                </Text>
+                            </View>
+                            {ROADMAP_HINTS.map((hint, i) => (
+                                <Animated.View
+                                    key={hint.label}
+                                    entering={FadeInRight.delay(400 + allUnits.length * 90 + i * 60).duration(400)}
+                                    style={[
+                                        styles.roadmapRow,
+                                        {
+                                            paddingVertical: spacing.xs,
+                                            borderTopWidth: i > 0 ? StyleSheet.hairlineWidth : 0,
+                                            borderTopColor: colors.separator,
+                                        },
+                                    ]}
+                                >
+                                    <Ionicons name={hint.icon} size={16} color={colors.textTertiary} />
+                                    <Text style={[typography.bodySmall, { color: colors.textSecondary, marginLeft: spacing.xs }]}>
+                                        {hint.label}
+                                    </Text>
+                                </Animated.View>
+                            ))}
+                            <IslamicDivider spacing={8} variant="rich" color={brand.lavender + '30'} />
+                            <Text style={[typography.caption, { color: colors.textTertiary, textAlign: 'center', fontStyle: 'italic' }]}>
+                                In sha Allah
                             </Text>
                         </View>
-                        {ROADMAP_HINTS.map((hint, i) => (
-                            <Animated.View
-                                key={hint.label}
-                                entering={FadeInRight.delay(400 + allUnits.length * 90 + i * 60).duration(400)}
-                                style={[
-                                    styles.roadmapRow,
-                                    {
-                                        paddingVertical: spacing.xs,
-                                        borderTopWidth: i > 0 ? StyleSheet.hairlineWidth : 0,
-                                        borderTopColor: colors.separator,
-                                    },
-                                ]}
-                            >
-                                <Ionicons name={hint.icon} size={16} color={colors.textTertiary} />
-                                <Text style={[typography.bodySmall, { color: colors.textSecondary, marginLeft: spacing.xs }]}>
-                                    {hint.label}
-                                </Text>
-                            </Animated.View>
-                        ))}
-                        <IslamicDivider spacing={8} color={brand.lavender + '30'} />
-                        <Text style={[typography.caption, { color: colors.textTertiary, textAlign: 'center', fontStyle: 'italic' }]}>
-                            In sha Allah
-                        </Text>
                     </View>
                 </Animated.View>
             </ScrollView>
@@ -635,6 +689,36 @@ export default function LearnScreen() {
 
 const styles = StyleSheet.create({
     safe: { flex: 1 },
+
+    /* Gradient hero header */
+    heroGradient: {
+        overflow: 'hidden',
+        position: 'relative',
+    },
+    heroOrb: {
+        position: 'absolute',
+        borderRadius: 999,
+        backgroundColor: 'rgba(255,255,255,0.06)',
+    },
+    heroOrbLarge: {
+        width: 200,
+        height: 200,
+        top: -40,
+        right: -60,
+    },
+    heroOrbSmall: {
+        width: 80,
+        height: 80,
+        bottom: 20,
+        left: -20,
+    },
+    heroOrbMedium: {
+        width: 120,
+        height: 120,
+        top: 30,
+        left: '40%' as unknown as number,
+        backgroundColor: 'rgba(255,255,255,0.03)',
+    },
 
     // Hero card
     heroCard: {},

@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../src/theme';
 import { Button, BismillahHeader } from '../../src/components/ui';
 import { useChildStore, useAppStore } from '../../src/stores';
@@ -17,7 +18,7 @@ import { ageToGroup, AGE_GROUP_RANGES } from '../../src/types/curriculum';
 import type { AvatarId } from '../../src/types';
 
 export default function AgeSelectionScreen() {
-    const { brand, colors, typography, radius } = useTheme();
+    const { brand, colors, typography, radius, gradients, shadows } = useTheme();
     const router = useRouter();
     const params = useLocalSearchParams<{ name: string; avatar: string }>();
     const addChild = useChildStore((s) => s.addChild);
@@ -60,15 +61,24 @@ export default function AgeSelectionScreen() {
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-                {/* Header */}
-                <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.header}>
-                    <Text style={[typography.title1, { color: colors.text }]}>
-                        How old is {params.name}?
-                    </Text>
-                    <BismillahHeader size="sm" color={brand.primary + '30'} align="left" />
-                    <Text style={[typography.body, { color: colors.textSecondary, marginTop: 4 }]}>
-                        This helps us pick the right lessons
-                    </Text>
+                {/* Hero gradient header */}
+                <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.heroWrapper}>
+                    <LinearGradient
+                        colors={['#066570', '#0A7E8C']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.heroGradient}
+                    >
+                        <View style={styles.heroOrb1} />
+                        <View style={styles.heroOrb2} />
+                        <Text style={[typography.title1, { color: '#FFFFFF' }]}>
+                            How old is {params.name}?
+                        </Text>
+                        <BismillahHeader size="sm" color="rgba(255,255,255,0.4)" align="left" />
+                        <Text style={[typography.body, { color: 'rgba(255,255,255,0.85)', marginTop: 4 }]}>
+                            This helps us pick the right lessons
+                        </Text>
+                    </LinearGradient>
                 </Animated.View>
 
                 {/* Age grid */}
@@ -83,15 +93,23 @@ export default function AgeSelectionScreen() {
                                     style={[
                                         styles.ageItem,
                                         {
-                                            backgroundColor: isSelected
-                                                ? brand.primary
-                                                : colors.surfaceSecondary,
+                                            backgroundColor: isSelected ? brand.primary : colors.surfaceSecondary,
                                             borderRadius: radius.md,
                                             borderWidth: isSelected ? 0 : 1,
                                             borderColor: colors.separator,
+                                            overflow: isSelected ? 'hidden' : 'visible',
+                                            ...(isSelected ? {} : shadows.cardPremium),
                                         },
                                     ]}
                                 >
+                                    {isSelected && (
+                                        <LinearGradient
+                                            colors={gradients.primary}
+                                            start={{ x: 0, y: 0 }}
+                                            end={{ x: 1, y: 1 }}
+                                            style={[StyleSheet.absoluteFillObject, { borderRadius: radius.md }]}
+                                        />
+                                    )}
                                     <Text
                                         style={[
                                             typography.title2,
@@ -127,12 +145,19 @@ export default function AgeSelectionScreen() {
                         style={[
                             styles.groupCard,
                             {
-                                backgroundColor: brand.primary + '12',
+                                backgroundColor: brand.primary + '10',
                                 borderRadius: radius.lg,
                                 borderColor: brand.primary + '30',
+                                ...shadows.cardPremium,
                             },
                         ]}
                     >
+                        <LinearGradient
+                            colors={[brand.primary + '08', brand.primary + '18']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={[StyleSheet.absoluteFillObject, { borderRadius: radius.lg }]}
+                        />
                         <Ionicons name="sparkles" size={20} color={brand.primary} />
                         <View style={styles.groupText}>
                             <Text style={[typography.calloutBold, { color: brand.primary }]}>
@@ -148,22 +173,32 @@ export default function AgeSelectionScreen() {
 
             {/* Done button */}
             <View style={[styles.footer, { borderTopColor: colors.separator }]}>
-                <Button
-                    title="Let's Go!"
-                    onPress={handleFinish}
-                    disabled={!selectedYear}
-                    style={[
-                        styles.continueButton,
-                        {
-                            backgroundColor: selectedYear ? brand.primary : colors.surfaceTertiary,
-                            borderRadius: radius.lg,
-                        },
-                    ]}
-                    textStyle={[
-                        typography.headlineBold,
-                        { color: selectedYear ? '#FFFFFF' : colors.textTertiary },
-                    ]}
-                />
+                {selectedYear ? (
+                    <LinearGradient
+                        colors={gradients.heroCta}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={{ borderRadius: radius.lg, overflow: 'hidden' }}
+                    >
+                        <Button
+                            title="Let's Go!"
+                            onPress={handleFinish}
+                            style={[styles.continueButton, { backgroundColor: 'transparent', borderRadius: radius.lg }]}
+                            textStyle={[typography.headlineBold, { color: '#FFFFFF' }]}
+                        />
+                    </LinearGradient>
+                ) : (
+                    <Button
+                        title="Let's Go!"
+                        onPress={handleFinish}
+                        disabled
+                        style={[
+                            styles.continueButton,
+                            { backgroundColor: colors.surfaceTertiary, borderRadius: radius.lg },
+                        ]}
+                        textStyle={[typography.headlineBold, { color: colors.textTertiary }]}
+                    />
+                )}
             </View>
         </SafeAreaView>
     );
@@ -173,10 +208,39 @@ const styles = StyleSheet.create({
     container: { flex: 1 },
     scrollContent: {
         paddingHorizontal: 24,
-        paddingTop: 40,
+        paddingTop: 0,
         paddingBottom: 120,
     },
-    header: { marginBottom: 28 },
+    heroWrapper: {
+        marginHorizontal: -24,
+        marginBottom: 28,
+    },
+    heroGradient: {
+        paddingTop: 40,
+        paddingBottom: 24,
+        paddingHorizontal: 24,
+        borderBottomLeftRadius: 24,
+        borderBottomRightRadius: 24,
+        overflow: 'hidden',
+    },
+    heroOrb1: {
+        position: 'absolute',
+        top: -20,
+        right: -40,
+        width: 140,
+        height: 140,
+        borderRadius: 70,
+        backgroundColor: 'rgba(255,255,255,0.06)',
+    },
+    heroOrb2: {
+        position: 'absolute',
+        bottom: -30,
+        left: -50,
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: 'rgba(255,255,255,0.04)',
+    },
     ageGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
@@ -196,6 +260,8 @@ const styles = StyleSheet.create({
         gap: 12,
         marginTop: 24,
         borderWidth: 1,
+        position: 'relative',
+        overflow: 'hidden',
     },
     groupText: { flex: 1, gap: 2 },
     footer: {
