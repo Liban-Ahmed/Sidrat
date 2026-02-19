@@ -7,7 +7,7 @@
  *
  * Components extracted to:
  *   src/components/         — ScalePress, SectionHeader, ProgressBar, Card
- *   src/components/home/    — AnimatedCounter, AnimatedStatCard, WeekStreak
+ *   src/components/home/    — AnimatedCounter, AyahOfTheDay, DuaOfTheDay, SalahReminder
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -38,8 +38,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '../../src/theme';
 import { useAppStore, useChildStore, useLessonStore } from '../../src/stores';
-import { Avatar, Badge, Button, Card, ScalePress, SectionHeader, ProgressBar, IslamicDivider, BismillahHeader } from '../../src/components';
-import { WeekStreak, AnimatedStatCard } from '../../src/components/home';
+import { Avatar, Badge, BismillahHeader, Button, Card, ScalePress, SectionHeader, ProgressBar } from '../../src/components';
+import { AyahOfTheDay, DuaOfTheDay, SalahReminder } from '../../src/components/home';
 import { categoryMeta } from '../../src/types';
 import { allCurriculumLessons } from '../../src/data/curriculum';
 import { useReviewQueue } from '../../src/hooks/useReviewQueue';
@@ -56,16 +56,29 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 function getGreeting(): string {
     const hour = new Date().getHours();
+    if (hour < 6) return 'Assalamu Alaikum';
     if (hour < 12) return 'Good Morning';
     if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 21) return 'Good Evening';
+    return 'Assalamu Alaikum';
 }
 
 function getGreetingIcon(): keyof typeof Ionicons.glyphMap {
     const hour = new Date().getHours();
+    if (hour < 6) return 'moon-outline';
     if (hour < 12) return 'sunny-outline';
     if (hour < 17) return 'sunny';
-    return 'moon-outline';
+    if (hour < 21) return 'moon-outline';
+    return 'moon';
+}
+
+function getMotivationalSubtitle(child: { currentStreak: number; totalLessonsCompleted: number } | undefined): string {
+    if (!child) return 'Start your Quran journey';
+    if (child.totalLessonsCompleted === 0) return 'Ready for your first lesson?';
+    if (child.currentStreak >= 7) return `Masha'Allah! ${child.currentStreak}-day streak ✨`;
+    if (child.currentStreak >= 3) return `Keep your ${child.currentStreak}-day streak going!`;
+    if (child.currentStreak === 1) return 'Great start — keep it up!';
+    return "Let's learn something new today";
 }
 
 // ── Main Component ──────────────────────────────────────────────
@@ -89,6 +102,19 @@ export default function HomeScreen() {
 
     // ── Review queue ──
     const { reviewCount, hasReviews, nextReview } = useReviewQueue();
+
+    // Did the child complete a lesson today? (controls review card visibility)
+    const completedLessonToday = useMemo(() => {
+        if (!activeChildId) return false;
+        const todayStr = new Date().toDateString();
+        return Object.values(progressMap).some(
+            (p) => p.childId === activeChildId && p.isCompleted && p.completedAt
+                && new Date(p.completedAt).toDateString() === todayStr,
+        );
+    }, [activeChildId, progressMap]);
+
+    // Allow user to dismiss the review card for this session
+    const [reviewsDismissed, setReviewsDismissed] = useState(false);
 
     // Next uncompleted curriculum lesson
     const todayLesson = useMemo(() => {
@@ -175,6 +201,7 @@ export default function HomeScreen() {
 
     const greeting = useMemo(getGreeting, []);
     const greetingIcon = useMemo(getGreetingIcon, []);
+    const subtitle = useMemo(() => getMotivationalSubtitle(child), [child?.currentStreak, child?.totalLessonsCompleted]);
 
     // ── Navigate to lesson player ──
     const navigateToLesson = useCallback((lessonId: string) => {
@@ -276,13 +303,16 @@ export default function HomeScreen() {
                         <View style={styles.header}>
                             <View style={styles.headerLeft}>
                                 {child && (
-                                    <ScalePress accessibilityLabel={`${child.name}'s avatar`}>
+                                    <ScalePress
+                                        onPress={() => router.push('/family' as any)}
+                                        accessibilityLabel={`${child.name}'s avatar — switch child`}
+                                    >
                                         <View style={[styles.avatarRing, { borderRadius: radius.full }]}>
                                             <Avatar avatarId={child.avatarId} size={52} />
                                         </View>
                                     </ScalePress>
                                 )}
-                                <View style={{ marginLeft: spacing.sm }}>
+                                <View style={{ marginLeft: spacing.sm, flex: 1 }}>
                                     <View style={styles.greetingRow}>
                                         <Text style={[typography.bodySmall, { color: 'rgba(255,255,255,0.8)' }]}>
                                             {greeting}
@@ -297,23 +327,28 @@ export default function HomeScreen() {
                                     <Text style={[typography.title2, { color: '#FFFFFF' }]}>
                                         {child?.name ?? 'Welcome'}
                                     </Text>
+                                    <Text
+                                        style={[
+                                            typography.caption,
+                                            { color: 'rgba(255,255,255,0.6)', marginTop: 2 },
+                                        ]}
+                                        numberOfLines={1}
+                                    >
+                                        {subtitle}
+                                    </Text>
                                 </View>
                             </View>
 
+                            {/* Settings */}
                             <ScalePress
-                                onPress={() => router.push('/notifications' as any)}
-                                accessibilityLabel="Notifications"
+                                onPress={() => router.push('/settings' as any)}
+                                accessibilityLabel="Settings"
                                 style={[
                                     styles.iconBtn,
                                     { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: radius.full },
                                 ]}
                             >
-                                <Ionicons name="notifications-outline" size={22} color="#FFFFFF" />
-                                {/* Notification badge dot */}
-                                <View style={[
-                                    styles.notifDot,
-                                    { backgroundColor: brand.accentLight, borderColor: 'rgba(255,255,255,0.15)' },
-                                ]} />
+                                <Ionicons name="settings-outline" size={21} color="#FFFFFF" />
                             </ScalePress>
                         </View>
                     </LinearGradient>
@@ -322,157 +357,14 @@ export default function HomeScreen() {
                 {/* ── Content area ────────────────────────────── */}
                 <View style={{ paddingHorizontal: spacing.md }}>
 
-                    {/* ── Decorative Divider ───────────────────── */}
-                    <IslamicDivider spacing={8} variant="rich" />
-
-                    {/* ── Streak Card (Premium) ────────────────── */}
-                    {child && (
-                        <Animated.View
-                            entering={FadeInDown.delay(STAGGER).duration(600)}
-                            style={{ marginTop: spacing.lg }}
-                        >
-                            <Card variant="premium" noPadding>
-                                <WeekStreak
-                                    streak={child.currentStreak}
-                                    longestStreak={child.longestStreak}
-                                />
-                            </Card>
-                        </Animated.View>
-                    )}
-
-                    {/* ── Reviews Due ──────────────────────────────── */}
-                    {hasReviews && (
-                        <Animated.View
-                            entering={FadeInDown.delay(STAGGER * 2.7).duration(600).springify().damping(16)}
-                            style={{ marginTop: spacing.lg }}
-                        >
-                            <ScalePress onPress={() => router.push('/review' as any)}>
-                                <Card variant="filled" accentColor={brand.coral} noPadding>
-                                    <View
-                                        accessible
-                                        accessibilityLabel={`${reviewCount} lessons due for review. Tap to start reviewing.`}
-                                        style={[
-                                            styles.continueCard,
-                                            { padding: spacing.md },
-                                        ]}
-                                    >
-                                        {/* Left gradient indicator */}
-                                        <View
-                                            style={[
-                                                styles.continueLeftEdge,
-                                                { backgroundColor: brand.coral, borderRadius: radius.full },
-                                            ]}
-                                        />
-                                        <View
-                                            style={[
-                                                styles.continueIcon,
-                                                { backgroundColor: brand.coral + '18', borderRadius: radius.md },
-                                            ]}
-                                        >
-                                            <Ionicons name="refresh" size={22} color={brand.coral} />
-                                        </View>
-                                        <View style={{ flex: 1, marginLeft: spacing.sm }}>
-                                            <Text style={[typography.caption, { color: brand.coral }]}>
-                                                Reviews Due
-                                            </Text>
-                                            <Text style={[typography.label, { color: colors.text, marginTop: 2 }]}>
-                                                {reviewCount} {reviewCount === 1 ? 'lesson' : 'lessons'} to review
-                                            </Text>
-                                            {nextReview && (
-                                                <Text
-                                                    style={[typography.caption, { color: colors.textTertiary, marginTop: 2 }]}
-                                                    numberOfLines={1}
-                                                >
-                                                    Next: {nextReview.lesson.title}
-                                                </Text>
-                                            )}
-                                        </View>
-                                        <View
-                                            style={[
-                                                styles.reviewBadge,
-                                                {
-                                                    backgroundColor: brand.coral,
-                                                    borderRadius: radius.full,
-                                                },
-                                            ]}
-                                        >
-                                            <Text style={[typography.captionBold, { color: '#FFF' }]}>
-                                                {reviewCount}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </Card>
-                            </ScalePress>
-                        </Animated.View>
-                    )}
-
-                    {/* ── Continue Where You Left Off ────────────── */}
-                    {inProgressLesson && inProgressLesson.id !== todayLesson?.id && (
-                        <Animated.View
-                            entering={FadeInDown.delay(STAGGER * 2.8).duration(600).springify().damping(16)}
-                            style={{ marginTop: spacing.lg }}
-                        >
-                            <SectionHeader title="Continue" />
-                            <ScalePress onPress={() => navigateToLesson(inProgressLesson.id)}>
-                                <Card variant="filled" accentColor={brand.accent} noPadding>
-                                    <View
-                                        accessible
-                                        accessibilityLabel={`Continue lesson: ${inProgressLesson.title}`}
-                                        style={[
-                                            styles.continueCard,
-                                            { padding: spacing.md },
-                                        ]}
-                                    >
-                                        {/* Left warm gradient indicator */}
-                                        <LinearGradient
-                                            colors={gradients.heroCta as unknown as [string, string]}
-                                            start={{ x: 0, y: 0 }}
-                                            end={{ x: 0, y: 1 }}
-                                            style={[
-                                                styles.continueLeftEdge,
-                                                { borderRadius: radius.full },
-                                            ]}
-                                        />
-                                        <View style={[styles.continueIcon, { backgroundColor: brand.accent + '20', borderRadius: radius.md }]}>
-                                            <Ionicons name="play-circle" size={24} color={brand.accent} />
-                                        </View>
-                                        <View style={{ flex: 1, marginLeft: spacing.sm }}>
-                                            <Text style={[typography.caption, { color: brand.accent }]}>
-                                                Pick up where you left off
-                                            </Text>
-                                            <Text style={[typography.label, { color: colors.text, marginTop: 2 }]} numberOfLines={1}>
-                                                {inProgressLesson.title}
-                                            </Text>
-                                            <View style={{ marginTop: spacing.xs }}>
-                                                <ProgressBar
-                                                    progress={
-                                                        (() => {
-                                                            const p = progressMap[`${activeChildId}:${inProgressLesson.id}`];
-                                                            if (!p) return 0;
-                                                            const completedPhases = Object.keys(p.phaseProgress ?? {}).length;
-                                                            // Estimate progress from phases (5 typical phases per lesson)
-                                                            return Math.min(completedPhases / 5, 0.95);
-                                                        })()
-                                                    }
-                                                    color={brand.accent}
-                                                    trackColor={brand.accent + '20'}
-                                                    height={4}
-                                                />
-                                            </View>
-                                        </View>
-                                        <Ionicons name="chevron-forward" size={20} color={brand.accent} style={{ marginLeft: spacing.sm }} />
-                                    </View>
-                                </Card>
-                            </ScalePress>
-                        </Animated.View>
-                    )}
-
-                    {/* ── Rich Divider ────────────────────────────── */}
-                    <IslamicDivider spacing={12} variant="rich" />
+                    {/* ── Salah Reminder (ambient) ─────────────── */}
+                    <View style={{ marginTop: spacing.md }}>
+                        <SalahReminder />
+                    </View>
 
                     {/* ── Today's Lesson ─────────────────────────── */}
                     <Animated.View
-                        entering={FadeInDown.delay(STAGGER * 3).duration(600).springify().damping(16)}
+                        entering={FadeInDown.delay(STAGGER).duration(600).springify().damping(16)}
                     >
                         <SectionHeader
                             title="Today's Lesson"
@@ -649,77 +541,159 @@ export default function HomeScreen() {
                         )}
                     </Animated.View>
 
-                    {/* ── Rich Divider ────────────────────────────── */}
-                    <IslamicDivider spacing={12} variant="rich" />
-
-                    {/* ── Quick Stats ─────────────────────────────── */}
-                    {child && (
+                    {/* ── Reviews Due (shown after completing a lesson today) ── */}
+                    {hasReviews && completedLessonToday && !reviewsDismissed && (
                         <Animated.View
-                            entering={FadeInDown.delay(STAGGER * 4).duration(600).springify().damping(16)}
+                            entering={FadeInDown.delay(STAGGER * 2).duration(600).springify().damping(16)}
+                            style={{ marginTop: spacing.lg }}
                         >
-                            <SectionHeader
-                                title="Your Progress"
-                                onSeeAll={() => router.push('/progress' as any)}
-                            />
-                            <View
-                                style={[
-                                    styles.statsContainer,
-                                    {
-                                        marginTop: spacing.sm,
-                                        borderRadius: radius.xl,
-                                        overflow: 'hidden',
-                                    },
-                                ]}
-                            >
-                                <LinearGradient
-                                    colors={
-                                        isDark
-                                            ? ['rgba(26,58,92,0.08)', 'rgba(26,58,92,0.04)']
-                                            : ['rgba(26,58,92,0.04)', 'rgba(212,152,42,0.03)']
-                                    }
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 1 }}
-                                    style={[
-                                        styles.statsGradientBg,
-                                        {
-                                            borderRadius: radius.xl,
-                                            padding: spacing.sm,
-                                        },
-                                    ]}
-                                >
-                                    <View style={[styles.statsRow, { gap: spacing.sm }]}>
-                                        <View style={[{ flex: 1 }, shadows.glow(brand.accent)]}>
-                                            <AnimatedStatCard
-                                                label="Total XP"
-                                                numericValue={child.totalXP}
-                                                iconName="flash"
-                                                color={brand.accent}
-                                                delay={STAGGER * 4}
-                                            />
+                            <ScalePress onPress={() => router.push('/review' as any)}>
+                                <Card variant="filled" accentColor={brand.coral} noPadding>
+                                    <View
+                                        accessible
+                                        accessibilityLabel={`${reviewCount} lessons due for review. Tap to start reviewing.`}
+                                        style={[
+                                            styles.continueCard,
+                                            { padding: spacing.md },
+                                        ]}
+                                    >
+                                        {/* Left gradient indicator */}
+                                        <View
+                                            style={[
+                                                styles.continueLeftEdge,
+                                                { backgroundColor: brand.coral, borderRadius: radius.full },
+                                            ]}
+                                        />
+                                        <View
+                                            style={[
+                                                styles.continueIcon,
+                                                { backgroundColor: brand.coral + '18', borderRadius: radius.md },
+                                            ]}
+                                        >
+                                            <Ionicons name="refresh" size={22} color={brand.coral} />
                                         </View>
-                                        <View style={[{ flex: 1 }, shadows.glow(brand.secondary)]}>
-                                            <AnimatedStatCard
-                                                label="Lessons"
-                                                numericValue={child.totalLessonsCompleted}
-                                                iconName="book"
-                                                color={brand.secondary}
-                                                delay={STAGGER * 5}
-                                            />
+                                        <View style={{ flex: 1, marginLeft: spacing.sm }}>
+                                            <Text style={[typography.caption, { color: brand.coral }]}>
+                                                Reviews Due
+                                            </Text>
+                                            <Text style={[typography.label, { color: colors.text, marginTop: 2 }]}>
+                                                {reviewCount} {reviewCount === 1 ? 'lesson' : 'lessons'} to review
+                                            </Text>
+                                            {nextReview && (
+                                                <Text
+                                                    style={[typography.caption, { color: colors.textTertiary, marginTop: 2 }]}
+                                                    numberOfLines={1}
+                                                >
+                                                    Next: {nextReview.lesson.title}
+                                                </Text>
+                                            )}
                                         </View>
-                                        <View style={[{ flex: 1 }, shadows.glow(brand.primary)]}>
-                                            <AnimatedStatCard
-                                                label="Streak"
-                                                numericValue={child.currentStreak}
-                                                iconName="flame"
-                                                color={brand.primary}
-                                                delay={STAGGER * 6}
-                                            />
+                                        <View
+                                            style={[
+                                                styles.reviewBadge,
+                                                {
+                                                    backgroundColor: brand.coral,
+                                                    borderRadius: radius.full,
+                                                },
+                                            ]}
+                                        >
+                                            <Text style={[typography.captionBold, { color: '#FFF' }]}>
+                                                {reviewCount}
+                                            </Text>
                                         </View>
                                     </View>
-                                </LinearGradient>
-                            </View>
+                                </Card>
+                            </ScalePress>
+
+                            {/* Dismiss button */}
+                            <ScalePress
+                                onPress={() => setReviewsDismissed(true)}
+                                accessibilityLabel="Dismiss review reminder"
+                                style={{ alignSelf: 'center', marginTop: spacing.xs }}
+                            >
+                                <Text style={[typography.caption, { color: colors.textTertiary }]}>
+                                    Maybe later
+                                </Text>
+                            </ScalePress>
                         </Animated.View>
                     )}
+
+                    {/* ── Continue Where You Left Off ────────────── */}
+                    {inProgressLesson && inProgressLesson.id !== todayLesson?.id && (
+                        <Animated.View
+                            entering={FadeInDown.delay(STAGGER * 2.5).duration(600).springify().damping(16)}
+                            style={{ marginTop: spacing.lg }}
+                        >
+                            <SectionHeader title="Continue" />
+                            <ScalePress onPress={() => navigateToLesson(inProgressLesson.id)}>
+                                <Card variant="filled" accentColor={brand.accent} noPadding>
+                                    <View
+                                        accessible
+                                        accessibilityLabel={`Continue lesson: ${inProgressLesson.title}`}
+                                        style={[
+                                            styles.continueCard,
+                                            { padding: spacing.md },
+                                        ]}
+                                    >
+                                        {/* Left warm gradient indicator */}
+                                        <LinearGradient
+                                            colors={gradients.heroCta as unknown as [string, string]}
+                                            start={{ x: 0, y: 0 }}
+                                            end={{ x: 0, y: 1 }}
+                                            style={[
+                                                styles.continueLeftEdge,
+                                                { borderRadius: radius.full },
+                                            ]}
+                                        />
+                                        <View style={[styles.continueIcon, { backgroundColor: brand.accent + '20', borderRadius: radius.md }]}>
+                                            <Ionicons name="play-circle" size={24} color={brand.accent} />
+                                        </View>
+                                        <View style={{ flex: 1, marginLeft: spacing.sm }}>
+                                            <Text style={[typography.caption, { color: brand.accent }]}>
+                                                Pick up where you left off
+                                            </Text>
+                                            <Text style={[typography.label, { color: colors.text, marginTop: 2 }]} numberOfLines={1}>
+                                                {inProgressLesson.title}
+                                            </Text>
+                                            <View style={{ marginTop: spacing.xs }}>
+                                                <ProgressBar
+                                                    progress={
+                                                        (() => {
+                                                            const p = progressMap[`${activeChildId}:${inProgressLesson.id}`];
+                                                            if (!p) return 0;
+                                                            const completedPhases = Object.keys(p.phaseProgress ?? {}).length;
+                                                            // Estimate progress from phases (5 typical phases per lesson)
+                                                            return Math.min(completedPhases / 5, 0.95);
+                                                        })()
+                                                    }
+                                                    color={brand.accent}
+                                                    trackColor={brand.accent + '20'}
+                                                    height={4}
+                                                />
+                                            </View>
+                                        </View>
+                                        <Ionicons name="chevron-forward" size={20} color={brand.accent} style={{ marginLeft: spacing.sm }} />
+                                    </View>
+                                </Card>
+                            </ScalePress>
+                        </Animated.View>
+                    )}
+
+                    {/* ── Ayah of the Day ──────────────────────── */}
+                    <Animated.View
+                        entering={FadeInDown.delay(STAGGER * 3.5).duration(600).springify().damping(16)}
+                        style={{ marginTop: spacing.lg }}
+                    >
+                        <AyahOfTheDay />
+                    </Animated.View>
+
+                    {/* ── Dua of the Day ───────────────────────── */}
+                    <Animated.View
+                        entering={FadeInDown.delay(STAGGER * 4).duration(600).springify().damping(16)}
+                        style={{ marginTop: spacing.lg }}
+                    >
+                        <DuaOfTheDay />
+                    </Animated.View>
 
                     {/* ── Bottom spacing for absolute tab bar ─── */}
                     <View style={{ height: 100 }} />
@@ -789,21 +763,13 @@ const styles = StyleSheet.create({
     headerLeft: {
         flexDirection: 'row',
         alignItems: 'center',
+        flex: 1,
     },
     iconBtn: {
         width: 44,
         height: 44,
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    notifDot: {
-        position: 'absolute',
-        top: 8,
-        right: 9,
-        width: 9,
-        height: 9,
-        borderRadius: 4.5,
-        borderWidth: 1.5,
     },
 
     /* Lesson card */
@@ -858,13 +824,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingVertical: 14,
         paddingHorizontal: 24,
-    },
-
-    /* Stats */
-    statsContainer: {},
-    statsGradientBg: {},
-    statsRow: {
-        flexDirection: 'row',
     },
 
     /* Continue card */
