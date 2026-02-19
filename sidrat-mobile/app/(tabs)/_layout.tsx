@@ -13,6 +13,7 @@ import { View, StyleSheet, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../src/theme';
 
 function TabBarBackground() {
@@ -36,26 +37,25 @@ export default function TabLayout() {
             tabBarInactiveTintColor: colors.textTertiary,
             tabBarBackground: () => <TabBarBackground />,
             tabBarStyle: {
-                backgroundColor: isDark ? 'rgba(20,22,24,0.82)' : 'rgba(255,255,255,0.78)',
+                backgroundColor: isDark ? 'rgba(15,18,24,0.85)' : 'rgba(255,255,255,0.82)',
                 borderTopColor: isDark ? colors.border + '60' : brand.primary + '10',
                 borderTopWidth: StyleSheet.hairlineWidth,
                 paddingBottom: Platform.OS === 'ios' ? 4 : 8,
                 paddingTop: 8,
                 height: Platform.OS === 'ios' ? 88 : 68,
                 position: 'absolute' as const,
-                ...(!isDark ? {
-                    shadowColor: '#0A7E8C',
-                    shadowOffset: { width: 0, height: -4 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 16,
-                    elevation: 12,
-                } : {}),
+                shadowColor: isDark ? 'transparent' : brand.primary,
+                shadowOffset: { width: 0, height: -4 },
+                shadowOpacity: isDark ? 0 : 0.10,
+                shadowRadius: isDark ? 0 : 16,
+                elevation: isDark ? 0 : 12,
             },
             tabBarLabelStyle: {
                 ...typography.captionBold,
                 fontSize: 10,
+                fontWeight: '700' as const,
                 marginTop: 0,
-                letterSpacing: 0.3,
+                letterSpacing: 0.4,
             },
             tabBarIconStyle: {
                 marginBottom: -2,
@@ -68,7 +68,12 @@ export default function TabLayout() {
         ({ color, focused }: { color: string; size: number; focused: boolean }) => (
             <View style={focused ? styles.activeIconWrap : styles.inactiveIconWrap}>
                 {focused && (
-                    <View style={[styles.activePill, { backgroundColor: brand.primary + '12' }]} />
+                    <LinearGradient
+                        colors={[brand.primary + '28', brand.primaryLight + '18']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.activePill}
+                    />
                 )}
                 <Ionicons name={focused ? nameFilled : name} size={22} color={color} />
             </View>

@@ -12,7 +12,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../../theme';
+import { useTheme, radius } from '../../theme';
 
 interface ScreenHeaderProps {
     /** Main title (rendered in Amiri display font via largeTitle) */
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     },
     orb: {
         position: 'absolute',
-        borderRadius: 999,
+        borderRadius: radius.full,
         backgroundColor: 'rgba(255,255,255,0.06)',
     },
     orbLarge: { width: 200, height: 200, top: -80, right: -50 },

@@ -74,47 +74,47 @@ export const radius = {
 export const shadows = {
     /** Barely visible lift — chips, badges */
     subtle: {
-        shadowColor: '#1A2B2D',
+        shadowColor: '#0F2440',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.06,
         shadowRadius: 3,
         elevation: 1,
     },
-    /** Standard card shadow — warm depth */
+    /** Standard card shadow — navy depth */
     card: {
-        shadowColor: '#1A2B2D',
+        shadowColor: '#0F2440',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.08,
         shadowRadius: 12,
         elevation: 3,
     },
-    /** Premium card — deeper, warmer shadow with slight spread */
+    /** Premium card — deeper navy shadow with slight spread */
     cardPremium: {
-        shadowColor: '#0A7E8C',
+        shadowColor: '#1A3A5C',
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.10,
+        shadowOpacity: 0.12,
         shadowRadius: 20,
         elevation: 5,
     },
     /** Floating elements — modals, FABs */
     elevated: {
-        shadowColor: '#1A2B2D',
+        shadowColor: '#0F2440',
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.12,
         shadowRadius: 24,
         elevation: 8,
     },
-    /** Luxury elevated — deeper with warm tint */
+    /** Luxury elevated — deeper navy with rich tint */
     luxuryElevated: {
-        shadowColor: '#0A7E8C',
+        shadowColor: '#1A3A5C',
         shadowOffset: { width: 0, height: 12 },
-        shadowOpacity: 0.15,
+        shadowOpacity: 0.18,
         shadowRadius: 32,
         elevation: 10,
     },
     /** Pressed / inset feel */
     inner: {
-        shadowColor: '#1A2B2D',
+        shadowColor: '#0F2440',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.04,
         shadowRadius: 2,

@@ -49,7 +49,7 @@ export default function ParentSetupScreen() {
                 {/* Hero gradient header */}
                 <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.heroWrapper}>
                     <LinearGradient
-                        colors={['#066570', '#0A7E8C']}
+                        colors={[brand.primaryDark, brand.primary] as [string, string]}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
                         style={styles.heroGradient}

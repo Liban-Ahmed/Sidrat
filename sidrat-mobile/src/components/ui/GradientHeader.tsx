@@ -9,7 +9,7 @@
 import React from 'react';
 import { View, StyleSheet, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../../theme';
+import { useTheme, radius } from '../../theme';
 
 interface GradientHeaderProps {
     /** Gradient color pair — defaults to theme primary gradient */
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     },
     patternDot: {
         position: 'absolute',
-        borderRadius: 999,
+        borderRadius: radius.full,
         backgroundColor: 'rgba(255,255,255,0.04)',
     },
     dot1: { width: 180, height: 180, top: -60, right: -40 },

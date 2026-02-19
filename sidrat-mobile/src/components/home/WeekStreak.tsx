@@ -19,6 +19,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme';
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
@@ -29,7 +30,7 @@ interface WeekStreakProps {
 }
 
 export function WeekStreak({ streak, longestStreak }: WeekStreakProps) {
-    const { brand, colors, typography, radius, shadows, isDark } = useTheme();
+    const { brand, colors, typography, radius, spacing, shadows, isDark, gradients } = useTheme();
     const today = new Date().getDay(); // 0 = Sun
     const isFullWeek = streak >= 7;
 
@@ -42,6 +43,8 @@ export function WeekStreak({ streak, longestStreak }: WeekStreakProps) {
             style={[
                 styles.card,
                 {
+                    paddingTop: spacing.md,
+                    paddingHorizontal: spacing.lg,
                     backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
                     borderRadius: radius.xl,
                     borderWidth: isDark ? 1 : 0,
@@ -51,7 +54,7 @@ export function WeekStreak({ streak, longestStreak }: WeekStreakProps) {
             ]}
         >
             {/* ── Header row: streak count + meta ── */}
-            <View style={styles.header}>
+            <View style={[styles.header, { marginBottom: spacing.lg }]}>
                 <View style={styles.streakInfo}>
                     <View style={styles.streakCountRow}>
                         <Text style={[typography.title1, { color: colors.text }]}>
@@ -84,7 +87,7 @@ export function WeekStreak({ streak, longestStreak }: WeekStreakProps) {
             </View>
 
             {/* ── Day dots ── */}
-            <View style={styles.daysRow}>
+            <View style={[styles.daysRow, { paddingHorizontal: spacing.xxs }]}>
                 {WEEKDAYS.map((day, i) => {
                     const daysAgo = (today - i + 7) % 7;
                     const isActive = daysAgo < streak && daysAgo >= 0;
@@ -93,29 +96,34 @@ export function WeekStreak({ streak, longestStreak }: WeekStreakProps) {
                     return (
                         <View key={i} style={styles.dayColumn}>
                             {/* Dot */}
-                            <View
-                                style={[
-                                    styles.dot,
-                                    {
-                                        backgroundColor: isActive
-                                            ? brand.primary
-                                            : isDark
+                            {(isActive || isCurrentDay) ? (
+                                <LinearGradient
+                                    colors={
+                                        isCurrentDay
+                                            ? ([brand.accentDark, brand.accentLight] as [string, string])
+                                            : (gradients.primary as unknown as [string, string])
+                                    }
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={[styles.dot, { borderRadius: radius.full }]}
+                                >
+                                    {isActive && (
+                                        <Ionicons name="checkmark" size={10} color="#FFF" />
+                                    )}
+                                </LinearGradient>
+                            ) : (
+                                <View
+                                    style={[
+                                        styles.dot,
+                                        {
+                                            borderRadius: radius.full,
+                                            backgroundColor: isDark
                                                 ? colors.surfaceTertiary
                                                 : colors.backgroundTertiary,
-                                    },
-                                    isCurrentDay && {
-                                        backgroundColor: brand.accent,
-                                    },
-                                ]}
-                            >
-                                {isActive && (
-                                    <Ionicons
-                                        name="checkmark"
-                                        size={10}
-                                        color="#FFF"
-                                    />
-                                )}
-                            </View>
+                                        },
+                                    ]}
+                                />
+                            )}
 
                             {/* Label */}
                             <Text
@@ -127,7 +135,7 @@ export function WeekStreak({ streak, longestStreak }: WeekStreakProps) {
                                             : isActive
                                                 ? colors.textSecondary
                                                 : colors.textTertiary,
-                                        fontWeight: isCurrentDay ? '700' : '500',
+                                        fontWeight: isCurrentDay ? '700' : '400',
                                     },
                                 ]}
                             >
@@ -143,6 +151,8 @@ export function WeekStreak({ streak, longestStreak }: WeekStreakProps) {
                 style={[
                     styles.progressRow,
                     {
+                        marginTop: spacing.md,
+                        paddingVertical: spacing.sm,
                         borderTopWidth: StyleSheet.hairlineWidth,
                         borderTopColor: isDark ? colors.border : colors.separator,
                     },
@@ -153,7 +163,7 @@ export function WeekStreak({ streak, longestStreak }: WeekStreakProps) {
                         <View
                             style={[
                                 styles.celebrationBadge,
-                                { backgroundColor: brand.accent + '14' },
+                                { backgroundColor: brand.accent + '14', borderRadius: radius.full },
                             ]}
                         >
                             <Ionicons name="star" size={12} color={brand.accent} />
@@ -184,8 +194,6 @@ export function WeekStreak({ streak, longestStreak }: WeekStreakProps) {
 
 const styles = StyleSheet.create({
     card: {
-        paddingTop: 18,
-        paddingHorizontal: 20,
     },
 
     /* Header */
@@ -193,7 +201,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'flex-start',
         justifyContent: 'space-between',
-        marginBottom: 20,
     },
     streakInfo: {},
     streakCountRow: {
@@ -209,7 +216,6 @@ const styles = StyleSheet.create({
     daysRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: 4,
     },
     dayColumn: {
         alignItems: 'center',
@@ -218,9 +224,9 @@ const styles = StyleSheet.create({
     dot: {
         width: 28,
         height: 28,
-        borderRadius: 14,
         alignItems: 'center',
         justifyContent: 'center',
+        overflow: 'hidden',
     },
     dayLabel: {
         fontSize: 10,
@@ -229,8 +235,6 @@ const styles = StyleSheet.create({
 
     /* Progress row */
     progressRow: {
-        marginTop: 16,
-        paddingVertical: 12,
         alignItems: 'center',
     },
     celebrationRow: {
@@ -241,7 +245,6 @@ const styles = StyleSheet.create({
     celebrationBadge: {
         width: 22,
         height: 22,
-        borderRadius: 11,
         alignItems: 'center',
         justifyContent: 'center',
     },

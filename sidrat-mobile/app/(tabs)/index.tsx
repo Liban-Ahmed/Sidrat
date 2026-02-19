@@ -290,7 +290,7 @@ export default function HomeScreen() {
                                         <Ionicons
                                             name={greetingIcon}
                                             size={14}
-                                            color="#EDC55E"
+                                            color={brand.accentLight}
                                             style={{ marginLeft: 5 }}
                                         />
                                     </View>
@@ -312,7 +312,7 @@ export default function HomeScreen() {
                                 {/* Notification badge dot */}
                                 <View style={[
                                     styles.notifDot,
-                                    { backgroundColor: '#EDC55E', borderColor: 'rgba(255,255,255,0.15)' },
+                                    { backgroundColor: brand.accentLight, borderColor: 'rgba(255,255,255,0.15)' },
                                 ]} />
                             </ScalePress>
                         </View>
@@ -674,8 +674,8 @@ export default function HomeScreen() {
                                 <LinearGradient
                                     colors={
                                         isDark
-                                            ? ['rgba(10,126,140,0.08)', 'rgba(6,101,112,0.04)']
-                                            : ['rgba(10,126,140,0.04)', 'rgba(212,152,42,0.03)']
+                                            ? ['rgba(26,58,92,0.08)', 'rgba(26,58,92,0.04)']
+                                            : ['rgba(26,58,92,0.04)', 'rgba(212,152,42,0.03)']
                                     }
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 1 }}

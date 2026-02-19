@@ -14,6 +14,7 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { useTheme } from '../../theme';
 
 interface MiniCrescentProps {
     active: boolean;
@@ -29,6 +30,8 @@ export function MiniCrescent({
     size = 14,
     isToday = false,
 }: MiniCrescentProps) {
+    const { brand } = useTheme();
+
     if (!active) {
         return (
             <View
@@ -44,7 +47,7 @@ export function MiniCrescent({
         );
     }
 
-    const moonColor = isToday ? '#FFD' : '#FFFFFF';
+    const moonColor = isToday ? brand.accentLight : '#FFFFFF';
     const outerSize = size + 2;
 
     return (

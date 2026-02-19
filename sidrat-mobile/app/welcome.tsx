@@ -94,7 +94,7 @@ export default function WelcomeScreen() {
 
     return (
         <LinearGradient
-            colors={['#044B54', '#066570', '#0A7E8C', '#12A4B4']}
+            colors={[brand.primaryDark, brand.primary, '#055F6E', brand.primaryLight]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.container}
@@ -113,7 +113,7 @@ export default function WelcomeScreen() {
                     >
                         <View style={[styles.iconOuterRing, { borderWidth: 2, borderColor: 'rgba(255,255,255,0.1)' }]}>
                             <View style={[styles.iconCircle, { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
-                                <Ionicons name="moon" size={64} color="#FFD700" />
+                                <Ionicons name="moon" size={64} color={brand.accentLight} />
                             </View>
                         </View>
                     </Animated.View>
@@ -136,7 +136,7 @@ export default function WelcomeScreen() {
                         ].map((feature, i) => (
                             <View key={i} style={styles.featureRow}>
                                 <View style={[styles.featureDot, { backgroundColor: 'rgba(255,255,255,0.2)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' }]}>
-                                    <Ionicons name={feature.icon} size={20} color="#FFD700" />
+                                    <Ionicons name={feature.icon} size={20} color={brand.accentLight} />
                                 </View>
                                 <Text style={[typography.callout, { color: 'rgba(255,255,255,0.9)' }]}>
                                     {feature.text}

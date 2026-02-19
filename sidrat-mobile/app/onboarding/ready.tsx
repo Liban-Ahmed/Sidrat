@@ -51,7 +51,7 @@ export default function ReadyScreen() {
 
     return (
         <LinearGradient
-            colors={['#044B54', '#066570', '#0A7E8C']}
+            colors={[brand.primaryDark, brand.primary, '#055F6E'] as [string, string, string]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
             style={styles.container}
@@ -66,7 +66,7 @@ export default function ReadyScreen() {
                     {/* Celebration icon */}
                     <Animated.View style={[styles.starContainer, starStyle]}>
                         <View style={[styles.starCircle, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
-                            <Ionicons name="star" size={72} color="#FFD700" />
+                            <Ionicons name="star" size={72} color={brand.accentLight} />
                         </View>
                     </Animated.View>
 

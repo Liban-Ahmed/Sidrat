@@ -24,7 +24,7 @@ import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../../src/theme';
+import { useTheme, brand as brandTokens } from '../../src/theme';
 import { useAppStore, useLessonStore } from '../../src/stores';
 import { ProgressRing, IslamicDivider, MiniStatPill } from '../../src/components';
 import { allUnits, allCurriculumLessons } from '../../src/data/curriculum';
@@ -45,9 +45,9 @@ const CATEGORY_SUBTITLES: Record<string, string> = {
 };
 
 const DIFFICULTY_META: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
-    beginner: { label: 'Beginner', icon: 'leaf-outline', color: '#2E8B57' },
-    intermediate: { label: 'Intermediate', icon: 'trending-up-outline', color: '#D4982A' },
-    advanced: { label: 'Advanced', icon: 'diamond-outline', color: '#E8636F' },
+    beginner: { label: 'Beginner', icon: 'leaf-outline', color: brandTokens.secondaryLight },
+    intermediate: { label: 'Intermediate', icon: 'trending-up-outline', color: brandTokens.accent },
+    advanced: { label: 'Advanced', icon: 'diamond-outline', color: brandTokens.coralLight },
 };
 
 const ROADMAP_HINTS = [
@@ -175,7 +175,7 @@ export default function LearnScreen() {
                                             colors={[heroColor, heroColor + '80']}
                                             start={{ x: 0, y: 0 }}
                                             end={{ x: 1, y: 0 }}
-                                            style={{ height: 4 }}
+                                            style={{ height: 3 }}
                                         />
 
                                         <View style={{ padding: spacing.lg }}>
@@ -252,8 +252,8 @@ export default function LearnScreen() {
                         <LinearGradient
                             colors={
                                 isDark
-                                    ? ['rgba(10,126,140,0.08)', 'rgba(6,101,112,0.04)']
-                                    : ['rgba(10,126,140,0.04)', 'rgba(212,152,42,0.03)']
+                                    ? ['rgba(26,58,92,0.08)', 'rgba(26,58,92,0.04)']
+                                    : ['rgba(26,58,92,0.04)', 'rgba(212,152,42,0.03)']
                             }
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 1 }}
@@ -306,7 +306,8 @@ export default function LearnScreen() {
 
                 {/* ── Section label ── */}
                 <Animated.View entering={FadeIn.delay(300).duration(400)}>
-                    <View style={{ paddingHorizontal: spacing.lg, marginBottom: spacing.xs }}>
+                    <View style={{ paddingHorizontal: spacing.lg, marginBottom: spacing.xs, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <Ionicons name="layers-outline" size={18} color={brand.primary} />
                         <Text style={[typography.title3, { color: colors.text }]}>
                             Units
                         </Text>

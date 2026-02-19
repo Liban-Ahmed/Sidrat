@@ -9,7 +9,7 @@
 import React from 'react';
 import { View, StyleSheet, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../../theme';
+import { useTheme, radius as radiusTokens } from '../../theme';
 
 interface GradientCardProps {
     /** Gradient color pair */
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     },
     circle: {
         position: 'absolute',
-        borderRadius: 999,
+        borderRadius: radiusTokens.full,
         backgroundColor: 'rgba(255,255,255,0.06)',
     },
     circle1: { width: 150, height: 150, top: -50, right: -30 },

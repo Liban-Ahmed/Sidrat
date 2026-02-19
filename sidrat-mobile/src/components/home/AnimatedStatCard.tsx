@@ -133,8 +133,8 @@ export function AnimatedStatCard({
                         styles.accentStrip,
                         {
                             backgroundColor: color,
-                            borderTopLeftRadius: radius.lg - 1,
-                            borderTopRightRadius: radius.lg - 1,
+                            borderTopLeftRadius: radius.lg,
+                            borderTopRightRadius: radius.lg,
                         },
                     ]}
                 />
@@ -145,6 +145,7 @@ export function AnimatedStatCard({
                     style={[
                         styles.iconContainer,
                         {
+                            marginTop: spacing.xxs,
                             borderRadius: radius.md,
                         },
                     ]}
@@ -174,7 +175,7 @@ export function AnimatedStatCard({
                 </Animated.View>
 
                 {/* Number with optional trend */}
-                <View style={styles.valueRow}>
+                <View style={[styles.valueRow, { gap: spacing.xxs }]}>
                     <AnimatedCounter
                         to={numericValue}
                         color={colors.text}
@@ -192,6 +193,7 @@ export function AnimatedStatCard({
                                 {
                                     backgroundColor: trendColor + '15',
                                     borderRadius: radius.full,
+                                    marginTop: spacing.xs,
                                 },
                             ]}
                         >
@@ -232,7 +234,6 @@ const styles = StyleSheet.create({
         height: 3,
     },
     iconContainer: {
-        marginTop: 4,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -250,13 +251,11 @@ const styles = StyleSheet.create({
     valueRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
     },
     trendBadge: {
         width: 18,
         height: 18,
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 8,
     },
 });

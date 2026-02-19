@@ -41,8 +41,8 @@ export function MiniStatPill({
                 ]}
             >
                 <Ionicons name={icon} size={14} color={color} />
-                <Text style={[styles.hValue, { color }]}>{value}</Text>
-                <Text style={[styles.hLabel, { color: color + '90' }]}>{label}</Text>
+                <Text style={[typography.headlineBold, { color, marginLeft: 6 }]}>{value}</Text>
+                <Text style={[typography.labelXs, { color: color + '90', marginLeft: spacing.xxs, textTransform: 'uppercase' as const }]}>{label}</Text>
             </View>
         );
     }
@@ -93,6 +93,4 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         minWidth: 80,
     },
-    hValue: { fontSize: 17, fontWeight: '800', marginLeft: 6 },
-    hLabel: { fontSize: 10, fontWeight: '600', marginLeft: 4, textTransform: 'uppercase', letterSpacing: 0.3 },
 });

@@ -197,9 +197,9 @@ export default function FamilyScreen() {
     const CATEGORY_COLORS: Record<FamilyActivity['category'], string> = {
         quran: brand.primary,
         dua: brand.secondary,
-        character: '#10B981',
+        character: brand.secondaryLight,
         worship: brand.accent,
-        knowledge: '#8B5CF6',
+        knowledge: brand.lavender,
     };
 
     return (
@@ -270,9 +270,9 @@ export default function FamilyScreen() {
 
                         <View
                             style={{
-                                width: 56,
-                                height: 56,
-                                borderRadius: 28,
+                                width: 48,
+                                height: 48,
+                                borderRadius: 24,
                                 backgroundColor: CATEGORY_COLORS[activity.category] + '15',
                                 borderWidth: 1.5,
                                 borderColor: CATEGORY_COLORS[activity.category] + '25',
@@ -283,7 +283,7 @@ export default function FamilyScreen() {
                         >
                             <Ionicons
                                 name={ACTIVITY_ICONS[activity.id] ?? 'sparkles-outline'}
-                                size={26}
+                                size={24}
                                 color={CATEGORY_COLORS[activity.category]}
                             />
                         </View>

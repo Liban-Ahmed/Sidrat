@@ -30,7 +30,7 @@ export function SectionHeader({
     accentColor,
     onSeeAll,
 }: SectionHeaderProps) {
-    const { colors, typography, brand, spacing } = useTheme();
+    const { colors, typography, brand, spacing, radius } = useTheme();
     const barColor = accentColor ?? brand.primary;
 
     return (
@@ -66,9 +66,9 @@ export function SectionHeader({
                         styles.seeAll,
                         {
                             backgroundColor: pressed ? colors.interactive + '10' : 'transparent',
-                            borderRadius: 8,
-                            paddingVertical: 4,
-                            paddingHorizontal: 8,
+                            borderRadius: radius.sm,
+                            paddingVertical: spacing.xxs,
+                            paddingHorizontal: spacing.xs,
                         },
                     ]}
                     accessibilityRole="button"

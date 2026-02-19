@@ -20,7 +20,7 @@ import Animated, {
     FadeInDown,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/theme';
+import { useTheme, brand as brandTokens } from '../../src/theme';
 import { useAppStore, useChildStore, useLessonStore, useAchievementStore, ACHIEVEMENTS } from '../../src/stores';
 import { Card, Avatar, ProgressRing, IslamicDivider, MiniStatPill, BismillahHeader } from '../../src/components';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -54,16 +54,16 @@ const ACHIEVEMENT_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
 
 const RARITY_COLORS: Record<AchievementDef['rarity'], string> = {
     bronze: '#CD7F32',
-    silver: '#9CA3AF',
-    gold: '#D4982A',
-    platinum: '#8B5CF6',
+    silver: '#8A9FAE',
+    gold: brandTokens.accent,
+    platinum: '#8B78C8',
 };
 
 const RARITY_BG: Record<AchievementDef['rarity'], string> = {
     bronze: '#CD7F3210',
-    silver: '#9CA3AF10',
-    gold: '#D4982A10',
-    platinum: '#8B5CF610',
+    silver: '#8A9FAE10',
+    gold: brandTokens.accentMuted,
+    platinum: '#8B78C810',
 };
 
 const RARITY_LABELS: Record<AchievementDef['rarity'], string> = {
@@ -228,36 +228,26 @@ export default function ProgressScreen() {
                         colors={gradients.progressHero as readonly [string, string]}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
-                        style={{
-                            paddingTop: 56,
-                            paddingBottom: 60,
-                            paddingHorizontal: spacing.lg,
-                            borderBottomLeftRadius: 24,
-                            borderBottomRightRadius: 24,
-                            overflow: 'hidden',
-                        }}
+                        style={[
+                            styles.heroGradient,
+                            {
+                                paddingHorizontal: spacing.lg,
+                                paddingTop: spacing.xl + 54,
+                                paddingBottom: spacing.xxl + 28,
+                                borderBottomLeftRadius: radius.xl,
+                                borderBottomRightRadius: radius.xl,
+                            },
+                        ]}
                     >
                         {/* Decorative orbs */}
-                        <View style={{
-                            position: 'absolute', top: -30, right: -30,
-                            width: 120, height: 120, borderRadius: 60,
-                            backgroundColor: 'rgba(255,255,255,0.08)',
-                        }} />
-                        <View style={{
-                            position: 'absolute', bottom: 10, left: -20,
-                            width: 80, height: 80, borderRadius: 40,
-                            backgroundColor: 'rgba(255,255,255,0.06)',
-                        }} />
-                        <View style={{
-                            position: 'absolute', top: 40, left: '45%' as any,
-                            width: 50, height: 50, borderRadius: 25,
-                            backgroundColor: 'rgba(255,255,255,0.04)',
-                        }} />
+                        <View style={[styles.heroOrb, styles.heroOrbLarge]} />
+                        <View style={[styles.heroOrb, styles.heroOrbSmall]} />
+                        <View style={[styles.heroOrb, styles.heroOrbMedium]} />
 
                         <Text style={[typography.largeTitle, { color: '#FFFFFF' }]}>
                             Progress
                         </Text>
-                        <Text style={[typography.body, { color: 'rgba(255,255,255,0.75)', marginTop: 4 }]}>
+                        <Text style={[typography.body, { color: 'rgba(255,255,255,0.75)', marginTop: spacing.xxs }]}>
                             Track your learning journey
                         </Text>
                     </LinearGradient>
@@ -750,6 +740,12 @@ const styles = StyleSheet.create({
     safe: { flex: 1 },
     empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 },
     emptyIcon: { width: 80, height: 80, alignItems: 'center', justifyContent: 'center' },
+    // Hero header — shared orb pattern
+    heroGradient: { overflow: 'hidden', position: 'relative' },
+    heroOrb: { position: 'absolute', borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.06)' },
+    heroOrbLarge: { width: 200, height: 200, top: -40, right: -60 },
+    heroOrbSmall: { width: 80, height: 80, bottom: 20, left: -20 },
+    heroOrbMedium: { width: 120, height: 120, top: 30, left: '40%' as unknown as number, backgroundColor: 'rgba(255,255,255,0.03)' },
 
     // Profile
     profileRow: { flexDirection: 'row', alignItems: 'center' },

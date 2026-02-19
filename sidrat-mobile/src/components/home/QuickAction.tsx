@@ -113,6 +113,7 @@ export function QuickAction({
                                     {
                                         backgroundColor: colors.error,
                                         borderColor: isDark ? colors.surfaceSecondary : colors.surface,
+                                        borderRadius: radius.full,
                                     },
                                 ]}
                             />
@@ -169,7 +170,6 @@ const styles = StyleSheet.create({
         right: 2,
         width: 10,
         height: 10,
-        borderRadius: 5,
         borderWidth: 2,
     },
 });

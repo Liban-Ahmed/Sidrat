@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, Pressable, Switch, Alert, StyleSheet, Linking, Platform } from 'react-native';
+import { View, Text, ScrollView, Pressable, Switch, Alert, StyleSheet, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -218,19 +218,23 @@ export default function SettingsScreen() {
                 colors={gradients.settingsHero}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={styles.heroGradient}
+                style={{
+                    borderBottomLeftRadius: radius.xl,
+                    borderBottomRightRadius: radius.xl,
+                    overflow: 'hidden',
+                    paddingHorizontal: spacing.lg,
+                    paddingTop: spacing.xl + 54,
+                    paddingBottom: spacing.xxl,
+                }}
             >
                 {/* Decorative orbs */}
-                <View style={[styles.orb, styles.orbTopRight, { backgroundColor: 'rgba(255,255,255,0.06)' }]} />
-                <View style={[styles.orb, styles.orbBottomLeft, { backgroundColor: 'rgba(212,152,42,0.08)' }]} />
-                <View style={{ paddingTop: Platform.OS === 'ios' ? 56 : 40, paddingBottom: spacing.xl, paddingHorizontal: spacing.lg }}>
-                    <Text style={[typography.caption, { color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: spacing.xxs }]}>
-                        Customize
-                    </Text>
-                    <Text style={[typography.largeTitle, { color: '#FFFFFF', fontSize: 32, fontWeight: '700' }]}>
-                        Settings
-                    </Text>
-                </View>
+                <View style={[styles.heroOrb, styles.heroOrbLarge, { backgroundColor: 'rgba(255,255,255,0.06)' }]} />
+                <View style={[styles.heroOrb, styles.heroOrbSmall, { backgroundColor: 'rgba(212,152,42,0.08)' }]} />
+                <View style={[styles.heroOrb, styles.heroOrbMedium]} />
+                <Text style={[typography.largeTitle, { color: '#FFFFFF' }]}>Settings</Text>
+                <Text style={[typography.body, { color: 'rgba(255,255,255,0.75)', marginTop: spacing.xxs }]}>
+                    Preferences & child profiles
+                </Text>
             </LinearGradient>
 
             <ScrollView
@@ -295,9 +299,9 @@ export default function SettingsScreen() {
 
                 {/* Preferences — Toggles */}
                 <IslamicDivider spacing={12} variant="rich" />
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.xs }}>
-                    <Ionicons name="options-outline" size={16} color={brand.primary} />
-                    <Text style={[typography.labelSmall, { color: brand.primary, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: '700' }]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: spacing.xs }}>
+                    <Ionicons name="options-outline" size={18} color={brand.primary} />
+                    <Text style={[typography.title3, { color: colors.text }]}>
                         Preferences
                     </Text>
                 </View>
@@ -336,9 +340,9 @@ export default function SettingsScreen() {
 
                 {/* Parent Zone — Actions */}
                 <IslamicDivider spacing={12} variant="rich" />
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.xs }}>
-                    <Ionicons name="shield-outline" size={16} color={brand.accent} />
-                    <Text style={[typography.labelSmall, { color: brand.accent, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: '700' }]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: spacing.xs }}>
+                    <Ionicons name="shield-outline" size={18} color={brand.accent} />
+                    <Text style={[typography.title3, { color: colors.text }]}>
                         Parent Zone
                     </Text>
                 </View>
@@ -384,9 +388,9 @@ export default function SettingsScreen() {
 
                 {/* About */}
                 <IslamicDivider spacing={12} variant="rich" />
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.xs }}>
-                    <Ionicons name="information-circle-outline" size={16} color={brand.lavender} />
-                    <Text style={[typography.labelSmall, { color: brand.lavender, textTransform: 'uppercase', letterSpacing: 1.2, fontWeight: '700' }]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: spacing.xs }}>
+                    <Ionicons name="information-circle-outline" size={18} color={brand.lavender} />
+                    <Text style={[typography.title3, { color: colors.text }]}>
                         About
                     </Text>
                 </View>
@@ -447,27 +451,10 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
     safe: { flex: 1 },
-    heroGradient: {
-        borderBottomLeftRadius: 28,
-        borderBottomRightRadius: 28,
-        overflow: 'hidden',
-    },
-    orb: {
-        position: 'absolute',
-        borderRadius: 9999,
-    },
-    orbTopRight: {
-        width: 180,
-        height: 180,
-        top: -40,
-        right: -50,
-    },
-    orbBottomLeft: {
-        width: 140,
-        height: 140,
-        bottom: -30,
-        left: -30,
-    },
+    heroOrb: { position: 'absolute', borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.06)' },
+    heroOrbLarge: { width: 200, height: 200, top: -40, right: -60 },
+    heroOrbSmall: { width: 80, height: 80, bottom: 20, left: -20 },
+    heroOrbMedium: { width: 120, height: 120, top: 30, left: '40%' as unknown as number, backgroundColor: 'rgba(255,255,255,0.03)' },
     profileRow: { flexDirection: 'row', flexWrap: 'wrap' },
     profileItem: { alignItems: 'center', minWidth: 80, overflow: 'hidden' },
     profileAccentStrip: {

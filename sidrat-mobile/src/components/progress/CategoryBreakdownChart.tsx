@@ -214,7 +214,7 @@ export function CategoryBreakdownChart({
                     },
                 ]}
             >
-                <Text style={{ fontSize: 32 }}>📊</Text>
+                <Ionicons name="bar-chart-outline" size={36} color={colors.textTertiary} />
                 <Text
                     style={[
                         typography.label,

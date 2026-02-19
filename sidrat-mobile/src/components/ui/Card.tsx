@@ -67,7 +67,7 @@ export function Card({
         glass: {
             backgroundColor: isDark ? 'rgba(28,31,34,0.65)' : 'rgba(255,255,255,0.72)',
             borderWidth: 1,
-            borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(10,126,140,0.08)',
+            borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(26,58,92,0.08)',
             ...shadows.subtle,
         },
     };
