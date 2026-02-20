@@ -538,7 +538,7 @@ export default function LearnScreen() {
                                                                 <Text style={[styles.chipText, { color: colors.textTertiary, marginLeft: 3 }]}>
                                                                     {lesson.durationMinutes}m
                                                                 </Text>
-                                                                <Text style={[styles.chipText, { color: colors.textTertiary, marginLeft: 2, marginRight: 2 }]}>\u00b7</Text>
+                                                                <View style={{ width: 8 }} />
                                                                 <Ionicons name="sparkles-outline" size={10} color={brand.accent} />
                                                                 <Text style={[styles.chipText, { color: brand.accent, marginLeft: 3 }]}>
                                                                     {lesson.xpReward} XP

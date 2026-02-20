@@ -3,187 +3,41 @@
  *
  * Weekly family activities with parent scripts.
  * Data-driven from a rotating activity bank.
- * Tracks completion via the child store.
+ * Tracks completion via the family store.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { MMKV } from 'react-native-mmkv';
 import { useTheme } from '../../src/theme';
-import { useAppStore } from '../../src/stores';
+import { useAppStore, useFamilyStore } from '../../src/stores';
+import {
+    ACTIVITY_ICONS,
+    getWeekOfYear,
+    getActivityForWeek,
+    getNextActivity,
+} from '../../src/stores/familyStore';
+import type { FamilyActivity } from '../../src/stores/familyStore';
 import { Card, Button, IslamicDivider, BismillahHeader } from '../../src/components';
 import { analyticsService } from '../../src/services/analyticsService';
 import { ANALYTICS_EVENTS } from '../../src/constants/config';
-
-const mmkv = new MMKV({ id: 'sidrat-store' });
-
-// ── Family Activity Bank ──
-
-interface FamilyActivity {
-    id: string;
-    title: string;
-    emoji: string;
-    description: string;
-    duration: number; // minutes
-    category: 'quran' | 'dua' | 'character' | 'worship' | 'knowledge';
-    tips: string[];
-    prompts: string[];
-}
-
-const ACTIVITIES: FamilyActivity[] = [
-    {
-        id: 'wudu-together',
-        title: 'Practice Wudu Together',
-        emoji: '💧',
-        description:
-            'Go through each step of Wudu together slowly and make it fun! Let them lead and gently guide when needed.',
-        duration: 15,
-        category: 'worship',
-        tips: [
-            'Make it playful — use a fun timer or sing a simple nasheed',
-            "Let them splash a little — it's about learning, not perfection",
-            'Praise effort, not just getting it right',
-        ],
-        prompts: [
-            'Why do you think we clean ourselves before talking to Allah?',
-            "What's your favorite part of making Wudu?",
-            'How do you feel after making Wudu?',
-        ],
-    },
-    {
-        id: 'bedtime-dua',
-        title: 'Bedtime Dua Together',
-        emoji: '🌙',
-        description:
-            'End the day by reciting bedtime duas together. Teach your child to speak to Allah before sleep.',
-        duration: 10,
-        category: 'dua',
-        tips: [
-            'Start with just one dua and add more each week',
-            'Make it cozy — dim lights, get comfy',
-            "Explain the meaning in simple words they'll understand",
-        ],
-        prompts: [
-            'What was the best thing that happened today?',
-            "What would you like to ask Allah for tonight?",
-            'Why do we say Bismillah before sleeping?',
-        ],
-    },
-    {
-        id: 'quran-listening',
-        title: 'Quran Listening Circle',
-        emoji: '🎧',
-        description:
-            'Sit together as a family and listen to a short surah. Talk about what it means and how beautiful it sounds.',
-        duration: 15,
-        category: 'quran',
-        tips: [
-            'Start with short surahs like Al-Fatiha or Al-Ikhlas',
-            'Play a beautiful recitation — Mishary Al-Afasy is great for kids',
-            'Ask them to close their eyes and just listen first',
-        ],
-        prompts: [
-            'How did it make you feel when you heard the Quran?',
-            "What words did you recognize?",
-            'Why do you think the Quran sounds so beautiful?',
-        ],
-    },
-    {
-        id: 'kindness-tracker',
-        title: 'Acts of Kindness Challenge',
-        emoji: '💚',
-        description:
-            'Challenge each family member to do 3 kind things today. Share your acts of kindness at dinner!',
-        duration: 20,
-        category: 'character',
-        tips: [
-            'Give examples: help a sibling, share a toy, say something nice',
-            'Make a simple chart they can draw check marks on',
-            'Remind them the Prophet ﷺ said the best people are those most kind',
-        ],
-        prompts: [
-            'What kind thing did you do today?',
-            'How did it make the other person feel?',
-            'What kind thing would you like to do tomorrow?',
-        ],
-    },
-    {
-        id: 'prophet-stories',
-        title: 'Prophet Stories Storytime',
-        emoji: '📖',
-        description:
-            'Read or tell a story about one of the Prophets (peace be upon them). Discuss the lessons we can learn.',
-        duration: 20,
-        category: 'knowledge',
-        tips: [
-            'Use age-appropriate language and keep it engaging',
-            'Ask questions during the story to keep them involved',
-            'Connect the story to something in their daily life',
-        ],
-        prompts: [
-            'Which prophet did we learn about? What did they teach?',
-            'What would you do if you were in their situation?',
-            'How can we be like this prophet in our daily life?',
-        ],
-    },
-    {
-        id: 'morning-adhkar',
-        title: 'Morning Adhkar Together',
-        emoji: '☀️',
-        description:
-            'Start the day with morning remembrances of Allah. Say them together over breakfast!',
-        duration: 10,
-        category: 'dua',
-        tips: [
-            'Pick 3-5 short adhkar to start with',
-            'Say them during breakfast so it becomes a routine',
-            'Use repetition — kids love saying things together',
-        ],
-        prompts: [
-            'How does it feel to start the day remembering Allah?',
-            'What does this dua mean in your own words?',
-            'When else during the day can we remember Allah?',
-        ],
-    },
-];
-
-const ACTIVITY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-    'wudu-together': 'water-outline',
-    'bedtime-dua': 'moon-outline',
-    'quran-listening': 'musical-notes-outline',
-    'kindness-tracker': 'heart-outline',
-    'prophet-stories': 'book-outline',
-    'morning-adhkar': 'sunny-outline',
-};
-
-// ── Helpers ──
-
-function getWeekOfYear(): number {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 1);
-    const diff = now.getTime() - start.getTime();
-    return Math.ceil(diff / (7 * 24 * 60 * 60 * 1000));
-}
 
 export default function FamilyScreen() {
     const { brand, colors, typography, spacing, radius, gradients } = useTheme();
 
     const activeChildId = useAppStore((s) => s.activeChildId);
+    const { markComplete, isCompleted } = useFamilyStore();
 
     // Rotate activities weekly
     const weekNum = getWeekOfYear();
-    const activity = useMemo(() => ACTIVITIES[weekNum % ACTIVITIES.length]!, [weekNum]);
+    const activity = useMemo(() => getActivityForWeek(weekNum), [weekNum]);
 
-    // Persist completion per-week using MMKV
-    const completionKey = `family-completed-${weekNum}-${activeChildId ?? 'default'}`;
-    const [completed, setCompleted] = useState(() => mmkv.getBoolean(completionKey) ?? false);
+    const completed = isCompleted(weekNum, activeChildId);
 
     const handleComplete = useCallback(() => {
-        setCompleted(true);
-        mmkv.set(completionKey, true);
+        markComplete(weekNum, activeChildId);
         analyticsService.track(ANALYTICS_EVENTS.FAMILY_ACTIVITY_COMPLETED, {
             activityId: activity.id,
             childId: activeChildId ?? 'none',
@@ -192,7 +46,7 @@ export default function FamilyScreen() {
             'Masha\'Allah! 🎉',
             'Great job completing this week\'s family activity together!',
         );
-    }, [activity.id, activeChildId]);
+    }, [activity.id, activeChildId, weekNum, markComplete]);
 
     const CATEGORY_COLORS: Record<FamilyActivity['category'], string> = {
         quran: brand.primary,
@@ -388,7 +242,7 @@ export default function FamilyScreen() {
                         </Text>
                     </View>
                     {(() => {
-                        const next = ACTIVITIES[(weekNum + 1) % ACTIVITIES.length]!;
+                        const next = getNextActivity(weekNum);
                         return (
                             <Card
                                 variant="filled"
