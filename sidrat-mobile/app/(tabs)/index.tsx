@@ -38,7 +38,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '../../src/theme';
 import { useAppStore, useChildStore, useLessonStore } from '../../src/stores';
-import { Avatar, Badge, BismillahHeader, Button, Card, ScalePress, SectionHeader, ProgressBar } from '../../src/components';
+import { Badge, BismillahHeader, Button, Card, ScalePress, SectionHeader, ProgressBar } from '../../src/components';
 import { AyahOfTheDay, DuaOfTheDay, HomeSkeletonLoader, SalahReminder } from '../../src/components/home';
 import { categoryMeta } from '../../src/types';
 import { allCurriculumLessons } from '../../src/data/curriculum';
@@ -70,15 +70,6 @@ function getGreetingIcon(): keyof typeof Ionicons.glyphMap {
     if (hour < 17) return 'sunny';
     if (hour < 21) return 'moon-outline';
     return 'moon';
-}
-
-function getMotivationalSubtitle(child: { currentStreak: number; totalLessonsCompleted: number } | undefined): string {
-    if (!child) return 'Start your Quran journey';
-    if (child.totalLessonsCompleted === 0) return 'Ready for your first lesson?';
-    if (child.currentStreak >= 7) return `Masha'Allah! ${child.currentStreak}-day streak ✨`;
-    if (child.currentStreak >= 3) return `Keep your ${child.currentStreak}-day streak going!`;
-    if (child.currentStreak === 1) return 'Great start — keep it up!';
-    return "Let's learn something new today";
 }
 
 /**
@@ -238,7 +229,6 @@ export default function HomeScreen() {
 
     const greeting = useMemo(getGreeting, []);
     const greetingIcon = useMemo(getGreetingIcon, []);
-    const subtitle = useMemo(() => getMotivationalSubtitle(child), [child?.currentStreak, child?.totalLessonsCompleted]);
     const heroGradient = useMemo(getTimeBasedHeroGradient, []);
 
     // ── Navigate to lesson player ──
@@ -334,11 +324,9 @@ export default function HomeScreen() {
                         style={[
                             styles.heroGradient,
                             {
-                                borderBottomLeftRadius: radius.xl,
-                                borderBottomRightRadius: radius.xl,
                                 paddingHorizontal: spacing.lg,
-                                paddingTop: spacing.xl + 44, // account for safe area
-                                paddingBottom: spacing.xl,
+                                paddingTop: spacing.xl + 54,
+                                paddingBottom: spacing.xxl + 12,
                             },
                         ]}
                     >
@@ -348,64 +336,41 @@ export default function HomeScreen() {
                         <Animated.View style={[styles.heroOrb, styles.heroOrbMedium, orbMediumStyle]} />
 
                         <View style={styles.header}>
-                            <View style={styles.headerLeft}>
-                                {child && (
-                                    <ScalePress
-                                        onPress={() => router.push('/family' as any)}
-                                        accessibilityLabel={`${child.name}'s avatar — switch child`}
-                                    >
-                                        <View style={[styles.avatarRing, { borderRadius: radius.full }]}>
-                                            <Avatar avatarId={child.avatarId} size={52} />
-                                        </View>
-                                    </ScalePress>
-                                )}
-                                <View style={{ marginLeft: spacing.sm, flex: 1 }}>
-                                    <View style={styles.greetingRow}>
-                                        <Text style={[typography.bodySmall, { color: 'rgba(255,255,255,0.8)' }]}>
-                                            {greeting}
-                                        </Text>
-                                        <Ionicons
-                                            name={greetingIcon}
-                                            size={14}
-                                            color={brand.accentLight}
-                                            style={{ marginLeft: 5 }}
-                                        />
-                                    </View>
-                                    <Text style={[typography.title2, { color: '#FFFFFF' }]}>
-                                        {child?.name ?? 'Welcome'}
+                            <View style={{ flex: 1 }}>
+                                <View style={styles.greetingRow}>
+                                    <Text style={[typography.body, { color: 'rgba(255,255,255,0.75)' }]}>
+                                        {greeting}
                                     </Text>
-                                    <Text
-                                        style={[
-                                            typography.caption,
-                                            { color: 'rgba(255,255,255,0.6)', marginTop: 2 },
-                                        ]}
-                                        numberOfLines={1}
-                                    >
-                                        {subtitle}
-                                    </Text>
+                                    <Ionicons
+                                        name={greetingIcon}
+                                        size={14}
+                                        color={brand.accentLight}
+                                        style={{ marginLeft: 5 }}
+                                    />
                                 </View>
+                                <Text style={[typography.largeTitle, { color: '#FFFFFF' }]}>
+                                    {child?.name ?? 'Welcome'}
+                                </Text>
                             </View>
-
-                            {/* Settings */}
-                            <ScalePress
-                                onPress={() => router.push('/settings' as any)}
-                                accessibilityLabel="Settings"
-                                style={[
-                                    styles.iconBtn,
-                                    { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: radius.full },
-                                ]}
-                            >
-                                <Ionicons name="settings-outline" size={21} color="#FFFFFF" />
-                            </ScalePress>
                         </View>
                     </LinearGradient>
                 </Animated.View>
+                {/* Bottom curve blending into background */}
+                <View
+                    style={{
+                        height: 24,
+                        marginTop: -24,
+                        backgroundColor: colors.background,
+                        borderTopLeftRadius: radius.xl,
+                        borderTopRightRadius: radius.xl,
+                    }}
+                />
 
                 {/* ── Content area ────────────────────────────── */}
                 <View style={{ paddingHorizontal: spacing.md }}>
 
                     {/* ── Salah Reminder (ambient) ─────────────── */}
-                    <View style={{ marginTop: spacing.md }}>
+                    <View style={{ marginTop: spacing.lg }}>
                         <SalahReminder />
                     </View>
 
@@ -795,28 +760,12 @@ const styles = StyleSheet.create({
         left: '40%' as unknown as number,
         backgroundColor: 'rgba(255,255,255,0.03)',
     },
-    avatarRing: {
-        borderWidth: 2.5,
-        borderColor: 'rgba(255,255,255,0.3)',
-        padding: 2,
-    },
 
     /* Greeting header */
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-    },
-    headerLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-    },
-    iconBtn: {
-        width: 44,
-        height: 44,
-        alignItems: 'center',
-        justifyContent: 'center',
     },
 
     /* Lesson card */

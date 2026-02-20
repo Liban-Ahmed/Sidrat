@@ -219,12 +219,10 @@ export default function SettingsScreen() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={{
-                    borderBottomLeftRadius: radius.xl,
-                    borderBottomRightRadius: radius.xl,
                     overflow: 'hidden',
                     paddingHorizontal: spacing.lg,
                     paddingTop: spacing.xl + 54,
-                    paddingBottom: spacing.xxl,
+                    paddingBottom: spacing.xxl + 12,
                 }}
             >
                 {/* Decorative orbs */}
@@ -236,6 +234,16 @@ export default function SettingsScreen() {
                     Preferences & child profiles
                 </Text>
             </LinearGradient>
+            {/* Bottom curve blending into background */}
+            <View
+                style={{
+                    height: 24,
+                    marginTop: -24,
+                    backgroundColor: colors.background,
+                    borderTopLeftRadius: radius.xl,
+                    borderTopRightRadius: radius.xl,
+                }}
+            />
 
             <ScrollView
                 contentContainerStyle={{ paddingHorizontal: spacing.md, paddingBottom: 100 }}

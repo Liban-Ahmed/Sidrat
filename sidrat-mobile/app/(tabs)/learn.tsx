@@ -123,9 +123,7 @@ export default function LearnScreen() {
                             {
                                 paddingHorizontal: spacing.lg,
                                 paddingTop: spacing.xl + 54,
-                                paddingBottom: spacing.xxl,
-                                borderBottomLeftRadius: radius.xl,
-                                borderBottomRightRadius: radius.xl,
+                                paddingBottom: spacing.xxl + 12,
                             },
                         ]}
                     >
@@ -134,12 +132,22 @@ export default function LearnScreen() {
                         <View style={[styles.heroOrb, styles.heroOrbSmall]} />
                         <View style={[styles.heroOrb, styles.heroOrbMedium]} />
 
-                        <Text style={[typography.title1, { color: '#FFFFFF' }]}>Learn</Text>
+                        <Text style={[typography.largeTitle, { color: '#FFFFFF' }]}>Learn</Text>
                         <Text style={[typography.body, { color: 'rgba(255,255,255,0.75)', marginTop: spacing.xxs }]}>
                             Your Islamic learning journey
                         </Text>
                     </LinearGradient>
                 </Animated.View>
+                {/* Bottom curve blending into background */}
+                <View
+                    style={{
+                        height: 24,
+                        marginTop: -24,
+                        backgroundColor: colors.background,
+                        borderTopLeftRadius: radius.xl,
+                        borderTopRightRadius: radius.xl,
+                    }}
+                />
 
                 {/* ── Continue Learning Hero ── */}
                 {nextLesson && (
@@ -149,8 +157,8 @@ export default function LearnScreen() {
                             style={({ pressed }) => [
                                 styles.heroCard,
                                 {
-                                    marginHorizontal: spacing.lg,
-                                    marginTop: -spacing.lg,
+                                    marginHorizontal: spacing.md,
+                                    marginTop: spacing.lg,
                                     backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
                                     borderRadius: radius.xl,
                                     overflow: 'hidden',

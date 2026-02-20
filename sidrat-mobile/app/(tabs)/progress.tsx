@@ -19,7 +19,7 @@ import Animated, {
     FadeIn,
     FadeInDown,
 } from 'react-native-reanimated';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme, brand as brandTokens } from '../../src/theme';
 import { useAppStore, useChildStore, useLessonStore, useAchievementStore, ACHIEVEMENTS } from '../../src/stores';
 import { Card, Avatar, ProgressRing, IslamicDivider, BismillahHeader } from '../../src/components';
@@ -85,7 +85,7 @@ function getMotivation(child: { currentStreak: number; totalLessonsCompleted: nu
 }
 
 export default function ProgressScreen() {
-    const { brand, colors, typography, spacing, radius, shadows, gradients, isDark } = useTheme();
+    const { brand, colors, typography, spacing, radius, gradients, isDark } = useTheme();
 
     const activeChildId = useAppStore((s) => s.activeChildId);
     const child = useChildStore((s) =>
@@ -233,9 +233,7 @@ export default function ProgressScreen() {
                             {
                                 paddingHorizontal: spacing.lg,
                                 paddingTop: spacing.xl + 54,
-                                paddingBottom: spacing.xxl + 28,
-                                borderBottomLeftRadius: radius.xl,
-                                borderBottomRightRadius: radius.xl,
+                                paddingBottom: spacing.xxl + 12,
                             },
                         ]}
                     >
@@ -251,81 +249,91 @@ export default function ProgressScreen() {
                             Track your learning journey
                         </Text>
                     </LinearGradient>
+                    {/* Bottom curve blending into background */}
+                    <View
+                        style={{
+                            height: 24,
+                            marginTop: -24,
+                            backgroundColor: colors.background,
+                            borderTopLeftRadius: radius.xl,
+                            borderTopRightRadius: radius.xl,
+                        }}
+                    />
+                </Animated.View>
 
-                    {/* Profile card floating into the hero */}
-                    <View style={{ paddingHorizontal: spacing.md, marginTop: -36 }}>
-                        <Card variant="premium" noPadding style={shadows.cardPremium}>
-                            <View style={{ padding: spacing.lg }}>
-                                <View style={styles.profileRow}>
-                                    {/* Gradient ring behind the avatar */}
-                                    <View style={{ position: 'relative' }}>
-                                        <LinearGradient
-                                            colors={gradients.primary as readonly [string, string]}
-                                            start={{ x: 0, y: 0 }}
-                                            end={{ x: 1, y: 1 }}
-                                            style={{
-                                                width: 70, height: 70, borderRadius: 35,
-                                                alignItems: 'center', justifyContent: 'center',
-                                            }}
-                                        >
-                                            <View style={{ width: 64, height: 64, borderRadius: 32, overflow: 'hidden' }}>
-                                                <Avatar avatarId={child.avatarId} size={64} />
-                                            </View>
-                                        </LinearGradient>
-                                    </View>
-                                    <View style={{ marginLeft: spacing.md, flex: 1 }}>
-                                        <Text style={[typography.title2, { color: colors.text }]}>
-                                            {child.name}
-                                        </Text>
-                                        <Text style={[typography.bodySmall, { color: colors.textSecondary, marginTop: 1 }]}>
-                                            {getAge(child.birthYear)} years old
-                                        </Text>
-                                        <Text style={[typography.caption, { color: brand.primary, marginTop: 4, fontStyle: 'italic' }]}>
-                                            {getMotivation(child)}
-                                        </Text>
-                                    </View>
-                                </View>
-
-                                {/* Level + XP */}
-                                <View style={[styles.levelSection, { marginTop: spacing.lg }]}>
-                                    <View style={styles.levelMeta}>
-                                        <View
-                                            style={[
-                                                styles.levelBadge,
-                                                {
-                                                    backgroundColor: brand.accent + '15',
-                                                    borderRadius: radius.full,
-                                                    borderWidth: 1,
-                                                    borderColor: brand.accent + '30',
-                                                },
-                                            ]}
-                                        >
-                                            <Ionicons name="star" size={11} color={brand.accent} />
-                                            <Text style={[typography.captionBold, { color: brand.accent, marginLeft: 3 }]}>
-                                                Level {level}
-                                            </Text>
+                {/* Profile card */}
+                <View style={{ paddingHorizontal: spacing.md, marginTop: spacing.lg }}>
+                    <Card variant="glass" noPadding>
+                        <View style={{ padding: spacing.lg }}>
+                            <View style={styles.profileRow}>
+                                {/* Gradient ring behind the avatar */}
+                                <View style={{ position: 'relative' }}>
+                                    <LinearGradient
+                                        colors={gradients.primary as readonly [string, string]}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 1, y: 1 }}
+                                        style={{
+                                            width: 70, height: 70, borderRadius: 35,
+                                            alignItems: 'center', justifyContent: 'center',
+                                        }}
+                                    >
+                                        <View style={{ width: 64, height: 64, borderRadius: 32, overflow: 'hidden' }}>
+                                            <Avatar avatarId={child.avatarId} size={64} />
                                         </View>
-                                        <Text style={[typography.caption, { color: colors.textTertiary }]}>
-                                            {xpInLevel}/100 XP
-                                        </Text>
-                                    </View>
-                                    <View style={[styles.xpBar, { backgroundColor: colors.surfaceTertiary, borderRadius: radius.full }]}>
-                                        <Animated.View
-                                            style={[
-                                                styles.xpFill,
-                                                {
-                                                    backgroundColor: brand.accent,
-                                                    borderRadius: radius.full,
-                                                    width: `${Math.min(xpInLevel / 100, 1) * 100}%` as `${number}%`,
-                                                },
-                                            ]}
-                                        />
-                                    </View>
+                                    </LinearGradient>
+                                </View>
+                                <View style={{ marginLeft: spacing.md, flex: 1 }}>
+                                    <Text style={[typography.title2, { color: colors.text }]}>
+                                        {child.name}
+                                    </Text>
+                                    <Text style={[typography.bodySmall, { color: colors.textSecondary, marginTop: 1 }]}>
+                                        {getAge(child.birthYear)} years old
+                                    </Text>
+                                    <Text style={[typography.caption, { color: brand.primary, marginTop: 4, fontStyle: 'italic' }]}>
+                                        {getMotivation(child)}
+                                    </Text>
                                 </View>
                             </View>
-                        </Card>
-                    </View>
-                </Animated.View>
+
+                            {/* Level + XP */}
+                            <View style={[styles.levelSection, { marginTop: spacing.lg }]}>
+                                <View style={styles.levelMeta}>
+                                    <View
+                                        style={[
+                                            styles.levelBadge,
+                                            {
+                                                backgroundColor: brand.accent + '15',
+                                                borderRadius: radius.full,
+                                                borderWidth: 1,
+                                                borderColor: brand.accent + '30',
+                                            },
+                                        ]}
+                                    >
+                                        <Ionicons name="star" size={11} color={brand.accent} />
+                                        <Text style={[typography.captionBold, { color: brand.accent, marginLeft: 3 }]}>
+                                            Level {level}
+                                        </Text>
+                                    </View>
+                                    <Text style={[typography.caption, { color: colors.textTertiary }]}>
+                                        {xpInLevel}/100 XP
+                                    </Text>
+                                </View>
+                                <View style={[styles.xpBar, { backgroundColor: colors.surfaceTertiary, borderRadius: radius.full }]}>
+                                    <Animated.View
+                                        style={[
+                                            styles.xpFill,
+                                            {
+                                                backgroundColor: brand.accent,
+                                                borderRadius: radius.full,
+                                                width: `${Math.min(xpInLevel / 100, 1) * 100}%` as `${number}%`,
+                                            },
+                                        ]}
+                                    />
+                                </View>
+                            </View>
+                        </View>
+                    </Card>
+                </View>
 
                 {/* ── Stats Grid ── */}
                 <Animated.View
