@@ -19,10 +19,10 @@ import Animated, {
     FadeIn,
     FadeInDown,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme, brand as brandTokens } from '../../src/theme';
 import { useAppStore, useChildStore, useLessonStore, useAchievementStore, ACHIEVEMENTS } from '../../src/stores';
-import { Card, Avatar, ProgressRing, IslamicDivider, MiniStatPill, BismillahHeader } from '../../src/components';
+import { Card, Avatar, ProgressRing, IslamicDivider, BismillahHeader } from '../../src/components';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CategoryBreakdownChart } from '../../src/components/progress';
 import { getAge } from '../../src/types';
@@ -327,32 +327,69 @@ export default function ProgressScreen() {
                     </View>
                 </Animated.View>
 
-                {/* ── Stats Row with glow shadows ── */}
+                {/* ── Stats Grid ── */}
                 <Animated.View
                     entering={FadeInDown.delay(120).duration(500)}
                     style={{ paddingHorizontal: spacing.md, marginTop: spacing.md }}
                 >
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{ gap: spacing.sm }}
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            flexWrap: 'wrap',
+                            gap: spacing.xs,
+                        }}
                     >
-                        <View style={shadows.softGlow(brand.coral)}>
-                            <MiniStatPill icon="flame" value={child.currentStreak} label="Streak" color={brand.coral} />
-                        </View>
-                        <View style={shadows.softGlow(brand.accent)}>
-                            <MiniStatPill icon="trophy" value={child.longestStreak} label="Best" color={brand.accent} />
-                        </View>
-                        <View style={shadows.softGlow(brand.primary)}>
-                            <MiniStatPill icon="book" value={child.totalLessonsCompleted} label="Lessons" color={brand.primary} />
-                        </View>
-                        <View style={shadows.softGlow(brand.lavender)}>
-                            <MiniStatPill icon="ribbon" value={unlockedCount} label="Badges" color={brand.lavender} />
-                        </View>
-                        <View style={shadows.softGlow(brand.secondary)}>
-                            <MiniStatPill icon="sparkles" value={child.totalXP} label="XP" color={brand.secondary} />
-                        </View>
-                    </ScrollView>
+                        {([
+                            { icon: 'flame' as const, value: child.currentStreak, label: 'Streak', color: brand.coral },
+                            { icon: 'trophy' as const, value: child.longestStreak, label: 'Best', color: brand.accent },
+                            { icon: 'book' as const, value: child.totalLessonsCompleted, label: 'Lessons', color: brand.primary },
+                            { icon: 'ribbon' as const, value: unlockedCount, label: 'Badges', color: brand.lavender },
+                            { icon: 'sparkles' as const, value: child.totalXP, label: 'XP', color: brand.secondary },
+                        ] as const).map((stat) => (
+                            <View
+                                key={stat.label}
+                                style={{
+                                    flex: 1,
+                                    minWidth: '18%' as unknown as number,
+                                    alignItems: 'center',
+                                    paddingVertical: spacing.sm,
+                                    backgroundColor: stat.color + '08',
+                                    borderRadius: radius.lg,
+                                    borderWidth: 1,
+                                    borderColor: stat.color + '12',
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        width: 28,
+                                        height: 28,
+                                        borderRadius: 14,
+                                        backgroundColor: stat.color + '15',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <Ionicons name={stat.icon} size={14} color={stat.color} />
+                                </View>
+                                <Text
+                                    style={[
+                                        typography.title3,
+                                        { color: colors.text, marginTop: 4, fontSize: 16 },
+                                    ]}
+                                >
+                                    {stat.value}
+                                </Text>
+                                <Text
+                                    style={[
+                                        typography.caption,
+                                        { color: colors.textTertiary, marginTop: 1, fontSize: 10 },
+                                    ]}
+                                >
+                                    {stat.label}
+                                </Text>
+                            </View>
+                        ))}
+                    </View>
                 </Animated.View>
 
                 {/* ── Streak + Weekly Goal ── */}
@@ -363,7 +400,7 @@ export default function ProgressScreen() {
                     <IslamicDivider variant="rich" spacing={4} />
                     <SectionHeader icon="calendar-outline" title="This Week" color={brand.primary} />
                     <Card variant="premium" style={{ marginTop: spacing.sm }}>
-                        {/* Day circles with gradient active state */}
+                        {/* Day indicators — nature icons only, no boxes */}
                         <View style={styles.streakRow}>
                             {streakDays.map((day, i) => (
                                 <View key={i} style={styles.streakDayCol}>
@@ -371,38 +408,20 @@ export default function ProgressScreen() {
                                         style={[
                                             typography.caption,
                                             {
-                                                color: day.isToday ? brand.primary : colors.textTertiary,
-                                                fontWeight: day.isToday ? '700' : '500',
-                                                marginBottom: 6,
+                                                color: day.active ? brand.secondary : day.isToday ? brand.secondaryLight : colors.textTertiary,
+                                                fontWeight: day.isToday || day.active ? '700' : '500',
+                                                marginBottom: 4,
                                             },
                                         ]}
                                     >
                                         {day.label}
                                     </Text>
                                     {day.active ? (
-                                        <LinearGradient
-                                            colors={gradients.coral as readonly [string, string]}
-                                            start={{ x: 0, y: 0 }}
-                                            end={{ x: 1, y: 1 }}
-                                            style={[
-                                                styles.streakDot,
-                                                { borderRadius: radius.full },
-                                            ]}
-                                        >
-                                            <Ionicons name="checkmark" size={14} color="#FFF" />
-                                        </LinearGradient>
+                                        <Ionicons name="moon" size={23} color={brand.secondary} />
+                                    ) : day.isToday ? (
+                                        <Ionicons name="moon-outline" size={23} color={brand.secondaryLight} />
                                     ) : (
-                                        <View
-                                            style={[
-                                                styles.streakDot,
-                                                {
-                                                    backgroundColor: isDark ? colors.surfaceSecondary : colors.surfaceTertiary,
-                                                    borderRadius: radius.full,
-                                                    borderWidth: day.isToday ? 2 : 0,
-                                                    borderColor: day.isToday ? brand.primary + '50' : 'transparent',
-                                                },
-                                            ]}
-                                        />
+                                        <Ionicons name="moon-outline" size={23} color={colors.textTertiary + '25'} />
                                     )}
                                 </View>
                             ))}
@@ -604,7 +623,7 @@ export default function ProgressScreen() {
                                     entering={FadeInDown.delay(560 + i * 30).duration(350)}
                                 >
                                     <Card
-                                        variant={isUnlocked ? 'premium' : 'glass'}
+                                        variant="glass"
                                         noPadding
                                         style={[
                                             styles.achCard,
@@ -613,14 +632,13 @@ export default function ProgressScreen() {
                                                     ? RARITY_BG[ach.rarity]
                                                     : isDark ? colors.surfaceSecondary : colors.surface,
                                                 borderRadius: radius.lg,
-                                                padding: spacing.md,
+                                                padding: spacing.sm,
                                                 marginTop: spacing.xs,
                                                 borderWidth: isUnlocked ? 1 : StyleSheet.hairlineWidth,
                                                 borderColor: isUnlocked
                                                     ? rarityColor + '30'
                                                     : colors.border,
                                                 opacity: isUnlocked ? 1 : 0.5,
-                                                ...(isUnlocked ? shadows.softGlow(rarityColor) : {}),
                                             },
                                         ] as any}
                                     >
@@ -640,65 +658,62 @@ export default function ProgressScreen() {
                                         >
                                             <Ionicons
                                                 name={ACHIEVEMENT_ICONS[ach.id] ?? 'ribbon-outline'}
-                                                size={18}
+                                                size={16}
                                                 color={isUnlocked ? rarityColor : colors.textTertiary}
                                             />
                                         </View>
 
                                         {/* Content */}
-                                        <View style={{ marginLeft: spacing.sm, flex: 1 }}>
-                                            <View style={styles.achTitleRow}>
-                                                <Text
-                                                    style={[
-                                                        typography.label,
-                                                        { color: isUnlocked ? colors.text : colors.textTertiary, flex: 1 },
-                                                    ]}
-                                                    numberOfLines={1}
-                                                >
-                                                    {ach.title}
-                                                </Text>
-                                                <View
-                                                    style={[
-                                                        styles.rarityPill,
-                                                        {
-                                                            backgroundColor: rarityColor + (isUnlocked ? '20' : '10'),
-                                                            borderRadius: radius.full,
-                                                        },
-                                                    ]}
-                                                >
-                                                    <Text
-                                                        style={{
-                                                            color: rarityColor,
-                                                            fontSize: 9,
-                                                            fontWeight: '700',
-                                                            textTransform: 'uppercase',
-                                                            letterSpacing: 0.6,
-                                                            opacity: isUnlocked ? 1 : 0.6,
-                                                        }}
-                                                    >
-                                                        {RARITY_LABELS[ach.rarity]}
-                                                    </Text>
-                                                </View>
-                                            </View>
+                                        <View style={{ marginLeft: spacing.xs, flex: 1, minWidth: 0 }}>
+                                            <Text
+                                                style={[
+                                                    typography.label,
+                                                    { color: isUnlocked ? colors.text : colors.textTertiary, fontSize: 13 },
+                                                ]}
+                                                numberOfLines={1}
+                                                ellipsizeMode="tail"
+                                            >
+                                                {ach.title}
+                                            </Text>
                                             <Text
                                                 style={[
                                                     typography.caption,
-                                                    { color: isUnlocked ? colors.textSecondary : colors.textTertiary, marginTop: 2 },
+                                                    { color: isUnlocked ? colors.textSecondary : colors.textTertiary, marginTop: 1, fontSize: 11 },
                                                 ]}
-                                                numberOfLines={2}
+                                                numberOfLines={1}
                                             >
                                                 {ach.description}
                                             </Text>
                                         </View>
 
-                                        {/* Status indicator */}
-                                        <View style={{ marginLeft: spacing.xs }}>
+                                        {/* Rarity + Status */}
+                                        <View style={{ alignItems: 'flex-end', marginLeft: spacing.xs }}>
+                                            <View
+                                                style={[
+                                                    styles.rarityPill,
+                                                    {
+                                                        backgroundColor: rarityColor + (isUnlocked ? '20' : '10'),
+                                                        borderRadius: radius.full,
+                                                    },
+                                                ]}
+                                            >
+                                                <Text
+                                                    style={{
+                                                        color: rarityColor,
+                                                        fontSize: 8,
+                                                        fontWeight: '700',
+                                                        textTransform: 'uppercase',
+                                                        letterSpacing: 0.5,
+                                                        opacity: isUnlocked ? 1 : 0.6,
+                                                    }}
+                                                >
+                                                    {RARITY_LABELS[ach.rarity]}
+                                                </Text>
+                                            </View>
                                             {isUnlocked ? (
-                                                <View style={[styles.achCheckCircle, { backgroundColor: rarityColor + '20', borderRadius: radius.full }]}>
-                                                    <Ionicons name="checkmark" size={14} color={rarityColor} />
-                                                </View>
+                                                <Ionicons name="checkmark-circle" size={14} color={rarityColor} style={{ marginTop: 3 }} />
                                             ) : (
-                                                <Ionicons name="lock-closed-outline" size={14} color={colors.textTertiary} />
+                                                <Ionicons name="lock-closed-outline" size={11} color={colors.textTertiary} style={{ marginTop: 3 }} />
                                             )}
                                         </View>
                                     </Card>
@@ -761,7 +776,7 @@ const styles = StyleSheet.create({
     // Streak
     streakRow: { flexDirection: 'row', justifyContent: 'space-around' },
     streakDayCol: { alignItems: 'center' },
-    streakDot: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
+    streakDot: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
     divider: { height: StyleSheet.hairlineWidth },
     weekRow: { flexDirection: 'row', alignItems: 'center' },
     completedBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 3, alignSelf: 'flex-start' },
@@ -779,8 +794,6 @@ const styles = StyleSheet.create({
     achProgressTrack: { height: 4, overflow: 'hidden' },
     achProgressFill: { height: '100%' },
     achCard: { flexDirection: 'row', alignItems: 'center' },
-    achIconCircle: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center' },
-    achTitleRow: { flexDirection: 'row', alignItems: 'center' },
-    rarityPill: { paddingHorizontal: 7, paddingVertical: 2, marginLeft: 6 },
-    achCheckCircle: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
+    achIconCircle: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
+    rarityPill: { paddingHorizontal: 6, paddingVertical: 2 },
 });
