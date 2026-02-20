@@ -30,10 +30,11 @@ import { MiniStatPill } from '../../src/components';
 import { allUnits, allCurriculumLessons } from '../../src/data/curriculum';
 import { categoryColors } from '../../src/theme/colors';
 import type { CurriculumUnit, CurriculumLesson } from '../../src/types/curriculum';
+import type { LessonCategory } from '../../src/types/models';
 
 // ── Constants ──
 
-const CATEGORY_SUBTITLES: Record<string, string> = {
+const CATEGORY_SUBTITLES: Record<LessonCategory, string> = {
     aqeedah: 'Foundations of belief',
     wudu: 'Purification before prayer',
     salah: 'The five daily prayers',
@@ -58,6 +59,24 @@ export default function LearnScreen() {
     const activeChildId = useAppStore((s) => s.activeChildId);
     const progress = useLessonStore((s) => s.progress);
 
+    // ── Stable lookup maps (module-level data, memoized once) ──
+    const lessonMap = useMemo(
+        () => new Map(allCurriculumLessons.map((l) => [l.id, l])),
+        [],
+    );
+    const unitLessonsMap = useMemo(
+        () => {
+            const map = new Map<string, CurriculumLesson[]>();
+            for (const lesson of allCurriculumLessons) {
+                const bucket = map.get(lesson.unitId) ?? [];
+                bucket.push(lesson);
+                map.set(lesson.unitId, bucket);
+            }
+            return map;
+        },
+        [],
+    );
+
     // ── Derived state ──
 
     const getIsCompleted = (lessonId: string) => {
@@ -79,18 +98,18 @@ export default function LearnScreen() {
                 total++;
                 if (getIsCompleted(lid)) {
                     completed++;
-                    const lesson = allCurriculumLessons.find((l) => l.id === lid);
+                    const lesson = lessonMap.get(lid);
                     if (lesson) xp += lesson.xpReward;
                 }
             }
         }
         return { completed, total, xp, pct: total > 0 ? completed / total : 0 };
-    }, [activeChildId, progress]);
+    }, [activeChildId, progress, lessonMap]);
 
     // Find the global "next" lesson — first incomplete, unlocked lesson across all units
     const nextLesson = useMemo<{ lesson: CurriculumLesson; unit: CurriculumUnit } | null>(() => {
         for (const unit of allUnits) {
-            const unitLessons = allCurriculumLessons.filter((l) => l.unitId === unit.id);
+            const unitLessons = unitLessonsMap.get(unit.id) ?? [];
             for (let i = 0; i < unitLessons.length; i++) {
                 const lesson = unitLessons[i]!;
                 if (!lesson) continue;
@@ -100,7 +119,7 @@ export default function LearnScreen() {
             }
         }
         return null;
-    }, [activeChildId, progress]);
+    }, [activeChildId, progress, unitLessonsMap]);
 
     const handleLessonPress = (lessonId: string) => {
         router.push(`/lesson/${lessonId}`);

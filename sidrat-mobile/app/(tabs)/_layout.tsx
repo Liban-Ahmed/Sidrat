@@ -9,11 +9,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../src/theme';
 
 function TabBarBackground() {
@@ -66,17 +65,7 @@ export default function TabLayout() {
 
     const tabIcon = (name: keyof typeof Ionicons.glyphMap, nameFilled: keyof typeof Ionicons.glyphMap) =>
         ({ color, focused }: { color: string; size: number; focused: boolean }) => (
-            <View style={focused ? styles.activeIconWrap : styles.inactiveIconWrap}>
-                {focused && (
-                    <LinearGradient
-                        colors={[brand.primary + '28', brand.primaryLight + '18']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.activePill}
-                    />
-                )}
-                <Ionicons name={focused ? nameFilled : name} size={22} color={color} />
-            </View>
+            <Ionicons name={focused ? nameFilled : name} size={22} color={color} />
         );
 
     return (
@@ -120,23 +109,3 @@ export default function TabLayout() {
     );
 }
 
-const styles = StyleSheet.create({
-    activeIconWrap: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 48,
-        height: 32,
-    },
-    inactiveIconWrap: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 48,
-        height: 32,
-    },
-    activePill: {
-        position: 'absolute',
-        width: 48,
-        height: 32,
-        borderRadius: 16,
-    },
-});

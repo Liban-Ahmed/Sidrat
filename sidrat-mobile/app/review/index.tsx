@@ -28,6 +28,7 @@ import { useAppStore, useLessonStore } from '../../src/stores';
 import { ScalePress, ProgressBar } from '../../src/components';
 import { categoryMeta } from '../../src/types';
 import { haptics } from '../../src/utils/haptics';
+import { groupReviewsByUrgency } from '../../src/utils/reviewGroups';
 import { IS_DEV } from '../../src/constants/config';
 import type { ReviewItem } from '../../src/hooks/useReviewQueue';
 
@@ -132,19 +133,7 @@ export default function ReviewScreen() {
     }, [nextReview, navigateToReview]);
 
     // Group reviews by urgency for section rendering
-    const sections = useMemo(() => {
-        const groups: { urgency: ReviewItem['urgency']; items: ReviewItem[] }[] = [];
-        let current: typeof groups[number] | null = null;
-
-        for (const item of reviewQueue) {
-            if (!current || current.urgency !== item.urgency) {
-                current = { urgency: item.urgency, items: [] };
-                groups.push(current);
-            }
-            current.items.push(item);
-        }
-        return groups;
-    }, [reviewQueue]);
+    const sections = useMemo(() => groupReviewsByUrgency(reviewQueue), [reviewQueue]);
 
     return (
         <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
