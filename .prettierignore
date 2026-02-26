@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+.expo/
+.expo-shared/
+
+# Native
+android/
+ios/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Lock files
+*.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Cache
+.cache/
+.parcel-cache/
+.turbo/
+
+# Misc
+.DS_Store
+*.pem
+.env*.local
+coverage/
