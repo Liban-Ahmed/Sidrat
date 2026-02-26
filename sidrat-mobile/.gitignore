@@ -46,3 +46,6 @@ coverage/
 
 # Sentry
 .sentryclirc
+
+# Misc
+PRD.md
