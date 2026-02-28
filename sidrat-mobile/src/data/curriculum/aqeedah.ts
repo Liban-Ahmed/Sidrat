@@ -89,6 +89,16 @@ export const aqeedahLessons: CurriculumLesson[] = [
                 hint: 'Who is the One true God?',
                 explanation: 'La ilaha illAllah — There is no god but Allah!',
             },
+            {
+                id: 'aq-01-01-p4',
+                type: 'tap-word',
+                instruction: 'Tap the words in the correct order to build the sentence:',
+                words: ['is', 'the', 'Allah', 'of', 'Creator', 'everything'],
+                correctSentence: ['Allah', 'is', 'the', 'Creator', 'of', 'everything'],
+                points: 10,
+                hint: 'The sentence starts with the name of our Creator.',
+                explanation: 'Allah is the Creator of everything — the heavens, the earth, and all that exists!',
+            },
         ],
 
         reward: {

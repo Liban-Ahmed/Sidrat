@@ -90,6 +90,16 @@ export const salahLessons: CurriculumLesson[] = [
                 points: 15,
                 explanation: 'The five prayers go from dawn (Fajr) all the way to night (Isha).',
             },
+            {
+                id: 'sal-01-01-p4',
+                type: 'tap-word',
+                instruction: 'Build the sentence about salah:',
+                words: ['pray', 'Muslims', 'times', 'five', 'a', 'day'],
+                correctSentence: ['Muslims', 'pray', 'five', 'times', 'a', 'day'],
+                points: 10,
+                hint: 'The sentence starts with "Muslims".',
+                explanation: 'Muslims pray five times a day: Fajr, Dhuhr, Asr, Maghrib, and Isha!',
+            },
         ],
 
         reward: {

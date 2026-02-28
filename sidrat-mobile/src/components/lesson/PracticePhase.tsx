@@ -21,6 +21,7 @@ import { TrueFalseCard } from './TrueFalseCard';
 import { OrderingCard } from './OrderingCard';
 import { MatchingCard } from './MatchingCard';
 import { FillBlankCard } from './FillBlankCard';
+import { TapWordCard } from './TapWordCard';
 
 interface Props {
     block: PracticeBlock;
@@ -46,6 +47,8 @@ export function PracticePhase({ block, index, total, score, maxScore, onAnswer }
                 return <MatchingCard block={block} onAnswer={onAnswer} />;
             case 'fill-blank':
                 return <FillBlankCard block={block} onAnswer={onAnswer} />;
+            case 'tap-word':
+                return <TapWordCard block={block} onAnswer={onAnswer} />;
             default:
                 return (
                     <View style={{ padding: 24 }}>

@@ -93,6 +93,16 @@ export const quranLessons: CurriculumLesson[] = [
                 points: 10,
                 explanation: 'The Quran was revealed over 23 years, little by little, to help people understand and follow it.',
             },
+            {
+                id: 'qur-01-01-p4',
+                type: 'tap-word',
+                instruction: 'Build the sentence about the Quran:',
+                words: ['Quran', 'is', 'the', 'the', 'word', 'of', 'Allah'],
+                correctSentence: ['the', 'Quran', 'is', 'the', 'word', 'of', 'Allah'],
+                points: 10,
+                hint: 'Start with "the Quran".',
+                explanation: 'The Quran is the word of Allah, revealed to Prophet Muhammad ﷺ through Angel Jibreel.',
+            },
         ],
 
         reward: {

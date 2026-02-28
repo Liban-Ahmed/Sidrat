@@ -106,6 +106,16 @@ export const wuduLessons: CurriculumLesson[] = [
                 points: 10,
                 explanation: 'We make wudu to show respect to Allah and prepare ourselves for prayer.',
             },
+            {
+                id: 'wudu-01-01-p4',
+                type: 'tap-word',
+                instruction: 'Build the sentence about wudu:',
+                words: ['half', 'is', 'of', 'Cleanliness', 'faith'],
+                correctSentence: ['Cleanliness', 'is', 'half', 'of', 'faith'],
+                points: 10,
+                hint: 'This famous hadith starts with the word "Cleanliness".',
+                explanation: 'The Prophet ﷺ said: "Cleanliness is half of faith." (Sahih Muslim)',
+            },
         ],
 
         reward: {

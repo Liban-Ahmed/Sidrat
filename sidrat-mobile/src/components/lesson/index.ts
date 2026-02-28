@@ -7,3 +7,4 @@ export { TrueFalseCard } from './TrueFalseCard';
 export { OrderingCard } from './OrderingCard';
 export { MatchingCard } from './MatchingCard';
 export { FillBlankCard } from './FillBlankCard';
+export { TapWordCard } from './TapWordCard';
