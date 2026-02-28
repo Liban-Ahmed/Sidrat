@@ -10,6 +10,7 @@ import { useState, useCallback, useMemo, useRef } from 'react';
 import { audioService } from '../services/audioService';
 import { useLessonStore, useChildStore } from '../stores';
 import { haptics } from '../utils/haptics';
+import type { ResolvedLesson } from '../services/ageAdaptiveService';
 import type {
   CurriculumLesson,
   LessonPlayerPhase,
@@ -17,8 +18,11 @@ import type {
   PracticeBlock,
 } from '../types/curriculum';
 
+/** The hook accepts either a raw CurriculumLesson or a resolved (age-adapted) one */
+type LessonInput = CurriculumLesson | ResolvedLesson;
+
 interface UseLessonPlayerOptions {
-  lesson: CurriculumLesson;
+  lesson: LessonInput;
   childId: string;
   /** If true, skips Hook phase and starts directly at Practice */
   isReview?: boolean;
@@ -69,7 +73,7 @@ interface UseLessonPlayerReturn {
 function createInitialState(
   lessonId: string,
   childId: string,
-  lesson: CurriculumLesson,
+  lesson: LessonInput,
   isReview: boolean,
 ): LessonPlayerState {
   const maxScore = lesson.practice.reduce((sum, p) => sum + p.points, 0);

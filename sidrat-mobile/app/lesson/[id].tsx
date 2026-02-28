@@ -5,27 +5,39 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HookPhase, TeachPhase, PracticePhase, RewardPhase } from '../../src/components/lesson';
 import { getCurriculumLesson } from '../../src/data/curriculum';
 import { useLessonPlayer } from '../../src/hooks/useLessonPlayer';
-import { useAppStore } from '../../src/stores';
+import { resolveLessonForChild } from '../../src/services/ageAdaptiveService';
+import { useAppStore, useChildStore } from '../../src/stores';
 import { useTheme } from '../../src/theme';
 import { categoryMeta } from '../../src/types';
+import type { ResolvedLesson } from '../../src/services/ageAdaptiveService';
 
 export default function LessonScreen() {
   const { brand, colors, typography } = useTheme();
   const router = useRouter();
   const { id, review } = useLocalSearchParams<{ id: string; review?: string }>();
   const activeChildId = useAppStore((s) => s.activeChildId);
+  const getChild = useChildStore((s) => s.getChild);
   const isReview = review === '1';
 
   const lesson = id ? getCurriculumLesson(id) : undefined;
+  const child = activeChildId ? getChild(activeChildId) : undefined;
 
-  if (!lesson || !activeChildId) {
+  // Resolve age-adaptive content based on the active child's birth year.
+  // Falls back to default lesson content if no child or no variant exists.
+  const resolvedLesson = useMemo(() => {
+    if (!lesson) return undefined;
+    if (!child) return undefined;
+    return resolveLessonForChild(lesson, child.birthYear);
+  }, [lesson, child]);
+
+  if (!resolvedLesson || !activeChildId) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.errorContainer}>
@@ -41,7 +53,9 @@ export default function LessonScreen() {
     );
   }
 
-  return <LessonPlayerContent lesson={lesson} childId={activeChildId} isReview={isReview} />;
+  return (
+    <LessonPlayerContent lesson={resolvedLesson} childId={activeChildId} isReview={isReview} />
+  );
 }
 
 function LessonPlayerContent({
@@ -49,7 +63,7 @@ function LessonPlayerContent({
   childId,
   isReview,
 }: {
-  lesson: NonNullable<ReturnType<typeof getCurriculumLesson>>;
+  lesson: ResolvedLesson;
   childId: string;
   isReview: boolean;
 }) {

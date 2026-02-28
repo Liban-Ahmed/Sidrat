@@ -150,11 +150,52 @@ export interface RewardConfig {
   };
 }
 
+// ── Age-Adaptive Variants ──────────────────────────────────────
+
+/** Ordered age groups from youngest to oldest (used for fallback resolution) */
+export const AGE_GROUP_ORDER: readonly AgeGroup[] = [
+  'toddler',
+  'early',
+  'middle',
+  'preteen',
+] as const;
+
+/**
+ * Age-specific content variant.
+ *
+ * Each field is optional — only specify overrides for the fields
+ * that differ from the lesson's default content. Un-specified fields
+ * fall through to the base lesson.
+ *
+ * Guidelines per age group:
+ *  - **toddler (3–4):** Shorter text, more images/audio, simpler vocabulary, 1-2 practice items
+ *  - **early (5–7):** Guided reading, basic Arabic letters, 2-3 practice items
+ *  - **middle (8–10):** Full text, Arabic with transliteration, 3-4 practice items
+ *  - **preteen (11–14):** Advanced concepts, Quran tafsir basics, 4-5 practice items
+ */
+export interface AgeVariant {
+  /** Override the hook for this age group */
+  hook?: HookBlock;
+  /** Override the teach blocks for this age group */
+  teach?: TeachBlock[];
+  /** Override the practice blocks for this age group */
+  practice?: PracticeBlock[];
+  /** Override the reward config for this age group */
+  reward?: RewardConfig;
+  /** Override estimated duration for this age group */
+  durationMinutes?: number;
+}
+
 // ── Curriculum Lesson ──────────────────────────────────────────
 
 /**
  * A single curriculum lesson with the 4-phase structure.
  * Extends the simpler Lesson model with structured phases.
+ *
+ * The base `hook`, `teach`, `practice`, and `reward` fields serve as the
+ * default content. If `ageVariants` is provided, the age-adaptive resolver
+ * will select the variant that matches the active child's age group and
+ * merge overrides on top of the defaults.
  */
 export interface CurriculumLesson {
   id: string;
@@ -175,11 +216,20 @@ export interface CurriculumLesson {
   /** Tags for search/filtering */
   tags?: string[];
 
-  // ── The 4 Phases ──
+  // ── The 4 Phases (default content) ──
   hook: HookBlock;
   teach: TeachBlock[];
   practice: PracticeBlock[];
   reward: RewardConfig;
+
+  // ── Age-Adaptive Overrides ──
+  /**
+   * Per-age-group content variants. Each variant can override any
+   * combination of the 4 phases. If a variant for the child's age
+   * group is not found, the resolver falls back to the closest
+   * younger age group, then to the base content.
+   */
+  ageVariants?: Partial<Record<AgeGroup, AgeVariant>>;
 }
 
 /** A unit groups related lessons within a category */
