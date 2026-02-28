@@ -1,13 +1,12 @@
 /**
  * Home Screen (index tab)
  *
- * "Playful luxury" redesign — Apple Health/Fitness meets Headspace:
- * warm gradients, soft shapes, elegant data visualization,
- * distinctive brand feel.
- *
- * Components extracted to:
- *   src/components/         — ScalePress, SectionHeader, ProgressBar, Card
- *   src/components/home/    — AnimatedCounter, AyahOfTheDay, DuaOfTheDay, SalahReminder
+ * Distinctive home experience with:
+ * - Time-based hero gradient with Islamic star motif
+ * - Inline stats row (streak, XP, lessons)
+ * - Compact left-edge accented lesson card
+ * - Stacked compact Ayah & Dua cards
+ * - Slim salah banner
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -38,21 +37,17 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '../../src/theme';
 import { useAppStore, useChildStore, useLessonStore } from '../../src/stores';
-import { Badge, BismillahHeader, Button, Card, ScalePress, SectionHeader, ProgressBar } from '../../src/components';
+import { BismillahHeader, Button, Card, ScalePress, ProgressBar } from '../../src/components';
 import { AyahOfTheDay, DuaOfTheDay, HomeSkeletonLoader, SalahReminder } from '../../src/components/home';
 import { categoryMeta } from '../../src/types';
 import { allCurriculumLessons } from '../../src/data/curriculum';
 import { useReviewQueue } from '../../src/hooks/useReviewQueue';
-
-// ── Constants ────────────────────────────────────────────────────
 
 const STAGGER = 80;
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-// ── Helpers ──────────────────────────────────────────────────────
 
 function getGreeting(): string {
     const hour = new Date().getHours();
@@ -72,28 +67,20 @@ function getGreetingIcon(): keyof typeof Ionicons.glyphMap {
     return 'moon';
 }
 
-/**
- * Returns a hero gradient pair that shifts with the time of day.
- * Dawn → warm amber/gold, Morning → teal/sky, Afternoon → golden/teal,
- * Evening → purple/coral, Night → deep indigo/navy.
- */
 function getTimeBasedHeroGradient(): [string, string] {
     const hour = new Date().getHours();
-    if (hour >= 4 && hour < 7) return ['#8A5E10', '#055F6E']; // Fajr — warm amber → teal
-    if (hour >= 7 && hour < 12) return ['#055F6E', '#1A7AB5']; // Morning — teal → sky blue
-    if (hour >= 12 && hour < 16) return ['#055F6E', '#0A3F5C']; // Afternoon — teal → deep navy (default feel)
-    if (hour >= 16 && hour < 19) return ['#8A5E10', '#9E3844']; // Sunset — gold → soft coral
-    if (hour >= 19 && hour < 21) return ['#3D2B7A', '#9E3844']; // Evening — purple → coral
-    return ['#0F1A28', '#1A3A5C'];                              // Night — deep indigo → navy
+    if (hour >= 4 && hour < 7) return ['#8A5E10', '#055F6E'];
+    if (hour >= 7 && hour < 12) return ['#055F6E', '#1A7AB5'];
+    if (hour >= 12 && hour < 16) return ['#055F6E', '#0A3F5C'];
+    if (hour >= 16 && hour < 19) return ['#8A5E10', '#9E3844'];
+    if (hour >= 19 && hour < 21) return ['#3D2B7A', '#9E3844'];
+    return ['#0F1A28', '#1A3A5C'];
 }
-
-// ── Main Component ──────────────────────────────────────────────
 
 export default function HomeScreen() {
     const { brand, colors, typography, spacing, radius, shadows, isDark, gradients } = useTheme();
     const router = useRouter();
 
-    // ── Store selectors ──
     const activeChildId = useAppStore((s) => s.activeChildId);
     const child = useChildStore((s) =>
         s.children.find((c) => c.id === activeChildId),
@@ -103,13 +90,10 @@ export default function HomeScreen() {
     const setActiveChild = useAppStore((s) => s.setActiveChild);
     const progressMap = useLessonStore((s) => s.progress);
 
-    // Use curriculum lessons as the source of truth
     const curriculumLessons = allCurriculumLessons;
 
-    // ── Review queue ──
     const { reviewCount, hasReviews, nextReview } = useReviewQueue();
 
-    // Did the child complete a lesson today? (controls review card visibility)
     const completedLessonToday = useMemo(() => {
         if (!activeChildId) return false;
         const todayStr = new Date().toDateString();
@@ -119,10 +103,8 @@ export default function HomeScreen() {
         );
     }, [activeChildId, progressMap]);
 
-    // Allow user to dismiss the review card for this session
     const [reviewsDismissed, setReviewsDismissed] = useState(false);
 
-    // Next uncompleted curriculum lesson
     const todayLesson = useMemo(() => {
         if (!activeChildId) return undefined;
         return curriculumLessons.find((l) => {
@@ -131,7 +113,6 @@ export default function HomeScreen() {
         });
     }, [curriculumLessons, progressMap, activeChildId]);
 
-    // In-progress lesson (started but not finished)
     const inProgressLesson = useMemo(() => {
         if (!activeChildId) return undefined;
         return curriculumLessons.find((l) => {
@@ -142,18 +123,22 @@ export default function HomeScreen() {
 
     const totalLessons = curriculumLessons.length;
 
-    // Current lesson index
     const currentLessonIndex = useMemo(() => {
         if (!todayLesson) return totalLessons;
         return curriculumLessons.findIndex((l) => l.id === todayLesson.id) + 1;
     }, [todayLesson, curriculumLessons, totalLessons]);
 
-    // Pull-to-refresh with store re-hydration
+    const completedCount = useMemo(() => {
+        if (!activeChildId) return 0;
+        return Object.values(progressMap).filter(
+            (p) => p.childId === activeChildId && p.isCompleted,
+        ).length;
+    }, [activeChildId, progressMap]);
+
     const [refreshing, setRefreshing] = useState(false);
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         try {
-            // Re-read store state (Zustand persist will pick up any changes)
             useChildStore.getState();
             useLessonStore.getState();
         } finally {
@@ -162,7 +147,6 @@ export default function HomeScreen() {
         }
     }, []);
 
-    // ── Seed demo child ──
     const ensureChild = useCallback(() => {
         if (children.length === 0) {
             const c = addChild({ name: 'Yusuf', birthYear: 2019, avatarId: 'lion' });
@@ -175,7 +159,6 @@ export default function HomeScreen() {
 
     useEffect(() => { ensureChild(); }, [ensureChild]);
 
-    // ── Scroll-driven translucent header bar ──
     const scrollY = useSharedValue(0);
     const scrollHandler = useAnimatedScrollHandler({
         onScroll: (e) => { scrollY.value = e.contentOffset.y; },
@@ -189,29 +172,6 @@ export default function HomeScreen() {
         borderBottomWidth: scrollY.value > 40 ? StyleSheet.hairlineWidth : 0,
     }));
 
-    // ── Parallax orb transforms (each orb moves at a different rate) ──
-    const orbLargeStyle = useAnimatedStyle(() => ({
-        transform: [
-            { translateY: interpolate(scrollY.value, [0, 200], [0, -30], Extrapolation.CLAMP) },
-            { translateX: interpolate(scrollY.value, [0, 200], [0, 12], Extrapolation.CLAMP) },
-            { scale: interpolate(scrollY.value, [0, 200], [1, 1.15], Extrapolation.CLAMP) },
-        ],
-    }));
-    const orbSmallStyle = useAnimatedStyle(() => ({
-        transform: [
-            { translateY: interpolate(scrollY.value, [0, 200], [0, -15], Extrapolation.CLAMP) },
-            { translateX: interpolate(scrollY.value, [0, 200], [0, -8], Extrapolation.CLAMP) },
-        ],
-    }));
-    const orbMediumStyle = useAnimatedStyle(() => ({
-        transform: [
-            { translateY: interpolate(scrollY.value, [0, 200], [0, -22], Extrapolation.CLAMP) },
-            { scale: interpolate(scrollY.value, [0, 200], [1, 0.9], Extrapolation.CLAMP) },
-        ],
-        opacity: interpolate(scrollY.value, [0, 150], [1, 0.4], Extrapolation.CLAMP),
-    }));
-
-    // ── Pulsing CTA ──
     const ctaPulse = useSharedValue(1);
     useEffect(() => {
         ctaPulse.value = withRepeat(
@@ -231,12 +191,10 @@ export default function HomeScreen() {
     const greetingIcon = useMemo(getGreetingIcon, []);
     const heroGradient = useMemo(getTimeBasedHeroGradient, []);
 
-    // ── Navigate to lesson player ──
     const navigateToLesson = useCallback((lessonId: string) => {
         router.push(`/lesson/${lessonId}` as any);
     }, [router]);
 
-    // ── Empty state: no child profile yet ──
     if (!child && children.length === 0) {
         return (
             <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
@@ -273,7 +231,6 @@ export default function HomeScreen() {
         );
     }
 
-    // ── Skeleton loading state: child exists but data hydrating ──
     if (!child) {
         return (
             <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['left', 'right']}>
@@ -284,7 +241,7 @@ export default function HomeScreen() {
 
     return (
         <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['left', 'right']}>
-            {/* ── Translucent header bar on scroll ── */}
+            {/* Translucent header bar on scroll */}
             <Animated.View
                 style={[
                     styles.stickyHeader,
@@ -315,7 +272,7 @@ export default function HomeScreen() {
                     />
                 }
             >
-                {/* ── Gradient Hero Greeting ──────────────────── */}
+                {/* ── Hero Greeting with Islamic star motif ── */}
                 <Animated.View entering={FadeInDown.duration(500).springify().damping(18)}>
                     <LinearGradient
                         colors={heroGradient}
@@ -325,15 +282,16 @@ export default function HomeScreen() {
                             styles.heroGradient,
                             {
                                 paddingHorizontal: spacing.lg,
-                                paddingTop: spacing.xl + 54,
-                                paddingBottom: spacing.xxl + 12,
+                                paddingTop: spacing.xl + 44,
+                                paddingBottom: spacing.lg + 8,
                             },
                         ]}
                     >
-                        {/* Decorative parallax orbs */}
-                        <Animated.View style={[styles.heroOrb, styles.heroOrbLarge, orbLargeStyle]} />
-                        <Animated.View style={[styles.heroOrb, styles.heroOrbSmall, orbSmallStyle]} />
-                        <Animated.View style={[styles.heroOrb, styles.heroOrbMedium, orbMediumStyle]} />
+                        {/* Islamic star pattern (two rotated squares) */}
+                        <View style={styles.starContainer}>
+                            <View style={styles.starSquare} />
+                            <View style={[styles.starSquare, { transform: [{ rotate: '45deg' }] }]} />
+                        </View>
 
                         <View style={styles.header}>
                             <View style={{ flex: 1 }}>
@@ -353,9 +311,25 @@ export default function HomeScreen() {
                                 </Text>
                             </View>
                         </View>
+
+                        {/* Inline stats pills */}
+                        <View style={[styles.statsPillRow, { marginTop: spacing.md }]}>
+                            <View style={styles.statsPill}>
+                                <Ionicons name="flame" size={13} color="#FF9F43" />
+                                <Text style={styles.statsPillText}>{child.currentStreak}</Text>
+                            </View>
+                            <View style={styles.statsPill}>
+                                <Ionicons name="sparkles" size={13} color={brand.accentLight} />
+                                <Text style={styles.statsPillText}>{child.totalXP} XP</Text>
+                            </View>
+                            <View style={styles.statsPill}>
+                                <Ionicons name="book" size={13} color="rgba(255,255,255,0.7)" />
+                                <Text style={styles.statsPillText}>{completedCount}/{totalLessons}</Text>
+                            </View>
+                        </View>
                     </LinearGradient>
                 </Animated.View>
-                {/* Bottom curve blending into background */}
+                {/* Curved blend into background */}
                 <View
                     style={{
                         height: 24,
@@ -366,186 +340,82 @@ export default function HomeScreen() {
                     }}
                 />
 
-                {/* ── Content area ────────────────────────────── */}
+                {/* ── Content ── */}
                 <View style={{ paddingHorizontal: spacing.md }}>
 
-                    {/* ── Salah Reminder (ambient) ─────────────── */}
-                    <View style={{ marginTop: spacing.lg }}>
+                    {/* Salah Reminder — slim inline banner */}
+                    <View style={{ marginTop: spacing.md }}>
                         <SalahReminder />
                     </View>
 
-                    {/* ── Today's Lesson ─────────────────────────── */}
+                    {/* ── Today's Lesson ── */}
                     <Animated.View
                         entering={FadeInDown.delay(STAGGER).duration(600).springify().damping(16)}
+                        style={{ marginTop: spacing.lg }}
                     >
-                        <SectionHeader
-                            title="Today's Lesson"
-                            onSeeAll={() => router.push('/learn' as any)}
-                        />
+                        <Text style={[typography.title3, { color: colors.text, marginBottom: spacing.xs }]}>
+                            Today's Lesson
+                        </Text>
 
                         {todayLesson ? (
-                            <ScalePress
-                                onPress={() => navigateToLesson(todayLesson.id)}
-                                accessibilityLabel={`Today's lesson: ${todayLesson.title}. ${todayLesson.durationMinutes} minutes, ${todayLesson.xpReward} XP reward`}
-                            >
+                            <ScalePress onPress={() => navigateToLesson(todayLesson.id)}>
                                 <View
                                     style={[
                                         styles.lessonCard,
                                         {
-                                            marginTop: spacing.sm,
                                             backgroundColor: colors.surface,
-                                            borderRadius: radius.xl,
+                                            borderRadius: radius.lg,
                                             borderWidth: 1,
-                                            borderColor: isDark ? colors.border : brand.accent + '18',
-                                            ...shadows.cardPremium,
+                                            borderColor: isDark ? colors.border : brand.accent + '10',
+                                            ...shadows.card,
                                         },
                                     ]}
                                 >
-                                    {/* Top gradient accent strip */}
-                                    <LinearGradient
-                                        colors={[brand.accent + '40', brand.primary + '40', brand.accent + '40']}
-                                        start={{ x: 0, y: 0 }}
-                                        end={{ x: 1, y: 0 }}
-                                        style={styles.lessonAccentStrip}
-                                    />
+                                    <View style={[styles.lessonLeftEdge, { backgroundColor: brand.accent, borderRadius: 2 }]} />
 
-                                    <View style={[styles.lessonBody, { padding: spacing.lg }]}>
-                                        {/* Lesson position indicator */}
-                                        <Text style={[typography.caption, { color: colors.textTertiary, marginBottom: spacing.xxs }]}>
-                                            Lesson {currentLessonIndex} of {totalLessons}
-                                        </Text>
-                                        <View style={styles.badgeRow}>
-                                            <View
-                                                style={[
-                                                    styles.categoryIcon,
-                                                    { backgroundColor: brand.primary + '15', borderRadius: radius.sm },
-                                                ]}
-                                            >
-                                                <Ionicons
-                                                    name={categoryMeta[todayLesson.category].icon as any}
-                                                    size={14}
-                                                    color={brand.primary}
-                                                />
-                                            </View>
-                                            <Badge
-                                                label={categoryMeta[todayLesson.category].label}
-                                                color={brand.primary}
-                                            />
-                                        </View>
-                                        <Text
-                                            style={[typography.title2, { color: colors.text, marginTop: spacing.sm }]}
-                                        >
-                                            {todayLesson.title}
-                                        </Text>
-                                        <Text
-                                            style={[
-                                                typography.bodySmall,
-                                                { color: colors.textSecondary, marginTop: spacing.xxs },
-                                            ]}
-                                            numberOfLines={2}
-                                        >
-                                            {todayLesson.description}
-                                        </Text>
-
-                                        {/* Meta chips */}
-                                        <View style={[styles.lessonMeta, { marginTop: spacing.md }]}>
-                                            <View
-                                                style={[
-                                                    styles.metaChip,
-                                                    {
-                                                        backgroundColor: colors.surfaceSecondary,
-                                                        borderRadius: radius.full,
-                                                        paddingVertical: spacing.xxs,
-                                                        paddingHorizontal: spacing.sm,
-                                                    },
-                                                ]}
-                                            >
-                                                <Ionicons name="time-outline" size={14} color={colors.textTertiary} />
-                                                <Text
-                                                    style={[
-                                                        typography.captionBold,
-                                                        { color: colors.textTertiary, marginLeft: 4 },
-                                                    ]}
-                                                >
-                                                    {todayLesson.durationMinutes} min
+                                    <View style={[styles.lessonBody, { padding: spacing.md, paddingLeft: spacing.md + 6 }]}>
+                                        <View style={styles.lessonTopRow}>
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={[typography.caption, { color: colors.textTertiary }]}>
+                                                    Lesson {currentLessonIndex} · {categoryMeta[todayLesson.category].label}
                                                 </Text>
-                                            </View>
-                                            <View
-                                                style={[
-                                                    styles.metaChip,
-                                                    {
-                                                        backgroundColor: brand.accent + '15',
-                                                        borderRadius: radius.full,
-                                                        paddingVertical: spacing.xxs,
-                                                        paddingHorizontal: spacing.sm,
-                                                    },
-                                                ]}
-                                            >
-                                                <Ionicons name="star" size={14} color={brand.accent} />
-                                                <Text
-                                                    style={[
-                                                        typography.captionBold,
-                                                        { color: brand.accent, marginLeft: 4 },
-                                                    ]}
-                                                >
-                                                    +{todayLesson.xpReward} XP
+                                                <Text style={[typography.title3, { color: colors.text, marginTop: 2 }]} numberOfLines={1}>
+                                                    {todayLesson.title}
                                                 </Text>
+                                                <View style={[styles.lessonMeta, { marginTop: spacing.xs }]}>
+                                                    <Ionicons name="time-outline" size={12} color={colors.textTertiary} />
+                                                    <Text style={[typography.caption, { color: colors.textTertiary, marginLeft: 3 }]}>
+                                                        {todayLesson.durationMinutes} min
+                                                    </Text>
+                                                    <Text style={[typography.caption, { color: colors.textTertiary, marginHorizontal: 6 }]}>·</Text>
+                                                    <Ionicons name="star" size={12} color={brand.accent} />
+                                                    <Text style={[typography.caption, { color: brand.accent, marginLeft: 3 }]}>
+                                                        +{todayLesson.xpReward} XP
+                                                    </Text>
+                                                </View>
                                             </View>
-                                        </View>
-
-                                        {/* Pulsing gradient CTA */}
-                                        <Animated.View style={[{ marginTop: spacing.md }, ctaStyle]}>
-                                            <ScalePress onPress={() => navigateToLesson(todayLesson.id)}>
+                                            <Animated.View style={ctaStyle}>
                                                 <LinearGradient
                                                     colors={gradients.heroCta as unknown as [string, string]}
                                                     start={{ x: 0, y: 0 }}
                                                     end={{ x: 1, y: 0 }}
-                                                    style={[
-                                                        styles.gradientCta,
-                                                        { borderRadius: radius.lg },
-                                                    ]}
+                                                    style={[styles.lessonCtaCircle, { borderRadius: radius.full }]}
                                                 >
-                                                    <Text style={[typography.label, { color: '#FFFFFF', letterSpacing: 0.3 }]}>
-                                                        Start Lesson
-                                                    </Text>
-                                                    <Ionicons name="arrow-forward" size={18} color="#FFFFFF" style={{ marginLeft: 8 }} />
+                                                    <Ionicons name="play" size={18} color="#FFFFFF" />
                                                 </LinearGradient>
-                                            </ScalePress>
-                                        </Animated.View>
+                                            </Animated.View>
+                                        </View>
                                     </View>
                                 </View>
                             </ScalePress>
                         ) : (
-                            <Card
-                                variant="premium"
-                                style={{
-                                    marginTop: spacing.sm,
-                                    alignItems: 'center' as const,
-                                    paddingVertical: spacing.xl,
-                                }}
-                            >
-                                <View
-                                    accessible
-                                    accessibilityLabel="All lessons completed"
-                                    style={styles.emptyCard}
-                                >
-                                    <View
-                                        style={[
-                                            styles.emptyIcon,
-                                            { backgroundColor: brand.secondary + '12', borderRadius: radius.full, borderWidth: 1.5, borderColor: brand.secondary + '25' },
-                                        ]}
-                                    >
-                                        <Ionicons name="checkmark-circle" size={36} color={brand.secondary} />
-                                    </View>
-                                    <Text style={[typography.title3, { color: colors.text, marginTop: spacing.sm }]}>
+                            <Card variant="glass" style={{ alignItems: 'center' as const, paddingVertical: spacing.lg }}>
+                                <View accessible accessibilityLabel="All lessons completed" style={styles.emptyCard}>
+                                    <Ionicons name="checkmark-circle" size={28} color={brand.secondary} />
+                                    <Text style={[typography.label, { color: colors.text, marginTop: spacing.xs }]}>
                                         All caught up!
                                     </Text>
-                                    <Text
-                                        style={[
-                                            typography.bodySmall,
-                                            { color: colors.textSecondary, marginTop: spacing.xxs, textAlign: 'center' },
-                                        ]}
-                                    >
+                                    <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 2, textAlign: 'center' }]}>
                                         You've completed all available lessons.
                                     </Text>
                                 </View>
@@ -553,7 +423,7 @@ export default function HomeScreen() {
                         )}
                     </Animated.View>
 
-                    {/* ── Reviews Due (shown after completing a lesson today) ── */}
+                    {/* ── Reviews Due ── */}
                     {hasReviews && completedLessonToday && !reviewsDismissed && (
                         <Animated.View
                             entering={FadeInDown.delay(STAGGER * 2).duration(600).springify().damping(16)}
@@ -564,24 +434,10 @@ export default function HomeScreen() {
                                     <View
                                         accessible
                                         accessibilityLabel={`${reviewCount} lessons due for review. Tap to start reviewing.`}
-                                        style={[
-                                            styles.continueCard,
-                                            { padding: spacing.md },
-                                        ]}
+                                        style={[styles.continueCard, { padding: spacing.md }]}
                                     >
-                                        {/* Left gradient indicator */}
-                                        <View
-                                            style={[
-                                                styles.continueLeftEdge,
-                                                { backgroundColor: brand.coral, borderRadius: radius.full },
-                                            ]}
-                                        />
-                                        <View
-                                            style={[
-                                                styles.continueIcon,
-                                                { backgroundColor: brand.coral + '18', borderRadius: radius.md },
-                                            ]}
-                                        >
+                                        <View style={[styles.continueLeftEdge, { backgroundColor: brand.coral, borderRadius: radius.full }]} />
+                                        <View style={[styles.continueIcon, { backgroundColor: brand.coral + '18', borderRadius: radius.md }]}>
                                             <Ionicons name="refresh" size={22} color={brand.coral} />
                                         </View>
                                         <View style={{ flex: 1, marginLeft: spacing.sm }}>
@@ -592,32 +448,18 @@ export default function HomeScreen() {
                                                 {reviewCount} {reviewCount === 1 ? 'lesson' : 'lessons'} to review
                                             </Text>
                                             {nextReview && (
-                                                <Text
-                                                    style={[typography.caption, { color: colors.textTertiary, marginTop: 2 }]}
-                                                    numberOfLines={1}
-                                                >
+                                                <Text style={[typography.caption, { color: colors.textTertiary, marginTop: 2 }]} numberOfLines={1}>
                                                     Next: {nextReview.lesson.title}
                                                 </Text>
                                             )}
                                         </View>
-                                        <View
-                                            style={[
-                                                styles.reviewBadge,
-                                                {
-                                                    backgroundColor: brand.coral,
-                                                    borderRadius: radius.full,
-                                                },
-                                            ]}
-                                        >
-                                            <Text style={[typography.captionBold, { color: '#FFF' }]}>
-                                                {reviewCount}
-                                            </Text>
+                                        <View style={[styles.reviewBadge, { backgroundColor: brand.coral, borderRadius: radius.full }]}>
+                                            <Text style={[typography.captionBold, { color: '#FFF' }]}>{reviewCount}</Text>
                                         </View>
                                     </View>
                                 </Card>
                             </ScalePress>
 
-                            {/* Dismiss button */}
                             <ScalePress
                                 onPress={() => setReviewsDismissed(true)}
                                 accessibilityLabel="Dismiss review reminder"
@@ -630,33 +472,30 @@ export default function HomeScreen() {
                         </Animated.View>
                     )}
 
-                    {/* ── Continue Where You Left Off ────────────── */}
+                    {/* ── Continue Where You Left Off ── */}
                     {inProgressLesson && inProgressLesson.id !== todayLesson?.id && (
                         <Animated.View
                             entering={FadeInDown.delay(STAGGER * 2.5).duration(600).springify().damping(16)}
                             style={{ marginTop: spacing.lg }}
                         >
-                            <SectionHeader title="Continue" />
+                            <Text style={[typography.title3, { color: colors.text, marginBottom: spacing.xs }]}>
+                                Continue
+                            </Text>
                             <ScalePress onPress={() => navigateToLesson(inProgressLesson.id)}>
                                 <Card variant="filled" accentColor={brand.accent} noPadding>
                                     <View
                                         accessible
                                         accessibilityLabel={`Continue lesson: ${inProgressLesson.title}`}
-                                        style={[
-                                            styles.continueCard,
-                                            { padding: spacing.md },
-                                        ]}
+                                        style={[styles.continueCard, { padding: spacing.md }]}
                                     >
-                                        {/* Left warm gradient indicator */}
-                                        <LinearGradient
-                                            colors={gradients.heroCta as unknown as [string, string]}
-                                            start={{ x: 0, y: 0 }}
-                                            end={{ x: 0, y: 1 }}
-                                            style={[
-                                                styles.continueLeftEdge,
-                                                { borderRadius: radius.full },
-                                            ]}
-                                        />
+                                        <View style={[styles.continueLeftEdge, { borderRadius: radius.full }]}>
+                                            <LinearGradient
+                                                colors={gradients.heroCta as unknown as [string, string]}
+                                                start={{ x: 0, y: 0 }}
+                                                end={{ x: 0, y: 1 }}
+                                                style={[StyleSheet.absoluteFill, { borderRadius: radius.full }]}
+                                            />
+                                        </View>
                                         <View style={[styles.continueIcon, { backgroundColor: brand.accent + '20', borderRadius: radius.md }]}>
                                             <Ionicons name="play-circle" size={24} color={brand.accent} />
                                         </View>
@@ -669,15 +508,12 @@ export default function HomeScreen() {
                                             </Text>
                                             <View style={{ marginTop: spacing.xs }}>
                                                 <ProgressBar
-                                                    progress={
-                                                        (() => {
-                                                            const p = progressMap[`${activeChildId}:${inProgressLesson.id}`];
-                                                            if (!p) return 0;
-                                                            const completedPhases = Object.keys(p.phaseProgress ?? {}).length;
-                                                            // Estimate progress from phases (5 typical phases per lesson)
-                                                            return Math.min(completedPhases / 5, 0.95);
-                                                        })()
-                                                    }
+                                                    progress={(() => {
+                                                        const p = progressMap[`${activeChildId}:${inProgressLesson.id}`];
+                                                        if (!p) return 0;
+                                                        const completedPhases = Object.keys(p.phaseProgress ?? {}).length;
+                                                        return Math.min(completedPhases / 5, 0.95);
+                                                    })()}
                                                     color={brand.accent}
                                                     trackColor={brand.accent + '20'}
                                                     height={4}
@@ -691,37 +527,31 @@ export default function HomeScreen() {
                         </Animated.View>
                     )}
 
-                    {/* ── Ayah of the Day ──────────────────────── */}
+                    {/* ── Ayah & Dua — compact stacked ── */}
+                    <Animated.View
+                        entering={FadeInDown.delay(STAGGER * 3).duration(600).springify().damping(16)}
+                        style={{ marginTop: spacing.lg }}
+                    >
+                        <AyahOfTheDay compact />
+                    </Animated.View>
                     <Animated.View
                         entering={FadeInDown.delay(STAGGER * 3.5).duration(600).springify().damping(16)}
-                        style={{ marginTop: spacing.lg }}
+                        style={{ marginTop: spacing.sm }}
                     >
-                        <AyahOfTheDay />
+                        <DuaOfTheDay compact />
                     </Animated.View>
 
-                    {/* ── Dua of the Day ───────────────────────── */}
-                    <Animated.View
-                        entering={FadeInDown.delay(STAGGER * 4).duration(600).springify().damping(16)}
-                        style={{ marginTop: spacing.lg }}
-                    >
-                        <DuaOfTheDay />
-                    </Animated.View>
-
-                    {/* ── Bottom spacing for absolute tab bar ─── */}
-                    <View style={{ height: 100 }} />
+                    <View style={{ height: 80 }} />
                 </View>
             </Animated.ScrollView>
         </SafeAreaView>
     );
 }
 
-// ── Styles ──────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
     safe: { flex: 1 },
     scroll: { paddingBottom: 32 },
 
-    /* Translucent scroll header */
     stickyHeader: {
         position: 'absolute',
         top: 0,
@@ -731,98 +561,91 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
 
-    /* Gradient hero */
     heroGradient: {
         overflow: 'hidden',
         position: 'relative',
     },
-    heroOrb: {
+
+    /* Islamic star — two overlapping rotated squares */
+    starContainer: {
         position: 'absolute',
-        borderRadius: 999,
-        backgroundColor: 'rgba(255,255,255,0.06)',
+        top: -10,
+        right: -10,
+        width: 130,
+        height: 130,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    heroOrbLarge: {
-        width: 200,
-        height: 200,
-        top: -40,
-        right: -60,
-    },
-    heroOrbSmall: {
+    starSquare: {
+        position: 'absolute',
         width: 80,
         height: 80,
-        bottom: 20,
-        left: -20,
-    },
-    heroOrbMedium: {
-        width: 120,
-        height: 120,
-        top: 30,
-        left: '40%' as unknown as number,
-        backgroundColor: 'rgba(255,255,255,0.03)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(255,255,255,0.08)',
+        borderRadius: 4,
     },
 
-    /* Greeting header */
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-    },
-
-    /* Lesson card */
-    lessonCard: {
-        overflow: 'hidden',
-    },
-    lessonAccentStrip: {
-        height: 3,
-    },
-    lessonBody: {
-        flex: 1,
-    },
-    lessonMeta: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    metaChip: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    emptyCard: {
-        alignItems: 'center',
-    },
-    emptyIcon: {
-        width: 64,
-        height: 64,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-
-    badgeRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    categoryIcon: {
-        width: 28,
-        height: 28,
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     greetingRow: {
         flexDirection: 'row',
         alignItems: 'center',
     },
 
-    /* Gradient CTA button */
-    gradientCta: {
+    /* Inline hero stats */
+    statsPillRow: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    statsPill: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 14,
-        paddingHorizontal: 24,
+        backgroundColor: 'rgba(255,255,255,0.12)',
+        borderRadius: 20,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        gap: 5,
+    },
+    statsPillText: {
+        color: 'rgba(255,255,255,0.85)',
+        fontSize: 12,
+        fontWeight: '600',
     },
 
-    /* Continue card */
+    /* Lesson card — compact horizontal */
+    lessonCard: {
+        overflow: 'hidden',
+    },
+    lessonLeftEdge: {
+        position: 'absolute',
+        left: 0,
+        top: 10,
+        bottom: 10,
+        width: 4,
+    },
+    lessonBody: {
+        flex: 1,
+    },
+    lessonTopRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    lessonMeta: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    lessonCtaCircle: {
+        width: 44,
+        height: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 12,
+    },
+
+    /* Continue/Review cards */
     continueCard: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -840,8 +663,6 @@ const styles = StyleSheet.create({
         bottom: 8,
         width: 4,
     },
-
-    /* Review badge */
     reviewBadge: {
         minWidth: 26,
         height: 26,
@@ -850,7 +671,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 6,
     },
 
-    /* Empty state (no child) */
+    /* Empty states */
+    emptyCard: {
+        alignItems: 'center',
+    },
     emptyState: {
         flex: 1,
         justifyContent: 'center',
