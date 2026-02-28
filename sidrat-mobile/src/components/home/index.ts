@@ -1,6 +1,7 @@
 export { AnimatedCounter } from './AnimatedCounter';
 export { AnimatedStatCard } from './AnimatedStatCard';
 export { AyahOfTheDay } from './AyahOfTheDay';
+export { DailyChallenge } from './DailyChallenge';
 export { DailyProgressRing } from './DailyProgressRing';
 export { DuaOfTheDay } from './DuaOfTheDay';
 export { HomeSkeletonLoader } from './SkeletonLoader';

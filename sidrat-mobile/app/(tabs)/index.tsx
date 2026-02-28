@@ -38,6 +38,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card, ScalePress, ProgressBar, EmptyState } from '../../src/components';
 import {
   AyahOfTheDay,
+  DailyChallenge,
   DuaOfTheDay,
   HomeSkeletonLoader,
   SalahReminder,
@@ -47,6 +48,7 @@ import { useReviewQueue } from '../../src/hooks/useReviewQueue';
 import { useAppStore, useChildStore, useLessonStore } from '../../src/stores';
 import { useTheme } from '../../src/theme';
 import { categoryMeta } from '../../src/types';
+import { formatHijriDate, getHijriContext } from '../../src/utils/hijriDate';
 
 const STAGGER = 80;
 
@@ -54,13 +56,30 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-function getGreeting(): string {
+function getIslamicGreeting(): { salaam: string; contextual: string } {
   const hour = new Date().getHours();
-  if (hour < 6) return 'Assalamu Alaikum';
-  if (hour < 12) return 'Good Morning';
-  if (hour < 17) return 'Good Afternoon';
-  if (hour < 21) return 'Good Evening';
-  return 'Assalamu Alaikum';
+  if (hour < 5) {
+    return { salaam: 'Assalamu Alaikum', contextual: 'May your Tahajjud be accepted' };
+  }
+  if (hour < 7) {
+    return { salaam: 'Assalamu Alaikum', contextual: 'A blessed Fajr morning to you' };
+  }
+  if (hour < 12) {
+    return { salaam: 'Assalamu Alaikum', contextual: 'Good morning — start with Bismillah!' };
+  }
+  if (hour < 15) {
+    return { salaam: 'Assalamu Alaikum', contextual: 'Good afternoon — keep learning!' };
+  }
+  if (hour < 18) {
+    return { salaam: 'Assalamu Alaikum', contextual: 'Good afternoon — Asr time soon' };
+  }
+  if (hour < 21) {
+    return { salaam: 'Assalamu Alaikum', contextual: 'Good evening — a peaceful night ahead' };
+  }
+  return {
+    salaam: 'Assalamu Alaikum',
+    contextual: 'Rest well — tomorrow is a new day of learning',
+  };
 }
 
 function getGreetingIcon(): keyof typeof Ionicons.glyphMap {
@@ -96,18 +115,6 @@ export default function HomeScreen() {
   const curriculumLessons = allCurriculumLessons;
 
   const { reviewCount, hasReviews, nextReview } = useReviewQueue();
-
-  const completedLessonToday = useMemo(() => {
-    if (!activeChildId) return false;
-    const todayStr = new Date().toDateString();
-    return Object.values(progressMap).some(
-      (p) =>
-        p.childId === activeChildId &&
-        p.isCompleted &&
-        p.completedAt &&
-        new Date(p.completedAt).toDateString() === todayStr,
-    );
-  }, [activeChildId, progressMap]);
 
   const [reviewsDismissed, setReviewsDismissed] = useState(false);
 
@@ -199,9 +206,11 @@ export default function HomeScreen() {
     transform: [{ scale: ctaPulse.value }],
   }));
 
-  const greeting = useMemo(getGreeting, []);
+  const greeting = useMemo(() => getIslamicGreeting(), []);
   const greetingIcon = useMemo(getGreetingIcon, []);
   const heroGradient = useMemo(getTimeBasedHeroGradient, []);
+  const hijriDateStr = useMemo(() => formatHijriDate(), []);
+  const hijriContext = useMemo(() => getHijriContext(), []);
 
   const navigateToLesson = useCallback(
     (lessonId: string) => {
@@ -288,7 +297,7 @@ export default function HomeScreen() {
               <View style={{ flex: 1 }}>
                 <View style={styles.greetingRow}>
                   <Text style={[typography.body, { color: 'rgba(255,255,255,0.75)' }]}>
-                    {greeting}
+                    {greeting.salaam}
                   </Text>
                   <Ionicons
                     name={greetingIcon}
@@ -299,6 +308,16 @@ export default function HomeScreen() {
                 </View>
                 <Text style={[typography.largeTitle, { color: '#FFFFFF' }]}>
                   {child?.name ?? 'Welcome'}
+                </Text>
+                <Text
+                  style={[typography.caption, { color: 'rgba(255,255,255,0.55)', marginTop: 2 }]}
+                >
+                  {hijriContext.isSpecialDay ? hijriContext.message : greeting.contextual}
+                </Text>
+                <Text
+                  style={[typography.caption, { color: 'rgba(255,255,255,0.45)', marginTop: 2 }]}
+                >
+                  {hijriDateStr}
                 </Text>
               </View>
             </View>
@@ -455,7 +474,7 @@ export default function HomeScreen() {
           </Animated.View>
 
           {/* ── Reviews Due ── */}
-          {hasReviews && completedLessonToday && !reviewsDismissed && (
+          {hasReviews && !reviewsDismissed && (
             <Animated.View
               entering={FadeInDown.delay(STAGGER * 2)
                 .duration(600)
@@ -592,6 +611,11 @@ export default function HomeScreen() {
               </ScalePress>
             </Animated.View>
           )}
+
+          {/* ── Daily Challenge ── */}
+          <View style={{ marginTop: spacing.lg }}>
+            <DailyChallenge delay={STAGGER * 2.8} />
+          </View>
 
           {/* ── Ayah & Dua — compact stacked ── */}
           <Animated.View
