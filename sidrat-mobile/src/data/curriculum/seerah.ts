@@ -53,7 +53,7 @@ export const seerahLessons: CurriculumLesson[] = [
           text: 'وَإِنَّكَ لَعَلَىٰ خُلُقٍ عَظِيمٍ',
           transliteration: 'Wa innaka la-ʿalā khuluqin ʿaẓīm',
           translation: 'And indeed, you are of a great moral character.',
-          quranRef: { surah: 68, ayah: 4 },
+          quranRef: { surah: 68, ayah: 4, globalAyahNumbers: [5275] },
         },
         keyTerms: [
           { term: 'Al-Amin', definition: 'The Trustworthy — a title given to the Prophet ﷺ' },
@@ -72,7 +72,7 @@ export const seerahLessons: CurriculumLesson[] = [
           transliteration: 'Laqad kāna lakum fī Rasūlillāhi uswatun ḥasanah',
           translation:
             'There has certainly been for you in the Messenger of Allah an excellent example.',
-          quranRef: { surah: 33, ayah: 21 },
+          quranRef: { surah: 33, ayah: 21, globalAyahNumbers: [3554] },
         },
         keyTerms: [
           {
@@ -178,7 +178,7 @@ export const seerahLessons: CurriculumLesson[] = [
             'Subḥānal-ladhī asrā bi-ʿabdihī laylan minal-Masjidil-Ḥarāmi ilal-Masjidil-Aqṣā',
           translation:
             'Glory be to the One Who took His servant by night from the Sacred Mosque to the Farthest Mosque.',
-          quranRef: { surah: 17, ayah: 1 },
+          quranRef: { surah: 17, ayah: 1, globalAyahNumbers: [2030] },
         },
         keyTerms: [
           {
@@ -326,7 +326,7 @@ export const seerahLessons: CurriculumLesson[] = [
           text: 'وَمَآ أَرْسَلْنَـٰكَ إِلَّا رَحْمَةً لِّلْعَـٰلَمِينَ',
           transliteration: 'Wa mā arsalnāka illā raḥmatan lil-ʿālamīn',
           translation: 'And We have not sent you except as a mercy to the worlds.',
-          quranRef: { surah: 21, ayah: 107 },
+          quranRef: { surah: 21, ayah: 107, globalAyahNumbers: [2590] },
         },
         keyTerms: [
           {

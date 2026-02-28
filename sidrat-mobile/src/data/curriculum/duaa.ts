@@ -77,7 +77,7 @@ export const duaaLessons: CurriculumLesson[] = [
           text: 'وَقَالَ رَبُّكُمُ ٱدْعُونِىٓ أَسْتَجِبْ لَكُمْ',
           transliteration: 'Wa qāla Rabbukumud-ʿūnī astajib lakum',
           translation: 'And your Lord says, "Call upon Me; I will respond to you."',
-          quranRef: { surah: 40, ayah: 60 },
+          quranRef: { surah: 40, ayah: 60, globalAyahNumbers: [4193] },
         },
         keyTerms: [
           {
@@ -191,7 +191,7 @@ export const duaaLessons: CurriculumLesson[] = [
             "Allāhu lā ilāha illā Huwal-Ḥayyul-Qayyūm. Lā ta'khudhuhu sinatun wa lā nawm.",
           translation:
             'Allah — there is no deity except Him, the Ever-Living, the Self-Sustaining. Neither drowsiness overtakes Him nor sleep.',
-          quranRef: { surah: 2, ayah: 255 },
+          quranRef: { surah: 2, ayah: 255, globalAyahNumbers: [262] },
         },
         keyTerms: [
           {

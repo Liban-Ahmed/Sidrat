@@ -73,7 +73,7 @@ export const adabLessons: CurriculumLesson[] = [
           transliteration: 'Fadhkurūnī adhkurkum washkurū lī wa lā takfurūn',
           translation:
             'So remember Me; I will remember you. And be grateful to Me and do not deny Me.',
-          quranRef: { surah: 2, ayah: 152 },
+          quranRef: { surah: 2, ayah: 152, globalAyahNumbers: [159] },
         },
         keyTerms: [
           {
@@ -181,7 +181,7 @@ export const adabLessons: CurriculumLesson[] = [
           transliteration: 'Wa qaḍā Rabbuka allā taʿbudū illā iyyāhu wa bil-wālidayni iḥsānā',
           translation:
             'And your Lord has decreed that you worship none but Him, and that you be dutiful to parents.',
-          quranRef: { surah: 17, ayah: 23 },
+          quranRef: { surah: 17, ayah: 23, globalAyahNumbers: [2052] },
         },
         keyTerms: [
           {
@@ -201,7 +201,7 @@ export const adabLessons: CurriculumLesson[] = [
           text: 'رَبِّ ٱرْحَمْهُمَا كَمَا رَبَّيَانِى صَغِيرًا',
           transliteration: 'Rabbi-rḥamhumā kamā rabbayānī ṣaghīrā',
           translation: 'My Lord, have mercy upon them as they brought me up when I was small.',
-          quranRef: { surah: 17, ayah: 24 },
+          quranRef: { surah: 17, ayah: 24, globalAyahNumbers: [2053] },
         },
         illustration: 'adab-mother',
       },
@@ -321,7 +321,7 @@ export const adabLessons: CurriculumLesson[] = [
           text: 'يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا لَا يَسْخَرْ قَوْمٌ مِّن قَوْمٍ',
           transliteration: 'Yā ayyuhal-ladhīna āmanū lā yaskhar qawmun min qawm',
           translation: 'O you who believe, let not a people ridicule another people.',
-          quranRef: { surah: 49, ayah: 11 },
+          quranRef: { surah: 49, ayah: 11, globalAyahNumbers: [4623] },
         },
         keyTerms: [
           {

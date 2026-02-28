@@ -55,7 +55,7 @@ export const storiesLessons: CurriculumLesson[] = [
             'Wa laqad arsalnā Nūḥan ilā qawmihī falabitha fīhim alfa sanatin illā khamsīna ʿāmā',
           translation:
             'And We certainly sent Nuh to his people, and he remained among them a thousand years minus fifty years.',
-          quranRef: { surah: 29, ayah: 14 },
+          quranRef: { surah: 29, ayah: 14, globalAyahNumbers: [3354] },
         },
         keyTerms: [
           {
@@ -77,7 +77,7 @@ export const storiesLessons: CurriculumLesson[] = [
             'Qulnaḥmil fīhā min kullin zawjayni-thnayn wa ahlaka illā man sabaqa ʿalayhil-qawlu wa man āman',
           translation:
             'We said: Load upon the ship of each creature two mates and your family, except those about whom the decree has passed, and whoever has believed.',
-          quranRef: { surah: 11, ayah: 40 },
+          quranRef: { surah: 11, ayah: 40, globalAyahNumbers: [1513] },
         },
         illustration: 'stories-nuh-flood',
       },
@@ -93,7 +93,7 @@ export const storiesLessons: CurriculumLesson[] = [
             "Rabbighfir lī wa li-wālidayya wa liman dakhala baytiya mu'minan wa lil-mu'minīna wal-mu'mināt",
           translation:
             'My Lord, forgive me and my parents and whoever enters my house as a believer, and the believing men and believing women.',
-          quranRef: { surah: 71, ayah: 28 },
+          quranRef: { surah: 71, ayah: 28, globalAyahNumbers: [5447] },
         },
         illustration: 'stories-nuh-saved',
       },
@@ -201,7 +201,7 @@ export const storiesLessons: CurriculumLesson[] = [
           transliteration: 'Fa-jaʿalahum judhādhan illā kabīran lahum laʿallahum ilayhi yarjiʿūn',
           translation:
             'So he made them into fragments, except a large one among them, that they might return to it [and question].',
-          quranRef: { surah: 21, ayah: 58 },
+          quranRef: { surah: 21, ayah: 58, globalAyahNumbers: [2541] },
         },
         keyTerms: [
           {
@@ -225,7 +225,7 @@ export const storiesLessons: CurriculumLesson[] = [
           text: 'قُلْنَا يَـٰنَارُ كُونِى بَرْدًا وَسَلَـٰمًا عَلَىٰٓ إِبْرَٰهِيمَ',
           transliteration: 'Qulnā yā nāru kūnī bardan wa salāman ʿalā Ibrāhīm',
           translation: 'We said, "O fire, be coolness and safety upon Ibrahim."',
-          quranRef: { surah: 21, ayah: 69 },
+          quranRef: { surah: 21, ayah: 69, globalAyahNumbers: [2552] },
         },
         keyTerms: [
           {
@@ -246,7 +246,7 @@ export const storiesLessons: CurriculumLesson[] = [
           transliteration: 'Rabbanā taqabbal minnā innaka Antas-Samīʿul-ʿAlīm',
           translation:
             'Our Lord, accept this from us. Indeed, You are the All-Hearing, the All-Knowing.',
-          quranRef: { surah: 2, ayah: 127 },
+          quranRef: { surah: 2, ayah: 127, globalAyahNumbers: [134] },
         },
         keyTerms: [
           {
@@ -392,7 +392,12 @@ export const storiesLessons: CurriculumLesson[] = [
           text: 'أَلَمْ تَرَ كَيْفَ فَعَلَ رَبُّكَ بِأَصْحَـٰبِ ٱلْفِيلِ',
           transliteration: 'A lam tara kayfa faʿala Rabbuka bi-aṣḥābil-fīl',
           translation: 'Have you not seen how your Lord dealt with the People of the Elephant?',
-          quranRef: { surah: 105, ayah: 1, endAyah: 5 },
+          quranRef: {
+            surah: 105,
+            ayah: 1,
+            endAyah: 5,
+            globalAyahNumbers: [6189, 6190, 6191, 6192, 6193],
+          },
         },
         keyTerms: [
           {
