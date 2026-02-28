@@ -13,6 +13,7 @@
  *  • Staggered entrance animations
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, {
@@ -25,12 +26,11 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { FeedbackCard } from './FeedbackCard';
+import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { PracticeTapWord } from '../../types/curriculum';
-import { FormattedText } from './FormattedText';
-import { FeedbackCard } from './FeedbackCard';
 
 interface Props {
   block: PracticeTapWord;
@@ -348,12 +348,12 @@ export function TapWordCard({ block, onAnswer }: Props) {
         })}
       </Animated.View>
 
-      {showHint && block.hint && (
-        <FeedbackCard type="hint">{block.hint}</FeedbackCard>
-      )}
+      {showHint && block.hint && <FeedbackCard type="hint">{block.hint}</FeedbackCard>}
 
       {showResult && block.explanation && (
-        <FeedbackCard type="success" delay={600} useFormatted>{block.explanation}</FeedbackCard>
+        <FeedbackCard type="success" delay={600} useFormatted>
+          {block.explanation}
+        </FeedbackCard>
       )}
     </Animated.View>
   );

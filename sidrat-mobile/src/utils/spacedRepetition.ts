@@ -8,8 +8,8 @@
 const INTERVALS = [1, 3, 7, 14, 30] as const;
 
 export interface ReviewSchedule {
-    nextReviewDate: Date;
-    intervalIndex: number;
+  nextReviewDate: Date;
+  intervalIndex: number;
 }
 
 /**
@@ -20,42 +20,40 @@ export interface ReviewSchedule {
  * @param now Injectable date for testing
  */
 export function calculateNextReview(
-    score: number,
-    currentIntervalIndex: number,
-    now: Date = new Date(),
+  score: number,
+  currentIntervalIndex: number,
+  now: Date = new Date(),
 ): ReviewSchedule {
-    // Score >= 80%: advance to next interval
-    // Score < 80%: reset to first interval
-    const passed = score >= 80;
-    const nextIndex = passed
-        ? Math.min(currentIntervalIndex + 1, INTERVALS.length - 1)
-        : 0;
+  // Score >= 80%: advance to next interval
+  // Score < 80%: reset to first interval
+  const passed = score >= 80;
+  const nextIndex = passed ? Math.min(currentIntervalIndex + 1, INTERVALS.length - 1) : 0;
 
-    const daysUntilReview = INTERVALS[nextIndex]!;
-    const nextReviewDate = new Date(now);
-    nextReviewDate.setDate(nextReviewDate.getDate() + daysUntilReview);
+  const daysUntilReview = INTERVALS[nextIndex]!;
+  const nextReviewDate = new Date(now);
+  nextReviewDate.setDate(nextReviewDate.getDate() + daysUntilReview);
 
-    return {
-        nextReviewDate,
-        intervalIndex: nextIndex,
-    };
+  return {
+    nextReviewDate,
+    intervalIndex: nextIndex,
+  };
 }
 
 /**
  * Check which lessons need review today.
  */
 export function getLessonsNeedingReview(
-    progressRecords: Array<{
-        lessonId: string;
-        nextReviewDate: string | null;
-        completedAt: string | null;
-    }>,
-    now: Date = new Date(),
+  progressRecords: {
+    lessonId: string;
+    nextReviewDate: string | null;
+    completedAt: string | null;
+  }[],
+  now: Date = new Date(),
 ): string[] {
-    return progressRecords
-        .filter((p) => {
-            if (!p.nextReviewDate || !p.completedAt) return false;
-            return new Date(p.nextReviewDate) <= now;
-        })
-        .map((p) => p.lessonId);
+  return progressRecords
+    .filter((p) => {
+      if (!p.nextReviewDate || !p.completedAt) return false;
+      return new Date(p.nextReviewDate) <= now;
+    })
+    .map((p) => p.lessonId);
 }

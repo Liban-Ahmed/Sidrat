@@ -5,18 +5,18 @@ import type { ReviewItem } from '../hooks/useReviewQueue';
  * Returns an array of sections, each with an urgency label and its items.
  */
 export function groupReviewsByUrgency(
-    queue: ReviewItem[],
+  queue: ReviewItem[],
 ): { urgency: ReviewItem['urgency']; items: ReviewItem[] }[] {
-    const groups: { urgency: ReviewItem['urgency']; items: ReviewItem[] }[] = [];
-    let current: (typeof groups)[number] | null = null;
+  const groups: { urgency: ReviewItem['urgency']; items: ReviewItem[] }[] = [];
+  let current: (typeof groups)[number] | null = null;
 
-    for (const item of queue) {
-        if (!current || current.urgency !== item.urgency) {
-            current = { urgency: item.urgency, items: [] };
-            groups.push(current);
-        }
-        current.items.push(item);
+  for (const item of queue) {
+    if (!current || current.urgency !== item.urgency) {
+      current = { urgency: item.urgency, items: [] };
+      groups.push(current);
     }
+    current.items.push(item);
+  }
 
-    return groups;
+  return groups;
 }

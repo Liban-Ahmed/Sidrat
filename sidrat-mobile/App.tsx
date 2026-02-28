@@ -7,4 +7,3 @@
  */
 
 export { default } from 'expo-router/build/qualified-entry';
-

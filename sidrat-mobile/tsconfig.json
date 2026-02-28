@@ -7,6 +7,7 @@
     "noUnusedParameters": true,
     "exactOptionalPropertyTypes": false,
     "forceConsistentCasingInFileNames": true,
+    "types": ["jest", "node"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]

@@ -5,10 +5,10 @@
  */
 
 export interface StreakResult {
-    current: number;
-    best: number;
-    isActive: boolean;
-    completedToday: boolean;
+  current: number;
+  best: number;
+  isActive: boolean;
+  completedToday: boolean;
 }
 
 /**
@@ -20,53 +20,53 @@ export interface StreakResult {
  * @param now - Current date (injectable for testing)
  */
 export function calculateStreak(
-    lastActiveDate: string | null,
-    currentStreak: number,
-    bestStreak: number,
-    now: Date = new Date(),
+  lastActiveDate: string | null,
+  currentStreak: number,
+  bestStreak: number,
+  now: Date = new Date(),
 ): StreakResult {
-    if (!lastActiveDate) {
-        return { current: 0, best: bestStreak, isActive: false, completedToday: false };
-    }
-
-    const last = startOfDay(new Date(lastActiveDate));
-    const today = startOfDay(now);
-    const diffMs = today.getTime() - last.getTime();
-    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) {
-        // Completed today — streak is active
-        return { current: currentStreak, best: bestStreak, isActive: true, completedToday: true };
-    }
-
-    if (diffDays === 1) {
-        // Yesterday — streak continues but not yet completed today
-        return { current: currentStreak, best: bestStreak, isActive: true, completedToday: false };
-    }
-
-    // 2+ days gap — streak broken
+  if (!lastActiveDate) {
     return { current: 0, best: bestStreak, isActive: false, completedToday: false };
+  }
+
+  const last = startOfDay(new Date(lastActiveDate));
+  const today = startOfDay(now);
+  const diffMs = today.getTime() - last.getTime();
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    // Completed today — streak is active
+    return { current: currentStreak, best: bestStreak, isActive: true, completedToday: true };
+  }
+
+  if (diffDays === 1) {
+    // Yesterday — streak continues but not yet completed today
+    return { current: currentStreak, best: bestStreak, isActive: true, completedToday: false };
+  }
+
+  // 2+ days gap — streak broken
+  return { current: 0, best: bestStreak, isActive: false, completedToday: false };
 }
 
 /**
  * Update streak values after completing a lesson today.
  */
 export function updateStreakOnCompletion(
-    currentStreak: number,
-    bestStreak: number,
+  currentStreak: number,
+  bestStreak: number,
 ): { newCurrent: number; newBest: number } {
-    const newCurrent = currentStreak + 1;
-    const newBest = Math.max(newCurrent, bestStreak);
-    return { newCurrent, newBest };
+  const newCurrent = currentStreak + 1;
+  const newBest = Math.max(newCurrent, bestStreak);
+  return { newCurrent, newBest };
 }
 
 /**
  * Get the start of the day (midnight, local time).
  */
 function startOfDay(date: Date): Date {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    return d;
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
 }
 
 /**
@@ -74,14 +74,14 @@ function startOfDay(date: Date): Date {
  * true = completed that day, false = not.
  */
 export function getWeekCompletionMap(
-    streak: number,
-    dayOfWeek: number = new Date().getDay(), // 0=Sun, 6=Sat
+  streak: number,
+  dayOfWeek: number = new Date().getDay(), // 0=Sun, 6=Sat
 ): boolean[] {
-    const week: boolean[] = [false, false, false, false, false, false, false];
-    // Fill backwards from current day of week
-    for (let i = 0; i < Math.min(streak, 7); i++) {
-        const idx = (dayOfWeek - i + 7) % 7;
-        week[idx] = true;
-    }
-    return week;
+  const week: boolean[] = [false, false, false, false, false, false, false];
+  // Fill backwards from current day of week
+  for (let i = 0; i < Math.min(streak, 7); i++) {
+    const idx = (dayOfWeek - i + 7) % 7;
+    week[idx] = true;
+  }
+  return week;
 }

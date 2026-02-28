@@ -8,10 +8,10 @@
 import { useFonts } from 'expo-font';
 
 export function useAppFonts() {
-    const [fontsLoaded, fontError] = useFonts({
-        'Amiri-Regular': require('../../assets/fonts/Amiri-Regular.ttf'),
-        'Amiri-Bold': require('../../assets/fonts/Amiri-Bold.ttf'),
-    });
+  const [fontsLoaded, fontError] = useFonts({
+    'Amiri-Regular': require('../../assets/fonts/Amiri-Regular.ttf'),
+    'Amiri-Bold': require('../../assets/fonts/Amiri-Bold.ttf'),
+  });
 
-    return { fontsLoaded, fontError };
+  return { fontsLoaded, fontError };
 }

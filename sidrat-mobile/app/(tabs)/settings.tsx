@@ -5,6 +5,9 @@
  * All toggles wired to settingsStore.
  */
 
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -17,12 +20,14 @@ import {
   Linking,
   Appearance,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import { useTheme } from '../../src/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Avatar, Card, ScalePress } from '../../src/components';
+import { ParentalGate } from '../../src/components/common/ParentalGate';
+import { useParentalGate } from '../../src/hooks';
+import { audioService } from '../../src/services/audioService';
+import { authService } from '../../src/services/auth';
+import { notificationService } from '../../src/services/notificationService';
 import {
   useAppStore,
   useAuthStore,
@@ -30,12 +35,7 @@ import {
   useSettingsStore,
   useToastStore,
 } from '../../src/stores';
-import { Avatar, Card, ScalePress } from '../../src/components';
-import { authService } from '../../src/services/auth';
-import { audioService } from '../../src/services/audioService';
-import { notificationService } from '../../src/services/notificationService';
-import { useParentalGate } from '../../src/hooks';
-import { ParentalGate } from '../../src/components/common/ParentalGate';
+import { useTheme } from '../../src/theme';
 
 // ── Reminder time options ──────────────────────────────────────────
 
@@ -160,7 +160,7 @@ export default function SettingsScreen() {
         setDailyReminder(false);
       }
     },
-    [setDailyReminder, reminderHour],
+    [setDailyReminder, reminderHour, showToast],
   );
 
   const handleReminderTime = useCallback(() => {
@@ -180,7 +180,7 @@ export default function SettingsScreen() {
       })),
       { text: 'Cancel', style: 'cancel' as const },
     ]);
-  }, [reminderHour, setReminderHour, dailyReminderEnabled]);
+  }, [reminderHour, setReminderHour, dailyReminderEnabled, showToast]);
 
   const handleRemoveChild = useCallback(
     (id: string, name: string) => {
@@ -208,7 +208,7 @@ export default function SettingsScreen() {
         );
       });
     },
-    [requireGate, removeChild, activeChildId, children, setActiveChild],
+    [requireGate, removeChild, activeChildId, children, setActiveChild, showToast],
   );
 
   const handleDeleteAccount = useCallback(() => {
