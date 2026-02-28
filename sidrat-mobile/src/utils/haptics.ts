@@ -1,8 +1,10 @@
 /**
- * Haptic Feedback Helper
+ * Haptic Feedback Service — Sidrat Design Spec §2
  *
- * Wraps expo-haptics with permission checks and
- * respects user settings.
+ * Centralized haptic utility. Every interactive element in the app
+ * must call the appropriate method here — no silent taps.
+ *
+ * All methods respect settingsStore.hapticsEnabled.
  */
 
 import * as Haptics from 'expo-haptics';
@@ -15,53 +17,70 @@ function isEnabled(): boolean {
   return useSettingsStore.getState().hapticsEnabled && isHapticsAvailable;
 }
 
-export const haptics = {
-  /** Light tap — button press, selection */
-  light() {
-    if (isEnabled()) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+const haptic = {
+  /** Light impact — button press, card selection, phase transition, pull-to-refresh, swipe */
+  light: () => {
+    if (!isEnabled()) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   },
 
-  /** Medium tap — significant action */
-  medium() {
-    if (isEnabled()) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
+  /** Medium impact — correct answer, Barakah Box tap */
+  medium: () => {
+    if (!isEnabled()) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   },
 
-  /** Heavy tap — destructive or important action */
-  heavy() {
-    if (isEnabled()) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    }
+  /** Heavy impact — long press, achievement unlock (first part), Barakah Box opens */
+  heavy: () => {
+    if (!isEnabled()) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
   },
 
-  /** Success — correct answer, lesson complete */
-  success() {
-    if (isEnabled()) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
+  /** Success notification — lesson complete, achievement unlock (second part) */
+  success: () => {
+    if (!isEnabled()) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   },
 
-  /** Error — wrong answer, invalid action */
-  error() {
-    if (isEnabled()) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    }
+  /** Warning notification — wrong answer */
+  warning: () => {
+    if (!isEnabled()) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
   },
 
-  /** Warning — approaching streak end, etc. */
-  warning() {
-    if (isEnabled()) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    }
+  /** Error notification — form validation failure, blocked action */
+  error: () => {
+    if (!isEnabled()) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   },
 
-  /** Selection change — picker, toggle */
-  selection() {
-    if (isEnabled()) {
-      Haptics.selectionAsync();
+  /** Selection feedback — tab switch, toggle/switch */
+  selection: () => {
+    if (!isEnabled()) return;
+    Haptics.selectionAsync();
+  },
+
+  /**
+   * Streak milestone celebration (Istiqamah).
+   *
+   * Pulses heavy impact n times based on streak count, then fires
+   * a success notification:
+   *   count < 7  → 2 pulses
+   *   count ≥ 7  → 3 pulses
+   *   count ≥ 14 → 4 pulses
+   *   count ≥ 30 → 5 pulses
+   *
+   * Each pulse is separated by a 100 ms gap.
+   */
+  streak: async (count: number) => {
+    if (!isEnabled()) return;
+    const pulses = count >= 30 ? 5 : count >= 14 ? 4 : count >= 7 ? 3 : 2;
+    for (let i = 0; i < pulses; i++) {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      await new Promise<void>((r) => setTimeout(r, 100));
     }
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   },
 };
+
+export default haptic;
