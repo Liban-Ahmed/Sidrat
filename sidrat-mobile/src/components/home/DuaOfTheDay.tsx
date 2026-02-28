@@ -54,7 +54,7 @@ export function DuaOfTheDay({ compact = false }: DuaOfTheDayProps) {
                         backgroundColor: isDark ? colors.surfaceSecondary : brand.lavender + '06',
                         borderRadius: radius.lg,
                         borderWidth: 1,
-                        borderColor: isDark ? colors.border : brand.lavender + '12',
+                        borderColor: isDark ? brand.lavender + '25' : brand.lavender + '12',
                         padding: compact ? spacing.sm : spacing.lg,
                     },
                 ]}

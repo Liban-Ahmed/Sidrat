@@ -18,6 +18,7 @@ import { useTheme } from '../src/theme';
 import { useAppStore, useAuthStore, useChildStore } from '../src/stores';
 import { ErrorBoundary } from '../src/components/common/ErrorBoundary';
 import { AchievementToast } from '../src/components/common/AchievementToast';
+import { Toast } from '../src/components/ui/Toast';
 import { authService } from '../src/services/auth';
 import { syncService } from '../src/services/syncService';
 import { closeDatabase } from '../src/services/localDatabase';
@@ -153,6 +154,7 @@ function AppLayout() {
                 />
             </Stack>
             <AchievementToast />
+            <Toast />
         </>
     );
 }

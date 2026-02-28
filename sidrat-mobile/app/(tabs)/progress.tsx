@@ -5,15 +5,15 @@
  * → weekly goal → overall progress → category chart (no card) → horizontal achievements.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { View, Text, ScrollView, StyleSheet, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme, brand as brandTokens } from '../../src/theme';
 import { useAppStore, useChildStore, useLessonStore, useAchievementStore, ACHIEVEMENTS } from '../../src/stores';
-import { Card, Avatar, ProgressRing, BismillahHeader } from '../../src/components';
+import { Card, Avatar, ProgressRing, EmptyState } from '../../src/components';
 import { CategoryBreakdownChart } from '../../src/components/progress';
 import { getAge } from '../../src/types';
 import { allCurriculumLessons } from '../../src/data/curriculum';
@@ -139,13 +139,15 @@ export default function ProgressScreen() {
     const streakDays = useMemo(() => {
         const today = new Date();
         const shortLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        const fullLabels = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const streak = child?.currentStreak ?? 0;
-        const days: { label: string; active: boolean; isToday: boolean }[] = [];
+        const days: { label: string; fullLabel: string; active: boolean; isToday: boolean }[] = [];
         for (let i = 6; i >= 0; i--) {
             const d = new Date(today);
             d.setDate(d.getDate() - i);
             days.push({
                 label: shortLabels[d.getDay()]!,
+                fullLabel: fullLabels[d.getDay()]!,
                 active: i < streak,
                 isToday: i === 0,
             });
@@ -156,18 +158,11 @@ export default function ProgressScreen() {
     if (!child) {
         return (
             <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
-                <View style={styles.empty}>
-                    <View style={[styles.emptyIcon, { backgroundColor: brand.primaryMuted, borderRadius: radius.full }]}>
-                        <Ionicons name="analytics-outline" size={36} color={brand.primary} />
-                    </View>
-                    <BismillahHeader size="sm" color={brand.primary + '40'} />
-                    <Text style={[typography.title2, { color: colors.text, marginTop: spacing.sm, textAlign: 'center' }]}>
-                        No profile selected
-                    </Text>
-                    <Text style={[typography.body, { color: colors.textSecondary, marginTop: spacing.xs, textAlign: 'center' }]}>
-                        Create a child profile to start{'\n'}tracking their learning journey.
-                    </Text>
-                </View>
+                <EmptyState
+                    icon="analytics-outline"
+                    title="No profile selected"
+                    subtitle={"Create a child profile to start\ntracking their learning journey."}
+                />
             </SafeAreaView>
         );
     }
@@ -196,9 +191,15 @@ export default function ProgressScreen() {
 
     const delay = (i: number) => Math.min(100 + i * 80, 400);
 
+    const [refreshing, setRefreshing] = useState(false);
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        setTimeout(() => setRefreshing(false), 600);
+    }, []);
+
     return (
         <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['left', 'right']}>
-            <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={brand.primary} />}>
                 {/* ── Profile-centric header ── */}
                 <Animated.View entering={FadeIn.duration(400)}>
                     <LinearGradient
@@ -271,13 +272,19 @@ export default function ProgressScreen() {
                     <Card variant="glass" style={{ marginTop: spacing.sm }}>
                         <View style={[styles.streakRow]}>
                             {streakDays.map((day, i) => (
-                                <View key={i} style={styles.streakDayCol}>
+                                <View
+                                    key={i}
+                                    style={styles.streakDayCol}
+                                    accessible
+                                    accessibilityRole="image"
+                                    accessibilityLabel={`${day.fullLabel}${day.isToday ? ', today' : ''}${day.active ? ', completed' : ''}`}
+                                >
                                     {day.active ? (
                                         <Ionicons name="moon" size={24} color={brand.secondary} />
                                     ) : day.isToday ? (
                                         <Ionicons name="moon-outline" size={24} color={brand.secondaryLight ?? brand.secondary} />
                                     ) : (
-                                        <Ionicons name="moon-outline" size={24} color={colors.textTertiary + '35'} />
+                                        <Ionicons name="moon-outline" size={24} color={isDark ? 'rgba(255,255,255,0.18)' : colors.textTertiary + '35'} />
                                     )}
                                     <Text
                                         style={[
@@ -380,6 +387,9 @@ export default function ProgressScreen() {
                             return (
                                 <View
                                     key={ach.id}
+                                    accessible
+                                    accessibilityRole="summary"
+                                    accessibilityLabel={`${ach.title}, ${isUnlocked ? `unlocked, ${RARITY_LABELS[ach.rarity]} rarity` : 'locked'}`}
                                     style={[
                                         styles.achCard,
                                         {
@@ -418,8 +428,6 @@ export default function ProgressScreen() {
 
 const styles = StyleSheet.create({
     safe: { flex: 1 },
-    empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 },
-    emptyIcon: { width: 80, height: 80, alignItems: 'center', justifyContent: 'center' },
     profileHeader: { overflow: 'hidden' },
     profileRow: { flexDirection: 'row', alignItems: 'center' },
     avatarRing: {

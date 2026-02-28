@@ -85,7 +85,7 @@ function getNextPrayer(): NextPrayerInfo {
 }
 
 export function SalahReminder() {
-    const { brand, colors, typography, spacing, radius } = useTheme();
+    const { brand, colors, typography, spacing, radius, isDark } = useTheme();
 
     const [next, setNext] = useState<NextPrayerInfo>(() => getNextPrayer());
 
@@ -137,8 +137,8 @@ export function SalahReminder() {
                                     backgroundColor: isNext
                                         ? brand.primary
                                         : isPast
-                                            ? brand.secondary + '60'
-                                            : colors.textTertiary + '30',
+                                            ? brand.secondary + (isDark ? '80' : '60')
+                                            : isDark ? 'rgba(255,255,255,0.18)' : colors.textTertiary + '30',
                                     width: isNext ? 6 : 5,
                                     height: isNext ? 6 : 5,
                                     borderRadius: radius.full,

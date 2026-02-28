@@ -42,7 +42,7 @@ export function AyahOfTheDay({ compact = false }: AyahOfTheDayProps) {
                         backgroundColor: isDark ? colors.surfaceSecondary : brand.secondary + '06',
                         borderRadius: radius.lg,
                         borderWidth: 1,
-                        borderColor: isDark ? colors.border : brand.secondary + '12',
+                        borderColor: isDark ? brand.secondary + '25' : brand.secondary + '12',
                         padding: compact ? spacing.sm : spacing.lg,
                     },
                 ]}

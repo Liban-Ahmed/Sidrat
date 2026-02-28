@@ -5,12 +5,13 @@
  * with left-edge accents, timeline layout, and interactive feedback.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import {
     View,
     Text,
     ScrollView,
     StyleSheet,
+    RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -108,11 +109,18 @@ export default function LearnScreen() {
         router.push(`/lesson/${lessonId}`);
     };
 
+    const [refreshing, setRefreshing] = useState(false);
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        setTimeout(() => setRefreshing(false), 600);
+    }, []);
+
     return (
         <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['left', 'right']}>
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 100 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={brand.primary} />}
             >
                 {/* ── Flat header ── */}
                 <Animated.View

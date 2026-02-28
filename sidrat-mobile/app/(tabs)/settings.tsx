@@ -23,8 +23,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../src/theme';
-import { useAppStore, useAuthStore, useChildStore, useSettingsStore } from '../../src/stores';
-import { Avatar, Card } from '../../src/components';
+import {
+  useAppStore,
+  useAuthStore,
+  useChildStore,
+  useSettingsStore,
+  useToastStore,
+} from '../../src/stores';
+import { Avatar, Card, ScalePress } from '../../src/components';
 import { authService } from '../../src/services/auth';
 import { audioService } from '../../src/services/audioService';
 import { notificationService } from '../../src/services/notificationService';
@@ -76,6 +82,8 @@ export default function SettingsScreen() {
   const setThemePreference = useSettingsStore((s) => s.setThemePreference);
   const analyticsEnabled = useSettingsStore((s) => s.analyticsEnabled);
   const setAnalyticsEnabled = useSettingsStore((s) => s.setAnalyticsEnabled);
+
+  const showToast = useToastStore((s) => s.show);
 
   // Parental gate
   const { isUnlocked, attemptUnlock } = useParentalGate();
@@ -145,10 +153,7 @@ export default function SettingsScreen() {
           await notificationService.scheduleDailyReminder(reminderHour);
           setDailyReminder(true);
         } else {
-          Alert.alert(
-            'Notifications Disabled',
-            'Please enable notifications in your device Settings to receive daily reminders.',
-          );
+          showToast('Enable notifications in Settings to receive reminders', 'info');
         }
       } else {
         await notificationService.cancelAll();
@@ -170,6 +175,7 @@ export default function SettingsScreen() {
               await notificationService.scheduleDailyReminder(hour);
             }
           }
+          showToast(`Reminder set for ${label}`);
         },
       })),
       { text: 'Cancel', style: 'cancel' as const },
@@ -195,6 +201,7 @@ export default function SettingsScreen() {
                     setActiveChild(remaining[0].id);
                   }
                 }
+                showToast(`${name}'s profile removed`);
               },
             },
           ],
@@ -385,20 +392,24 @@ export default function SettingsScreen() {
       >
         {/* ── Child Profiles ── */}
         <Animated.View entering={FadeInDown.delay(delay(0)).duration(400)}>
-          <Text style={[typography.title3, { color: colors.text, marginTop: spacing.lg }]}>
+          <Text style={[typography.title3, { color: colors.text, marginTop: spacing.xxxs }]}>
             Profiles
           </Text>
 
           {children.length > 0 && (
             <>
-              <View style={[styles.profileRow, { marginTop: spacing.sm, gap: spacing.sm }]}>
+              <View style={[styles.profileRow, { marginTop: spacing.xs, gap: spacing.sm }]}>
                 {children.map((child) => {
                   const isActive = child.id === activeChildId;
                   return (
-                    <Pressable
+                    <ScalePress
                       key={child.id}
                       onPress={() => setActiveChild(child.id)}
                       onLongPress={() => handleRemoveChild(child.id, child.name)}
+                      haptic
+                      pressScale={0.93}
+                      accessibilityLabel={`${child.name}${isActive ? ', selected' : ''}. Long press to remove`}
+                      accessibilityRole="button"
                       style={[
                         styles.profileItem,
                         {
@@ -408,29 +419,22 @@ export default function SettingsScreen() {
                               ? colors.surfaceSecondary
                               : colors.surface,
                           borderRadius: radius.lg,
-                          padding: spacing.md,
+                          paddingVertical: spacing.sm,
+                          paddingHorizontal: spacing.md,
                           borderWidth: isActive ? 2 : StyleSheet.hairlineWidth,
                           borderColor: isActive ? brand.primary : colors.border,
                           ...(isActive ? shadows.card : {}),
                         },
                       ]}
                     >
-                      {isActive && (
-                        <View
-                          style={[
-                            styles.profileAccentStrip,
-                            { borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg },
-                          ]}
-                        >
-                          <LinearGradient
-                            colors={gradients.primary}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 0 }}
-                            style={StyleSheet.absoluteFill}
-                          />
-                        </View>
-                      )}
-                      <Avatar avatarId={child.avatarId} size={40} />
+                      <View
+                        style={[
+                          styles.avatarWrap,
+                          { borderWidth: 2, borderColor: isActive ? brand.primary : 'transparent' },
+                        ]}
+                      >
+                        <Avatar avatarId={child.avatarId} size={36} />
+                      </View>
                       <Text
                         style={[
                           typography.labelSmall,
@@ -444,10 +448,7 @@ export default function SettingsScreen() {
                       >
                         {child.name}
                       </Text>
-                      {isActive && (
-                        <View style={[styles.activeDot, { backgroundColor: brand.primary }]} />
-                      )}
-                    </Pressable>
+                    </ScalePress>
                   );
                 })}
               </View>
@@ -572,10 +573,11 @@ export default function SettingsScreen() {
               return (
                 <Pressable
                   key={value}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: isSelected }}
+                  accessibilityLabel={`${label} theme${isSelected ? ', selected' : ''}`}
                   onPress={() => {
                     setThemePreference(value);
-                    // Push preference to the native layer so system
-                    // components (Switch, Alert, keyboard) match too.
                     Appearance.setColorScheme(value === 'system' ? null : value);
                   }}
                   style={[
@@ -896,20 +898,13 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   profileRow: { flexDirection: 'row', flexWrap: 'wrap' },
-  profileItem: { alignItems: 'center', minWidth: 80, overflow: 'hidden' },
-  profileAccentStrip: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 3,
-    overflow: 'hidden',
-  },
-  activeDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    marginTop: 4,
+  profileItem: { alignItems: 'center', minWidth: 72, overflow: 'hidden' },
+  avatarWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sectionHeader: { flexDirection: 'row', alignItems: 'center' },
   settingRow: { flexDirection: 'row', alignItems: 'center' },

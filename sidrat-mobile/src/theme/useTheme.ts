@@ -15,7 +15,7 @@
 
 import { useMemo } from 'react';
 import { useColorScheme } from 'react-native';
-import { brand, palette, categoryColors, rarityColors, gradients } from './colors';
+import { brand, palette, categoryColors, rarityColors, gradients, gradientsDark } from './colors';
 import { typography } from './typography';
 import { spacing, layout, radius, shadows, timing, springs } from './spacing';
 import { useSettingsStore } from '../stores/settingsStore';
@@ -27,7 +27,7 @@ export interface Theme {
     isDark: boolean;
     brand: typeof brand;
     colors: (typeof palette)[ThemeMode];
-    gradients: typeof gradients;
+    gradients: { [K in keyof typeof gradients]: readonly [string, string, ...string[]] };
     categoryColors: typeof categoryColors;
     rarityColors: typeof rarityColors;
     typography: typeof typography;
@@ -54,7 +54,7 @@ export function useTheme(): Theme {
             isDark: mode === 'dark',
             brand,
             colors: palette[mode],
-            gradients,
+            gradients: mode === 'dark' ? { ...gradients, ...gradientsDark } : gradients,
             categoryColors,
             rarityColors,
             typography,

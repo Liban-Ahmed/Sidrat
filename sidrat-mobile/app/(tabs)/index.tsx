@@ -37,7 +37,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '../../src/theme';
 import { useAppStore, useChildStore, useLessonStore } from '../../src/stores';
-import { BismillahHeader, Button, Card, ScalePress, ProgressBar } from '../../src/components';
+import { Card, ScalePress, ProgressBar, EmptyState } from '../../src/components';
 import { AyahOfTheDay, DuaOfTheDay, HomeSkeletonLoader, SalahReminder } from '../../src/components/home';
 import { categoryMeta } from '../../src/types';
 import { allCurriculumLessons } from '../../src/data/curriculum';
@@ -198,35 +198,13 @@ export default function HomeScreen() {
     if (!child && children.length === 0) {
         return (
             <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
-                <View style={styles.emptyState}>
-                    <View
-                        style={[
-                            styles.emptyStateIcon,
-                            { backgroundColor: brand.primary + '15', borderRadius: radius.full },
-                        ]}
-                    >
-                        <Ionicons name="people-outline" size={48} color={brand.primary} />
-                    </View>
-                    <Text style={[typography.title2, { color: colors.text, marginTop: spacing.lg, textAlign: 'center' }]}>
-                        Welcome to Sidrat!
-                    </Text>
-                    <BismillahHeader size="sm" color={brand.primary + '50'} />
-                    <Text
-                        style={[
-                            typography.bodySmall,
-                            { color: colors.textSecondary, marginTop: spacing.xs, textAlign: 'center', paddingHorizontal: spacing.xl },
-                        ]}
-                    >
-                        Let's set up your child's learning profile to get started on their Quran journey.
-                    </Text>
-                    <View style={{ marginTop: spacing.lg }}>
-                        <Button
-                            title="Create Profile"
-                            variant="primary"
-                            onPress={() => router.push('/onboarding' as any)}
-                        />
-                    </View>
-                </View>
+                <EmptyState
+                    icon="people-outline"
+                    title="Welcome to Sidrat!"
+                    subtitle="Let's set up your child's learning profile to get started on their Quran journey."
+                    actionLabel="Create Profile"
+                    onAction={() => router.push('/onboarding' as any)}
+                />
             </SafeAreaView>
         );
     }
@@ -674,17 +652,5 @@ const styles = StyleSheet.create({
     /* Empty states */
     emptyCard: {
         alignItems: 'center',
-    },
-    emptyState: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 32,
-    },
-    emptyStateIcon: {
-        width: 96,
-        height: 96,
-        alignItems: 'center',
-        justifyContent: 'center',
     },
 });

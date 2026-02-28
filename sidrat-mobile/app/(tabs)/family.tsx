@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Alert, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
@@ -58,11 +58,18 @@ export default function FamilyScreen() {
     const catColor = CATEGORY_COLORS[activity.category];
     const next = useMemo(() => getNextActivity(weekNum), [weekNum]);
 
+    const [refreshing, setRefreshing] = useState(false);
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        setTimeout(() => setRefreshing(false), 600);
+    }, []);
+
     return (
         <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['left', 'right']}>
             <ScrollView
                 contentContainerStyle={{ paddingBottom: 100 }}
                 showsVerticalScrollIndicator={false}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={brand.primary} />}
             >
                 {/* ── Compact warm header ── */}
                 <Animated.View entering={FadeIn.duration(400)}>
