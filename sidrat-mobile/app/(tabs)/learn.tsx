@@ -63,21 +63,18 @@ export default function LearnScreen() {
   const { brand, colors, typography, spacing, radius, shadows, isDark } = useTheme();
   const router = useRouter();
   const activeChildId = useAppStore((s) => s.activeChildId);
+  const expandedUnitIds = useAppStore((s) => s.expandedUnitIds);
+  const toggleUnitExpanded = useAppStore((s) => s.toggleUnitExpanded);
   const progress = useLessonStore((s) => s.progress);
 
-  // ── Collapse state ──
-  const [collapsedUnits, setCollapsedUnits] = useState<Set<string>>(new Set());
-
-  const toggleUnit = useCallback((unitId: string) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    haptics.selection();
-    setCollapsedUnits((prev) => {
-      const next = new Set(prev);
-      if (next.has(unitId)) next.delete(unitId);
-      else next.add(unitId);
-      return next;
-    });
-  }, []);
+  const toggleUnit = useCallback(
+    (unitId: string) => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      haptics.selection();
+      toggleUnitExpanded(unitId);
+    },
+    [toggleUnitExpanded],
+  );
 
   const lessonMap = useMemo(() => new Map(allCurriculumLessons.map((l) => [l.id, l])), []);
   const unitLessonsMap = useMemo(() => {
@@ -334,7 +331,7 @@ export default function LearnScreen() {
             const unitComplete = unitProgress.completed === unitProgress.total;
             const pct = unitProgress.total > 0 ? unitProgress.completed / unitProgress.total : 0;
             const delay = Math.min(300 + ui * 80, 500);
-            const isCollapsed = collapsedUnits.has(unit.id);
+            const isCollapsed = !expandedUnitIds.includes(unit.id);
 
             return (
               <Animated.View

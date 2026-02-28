@@ -37,6 +37,9 @@ interface AppState {
   /** History of daily challenge completions (per child, per day) */
   dailyChallengeCompletions: DailyChallengeCompletion[];
 
+  /** Unit IDs that are currently expanded in the Learn screen (all others collapsed by default) */
+  expandedUnitIds: string[];
+
   // Actions
   completeOnboarding: () => void;
   setActiveChild: (id: string) => void;
@@ -48,6 +51,8 @@ interface AppState {
   completeDailyChallenge: (lessonId: string, practiceId: string, childId: string) => void;
   /** Check if today's daily challenge is complete for a specific child */
   isDailyChallengeComplete: (lessonId: string, practiceId: string, childId: string) => boolean;
+  /** Toggle a unit's expanded/collapsed state */
+  toggleUnitExpanded: (unitId: string) => void;
 }
 
 function getTodayDateString(): string {
@@ -63,6 +68,7 @@ export const useAppStore = create<AppState>()(
       parentalGateUnlocked: false,
       isReady: false,
       dailyChallengeCompletions: [],
+      expandedUnitIds: [],
 
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),
 
@@ -114,6 +120,16 @@ export const useAppStore = create<AppState>()(
             c.childId === childId,
         );
       },
+
+      toggleUnitExpanded: (unitId) => {
+        set((state) => {
+          const isExpanded = state.expandedUnitIds.includes(unitId);
+          const expandedUnitIds = isExpanded
+            ? state.expandedUnitIds.filter((id) => id !== unitId)
+            : [...state.expandedUnitIds, unitId];
+          return { expandedUnitIds };
+        });
+      },
     }),
     {
       name: 'sidrat-app',
@@ -123,6 +139,7 @@ export const useAppStore = create<AppState>()(
         hasCompletedOnboarding: state.hasCompletedOnboarding,
         activeChildId: state.activeChildId,
         dailyChallengeCompletions: state.dailyChallengeCompletions,
+        expandedUnitIds: state.expandedUnitIds,
       }),
     },
   ),
