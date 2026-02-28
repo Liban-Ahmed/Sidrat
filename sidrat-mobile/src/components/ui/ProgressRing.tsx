@@ -44,29 +44,33 @@ export function ProgressRing({
   const track = trackColor ?? (isDark ? fillColor + '18' : fillColor + '12');
   const pct = Math.min(Math.max(progress, 0), 1);
 
-  const animProgress = useSharedValue(0);
+  const animProgress = useSharedValue(pct);
   useEffect(() => {
-    animProgress.value = withTiming(pct, {
-      duration: 1000,
-      easing: Easing.out(Easing.cubic),
-    });
-  }, [pct, animProgress]);
+    if (pct !== animProgress.value) {
+      animProgress.value = withTiming(pct, {
+        duration: 800,
+        easing: Easing.out(Easing.cubic),
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pct]);
 
   // Each half-circle covers 180°. We rotate them to fill the arc.
   const halfSize = size / 2;
 
   const leftStyle = useAnimatedStyle(() => {
     const rotate = interpolate(animProgress.value, [0, 0.5, 1], [0, 0, 180]);
+    const opacity = interpolate(animProgress.value, [0.499, 0.5, 1], [0, 1, 1]);
     return {
       transform: [{ rotate: `${rotate}deg` }],
-      opacity: animProgress.value > 0.5 ? 1 : 0,
+      opacity,
     };
   });
 
   const rightStyle = useAnimatedStyle(() => {
-    const rotate = interpolate(animProgress.value, [0, 0.5], [0, 180]);
+    const rotate = interpolate(animProgress.value, [0, 0.5, 1], [0, 180, 180]);
     return {
-      transform: [{ rotate: `${Math.min(rotate, 180)}deg` }],
+      transform: [{ rotate: `${rotate}deg` }],
     };
   });
 
@@ -117,14 +121,13 @@ export function ProgressRing({
           style={[
             rightStyle,
             {
-              width: halfSize,
+              position: 'absolute',
+              left: -halfSize,
+              width: size,
               height: size,
-              borderTopRightRadius: halfSize,
-              borderBottomRightRadius: halfSize,
+              borderRadius: halfSize,
               borderWidth: strokeWidth,
-              borderLeftWidth: 0,
               borderColor: fillColor,
-              transformOrigin: 'left center',
             },
           ]}
         />
@@ -146,22 +149,20 @@ export function ProgressRing({
           style={[
             leftStyle,
             {
-              width: halfSize,
-              height: size,
+              position: 'absolute',
               left: 0,
-              borderTopLeftRadius: halfSize,
-              borderBottomLeftRadius: halfSize,
+              width: size,
+              height: size,
+              borderRadius: halfSize,
               borderWidth: strokeWidth,
-              borderRightWidth: 0,
               borderColor: fillColor,
-              transformOrigin: 'right center',
             },
           ]}
         />
       </View>
 
       {/* Center content */}
-      <View style={styles.center}>
+      <View style={[styles.center, { width: size, height: size }]}>
         {children ?? (
           <Text
             style={[
@@ -200,6 +201,7 @@ const styles = StyleSheet.create({
     top: 0,
   },
   center: {
+    position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
   },
