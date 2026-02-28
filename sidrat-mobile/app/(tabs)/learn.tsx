@@ -200,16 +200,25 @@ export default function LearnScreen() {
               {overallStats.completed} of {overallStats.total} lessons
             </Text>
           </View>
-          <ProgressRing
-            progress={overallStats.pct}
-            size={52}
-            strokeWidth={4}
-            color={brand.secondary}
-          >
-            <Text style={[typography.captionBold, { color: brand.secondary, fontSize: 9 }]}>
-              {overallStats.total > 0 ? Math.round(overallStats.pct * 100) : 0}%
-            </Text>
-          </ProgressRing>
+          <View style={styles.headerRight}>
+            <ProgressRing
+              progress={overallStats.pct}
+              size={40}
+              strokeWidth={4}
+              color={brand.secondary}
+            >
+              <Text
+                style={{
+                  color: brand.secondary,
+                  fontSize: 10,
+                  fontWeight: '500',
+                  textAlign: 'center',
+                }}
+              >
+                {overallStats.total > 0 ? Math.round(overallStats.pct * 100) : 0}%
+              </Text>
+            </ProgressRing>
+          </View>
         </Animated.View>
 
         {/* ── Continue Learning hero card ── */}
@@ -706,6 +715,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   headerLeft: { flex: 1, minWidth: 0 },
+  headerRight: { marginTop: -32 },
 
   // Hero card
   heroCard: { position: 'relative' },
