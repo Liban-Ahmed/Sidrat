@@ -8,7 +8,7 @@ import { View, Text, StyleSheet, TextInput, Pressable } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FeedbackCard } from './FeedbackCard';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 import type { PracticeFillBlank } from '../../types/curriculum';
 
 interface Props {
@@ -29,7 +29,7 @@ export function FillBlankCard({ block, onAnswer }: Props) {
 
   const handleSubmit = useCallback(() => {
     if (answer.trim().length === 0) return;
-    haptics.medium();
+    haptic.medium();
     setShowResult(true);
 
     if (isCorrect) {

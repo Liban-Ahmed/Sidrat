@@ -131,7 +131,7 @@ export default function SettingsScreen() {
 
   const handleToggleHaptics = useCallback(
     (value: boolean) => setHapticsEnabled(value),
-    // haptics.ts reads hapticsEnabled from store directly — no extra wiring needed
+    // haptic.ts reads hapticsEnabled from store directly — no extra wiring needed
     [setHapticsEnabled],
   );
 

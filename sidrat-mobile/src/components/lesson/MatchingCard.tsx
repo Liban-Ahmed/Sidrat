@@ -18,7 +18,7 @@ import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { FeedbackCard } from './FeedbackCard';
 import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 import type { PracticeMatching } from '../../types/curriculum';
 
 interface Props {
@@ -43,7 +43,7 @@ export function MatchingCard({ block, onAnswer }: Props) {
   const handleLeftTap = useCallback(
     (left: string) => {
       if (matched.has(left)) return;
-      haptics.light();
+      haptic.light();
       setSelectedLeft(left);
       setWrongPair(null);
     },
@@ -57,7 +57,7 @@ export function MatchingCard({ block, onAnswer }: Props) {
 
       const correctPair = block.pairs.find((p) => p.left === selectedLeft);
       if (correctPair && correctPair.right === right) {
-        haptics.medium();
+        haptic.medium();
         const newMatched = new Map(matched);
         newMatched.set(selectedLeft, right);
         setMatched(newMatched);
@@ -68,7 +68,7 @@ export function MatchingCard({ block, onAnswer }: Props) {
           setTimeout(() => onAnswer(true, block.points), 800);
         }
       } else {
-        haptics.light();
+        haptic.light();
         setWrongPair({ left: selectedLeft, right });
         setTimeout(() => {
           setWrongPair(null);

@@ -20,7 +20,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 import type { HookBlock } from '../../types/curriculum';
 
 interface Props {
@@ -87,7 +87,7 @@ export function HookPhase({
   }));
 
   const handleContinue = () => {
-    haptics.medium();
+    haptic.medium();
     onContinue();
   };
 
@@ -125,7 +125,7 @@ export function HookPhase({
       <Animated.View entering={FadeIn.delay(600).duration(500)} style={styles.speakerArea}>
         <Pressable
           onPress={() => {
-            haptics.light();
+            haptic.light();
             onNarrate(hook.narration);
           }}
           style={styles.speakerOuter}

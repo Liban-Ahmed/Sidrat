@@ -9,7 +9,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { FeedbackCard } from './FeedbackCard';
 import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 import type { PracticeTrueFalse } from '../../types/curriculum';
 
 interface Props {
@@ -27,7 +27,7 @@ export function TrueFalseCard({ block, onAnswer }: Props) {
   const handleSelect = useCallback(
     (value: boolean) => {
       if (showResult) return;
-      haptics.medium();
+      haptic.medium();
       setSelected(value);
       setShowResult(true);
 

@@ -18,7 +18,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAchievementStore, getAchievementDef } from '../../stores/achievementStore';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 
 // Using theme rarityColors — imported via useTheme
 
@@ -43,7 +43,7 @@ export function AchievementToast() {
 
   useEffect(() => {
     if (achievement) {
-      haptics.success();
+      haptic.success();
       translateY.value = withSpring(0, { damping: 12, stiffness: 100 });
       opacity.value = withTiming(1, { duration: 300 });
       scale.value = withSpring(1, { damping: 10, stiffness: 120 });

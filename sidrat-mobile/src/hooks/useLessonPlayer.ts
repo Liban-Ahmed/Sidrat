@@ -9,7 +9,7 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { audioService } from '../services/audioService';
 import { useLessonStore, useChildStore } from '../stores';
-import { haptics } from '../utils/haptics';
+import haptic from '../utils/haptics';
 import type { ResolvedLesson } from '../services/ageAdaptiveService';
 import type {
   CurriculumLesson,
@@ -170,7 +170,7 @@ export function useLessonPlayer({
     audioService.stop();
     setState((s) => ({ ...s, currentPhase: 'teach', teachIndex: 0 }));
     markPhaseComplete(childId, lesson.id, 'teach');
-    haptics.light();
+    haptic.light();
   }, [childId, lesson.id, markPhaseComplete]);
 
   const nextTeachBlock = useCallback(() => {
@@ -183,7 +183,7 @@ export function useLessonPlayer({
     } else {
       setState((s) => ({ ...s, teachIndex: s.teachIndex + 1 }));
     }
-    haptics.light();
+    haptic.light();
   }, [totalTeachBlocks, state.teachIndex, childId, lesson.id, markPhaseComplete]);
 
   const submitAnswer = useCallback(
@@ -210,9 +210,9 @@ export function useLessonPlayer({
       }
 
       if (isCorrect) {
-        haptics.success();
+        haptic.success();
       } else {
-        haptics.error();
+        haptic.error();
       }
     },
     [totalPracticeBlocks, state.practiceIndex, childId, lesson.id, markPhaseComplete],
@@ -222,7 +222,7 @@ export function useLessonPlayer({
     audioService.stop();
     setState((s) => ({ ...s, currentPhase: 'reward' }));
     markPhaseComplete(childId, lesson.id, 'reward');
-    haptics.success();
+    haptic.success();
   }, [childId, lesson.id, markPhaseComplete]);
 
   const completeLesson = useCallback(() => {
@@ -234,7 +234,7 @@ export function useLessonPlayer({
       completeLessonInStore(childId, lesson.id, scorePercent, lesson.xpReward);
       recordLessonCompletion(childId, lesson.xpReward);
     }
-    haptics.success();
+    haptic.success();
   }, [
     childId,
     lesson.id,

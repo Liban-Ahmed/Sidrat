@@ -23,7 +23,7 @@ import { AnimatedScoreDisplay } from './AnimatedScoreDisplay';
 import { ConfettiCelebration } from './ConfettiCelebration';
 import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 import type { RewardConfig } from '../../types/curriculum';
 
 interface Props {
@@ -75,7 +75,7 @@ export function RewardPhase({
   useEffect(() => {
     trophyScale.value = withDelay(200, withSpring(1, { damping: 12, stiffness: 80 }));
 
-    haptics.medium();
+    haptic.medium();
     if (!hasCompleted.current) {
       hasCompleted.current = true;
       onComplete();
@@ -208,7 +208,7 @@ export function RewardPhase({
           <Animated.View entering={FadeInUp.delay(1000).duration(600)} style={styles.buttonArea}>
             <Pressable
               onPress={() => {
-                haptics.medium();
+                haptic.medium();
                 onDone();
               }}
               style={({ pressed }) => [

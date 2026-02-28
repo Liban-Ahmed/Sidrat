@@ -8,7 +8,7 @@
 import React from 'react';
 import { Pressable, type ViewStyle, type StyleProp } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { haptics } from '../utils/haptics';
+import haptic from '../utils/haptics';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -46,7 +46,7 @@ export function ScalePress({
   }));
 
   const handlePress = () => {
-    if (haptic) haptics.light();
+    if (haptic) haptic.light();
     onPress?.();
   };
 

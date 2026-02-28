@@ -26,7 +26,7 @@ import { allUnits, allCurriculumLessons } from '../../src/data/curriculum';
 import { useAppStore, useLessonStore } from '../../src/stores';
 import { useTheme } from '../../src/theme';
 import { categoryColors } from '../../src/theme/colors';
-import { haptics } from '../../src/utils/haptics';
+import haptic from '../../src/utils/haptics';
 import type { CurriculumUnit, CurriculumLesson } from '../../src/types/curriculum';
 import type { LessonCategory, Difficulty } from '../../src/types/models';
 
@@ -70,7 +70,7 @@ export default function LearnScreen() {
   const toggleUnit = useCallback(
     (unitId: string) => {
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      haptics.selection();
+      haptic.selection();
       toggleUnitExpanded(unitId);
     },
     [toggleUnitExpanded],
@@ -138,11 +138,11 @@ export default function LearnScreen() {
 
   const handleLessonPress = (lessonId: string) => {
     if (isLessonPremium(lessonId)) {
-      haptics.warning();
+      haptic.warning();
       // Future: navigate to paywall
       return;
     }
-    haptics.light();
+    haptic.light();
     router.push(`/lesson/${lessonId}`);
   };
 

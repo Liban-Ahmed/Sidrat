@@ -18,7 +18,7 @@ import {
 } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -65,7 +65,7 @@ export function Button({
     scale.value = withSpring(1, springs.snappy);
   };
   const handlePress = (e: any) => {
-    haptics.light();
+    haptic.light();
     onPress?.(e);
   };
 

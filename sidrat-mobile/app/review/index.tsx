@@ -19,7 +19,7 @@ import { ScalePress, ProgressBar, EmptyState } from '../../src/components';
 import { useReviewQueue } from '../../src/hooks/useReviewQueue';
 import { useTheme } from '../../src/theme';
 import { categoryMeta } from '../../src/types';
-import { haptics } from '../../src/utils/haptics';
+import haptic from '../../src/utils/haptics';
 import { groupReviewsByUrgency } from '../../src/utils/reviewGroups';
 import type { ReviewItem } from '../../src/hooks/useReviewQueue';
 
@@ -84,7 +84,7 @@ export default function ReviewScreen() {
   const { reviewQueue, reviewCount, hasReviews, nextReview } = useReviewQueue();
   const navigateToReview = useCallback(
     (lessonId: string) => {
-      haptics.light();
+      haptic.light();
       router.push(`/lesson/${lessonId}?review=1` as any);
     },
     [router],

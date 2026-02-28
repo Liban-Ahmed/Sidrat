@@ -20,7 +20,7 @@ import { FormattedText } from './FormattedText';
 import { QuranAudioButton } from './QuranAudioButton';
 import { useQuranAudio } from '../../hooks/useQuranAudio';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 import type { TeachBlock } from '../../types/curriculum';
 
 interface Props {
@@ -74,7 +74,7 @@ export function TeachPhase({
       if (quranAudio.isPlaying || quranAudio.isLoading) {
         quranAudio.stop();
       }
-      haptics.light();
+      haptic.light();
       onNarrate(text);
     },
     [quranAudio, onNarrate],
@@ -289,7 +289,7 @@ export function TeachPhase({
       >
         <Pressable
           onPress={() => {
-            haptics.medium();
+            haptic.medium();
             onNext();
           }}
           style={({ pressed }) => [

@@ -31,7 +31,7 @@ import Animated, {
 import { quranService } from '../../services/quranService';
 import { useTheme } from '../../theme';
 import { brand } from '../../theme/colors';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 
 interface QuranRef {
   surah: number;
@@ -199,7 +199,7 @@ export function QuranAudioButton({
   // ── Handlers ──
 
   const handlePress = useCallback(() => {
-    haptics.light();
+    haptic.light();
 
     if (isActivelyPlaying) {
       onPause();

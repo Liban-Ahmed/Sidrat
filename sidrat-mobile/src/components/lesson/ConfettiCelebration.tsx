@@ -27,7 +27,7 @@ import Animated, {
   FadeOut,
 } from 'react-native-reanimated';
 import { brand } from '../../theme/colors';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
@@ -202,9 +202,9 @@ export function ConfettiCelebration({ visible, isPerfect = false, onComplete }: 
   useEffect(() => {
     if (visible) {
       // Double success haptic for perfect (Design Spec §5.1)
-      haptics.success();
+      haptic.success();
       if (isPerfect) {
-        setTimeout(() => haptics.success(), 200);
+        setTimeout(() => haptic.success(), 200);
       }
 
       // Auto-dismiss

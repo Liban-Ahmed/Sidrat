@@ -18,7 +18,7 @@ import Animated, { FadeInDown, FadeIn, ZoomIn, Layout } from 'react-native-reani
 import { FeedbackCard } from './FeedbackCard';
 import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 import type { PracticeOrdering } from '../../types/curriculum';
 
 interface Props {
@@ -41,14 +41,14 @@ export function OrderingCard({ block, onAnswer }: Props) {
   const handleTap = useCallback(
     (item: string) => {
       if (showResult) return;
-      haptics.light();
+      haptic.light();
       const newSelected = [...selected, item];
       setSelected(newSelected);
 
       if (newSelected.length === block.correctOrder.length) {
         setShowResult(true);
         const correct = newSelected.every((s, i) => s === block.correctOrder[i]);
-        haptics.medium();
+        haptic.medium();
         setTimeout(() => onAnswer(correct, correct ? block.points : 0), 1500);
       }
     },
@@ -57,12 +57,12 @@ export function OrderingCard({ block, onAnswer }: Props) {
 
   const handleUndo = useCallback(() => {
     if (showResult || selected.length === 0) return;
-    haptics.light();
+    haptic.light();
     setSelected((s) => s.slice(0, -1));
   }, [showResult, selected.length]);
 
   const handleReset = useCallback(() => {
-    haptics.light();
+    haptic.light();
     setSelected([]);
     setShowResult(false);
   }, []);
