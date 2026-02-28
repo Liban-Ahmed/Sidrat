@@ -19,6 +19,7 @@ import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { PracticeOrdering } from '../../types/curriculum';
 import { FormattedText } from './FormattedText';
+import { FeedbackCard } from './FeedbackCard';
 
 interface Props {
     block: PracticeOrdering;
@@ -224,29 +225,10 @@ export function OrderingCard({ block, onAnswer }: Props) {
                 ))}
             </Animated.View>
 
-            {/* ── Explanation ── */}
             {showResult && block.explanation && (
-                <Animated.View
-                    entering={FadeIn.delay(600).duration(400)}
-                    style={[
-                        styles.explanation,
-                        {
-                            backgroundColor: isCorrect ? colors.successMuted : colors.warningMuted,
-                            borderRadius: radius.md,
-                            borderLeftWidth: 3,
-                            borderLeftColor: isCorrect ? colors.success : brand.accent,
-                        },
-                    ]}
-                >
-                    <Ionicons
-                        name={isCorrect ? 'sparkles' : 'information-circle-outline'}
-                        size={18}
-                        color={isCorrect ? colors.success : brand.accent}
-                    />
-                    <FormattedText style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
-                        {block.explanation}
-                    </FormattedText>
-                </Animated.View>
+                <FeedbackCard type={isCorrect ? 'success' : 'hint'} delay={600} useFormatted>
+                    {block.explanation}
+                </FeedbackCard>
             )}
         </View>
     );
@@ -310,12 +292,5 @@ const styles = StyleSheet.create({
         paddingHorizontal: 18,
         paddingVertical: 12,
         borderWidth: 1,
-    },
-    explanation: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        gap: 10,
-        padding: 14,
-        marginTop: 20,
     },
 });

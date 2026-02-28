@@ -5,14 +5,19 @@
  * Uses expo-speech (system TTS) — free, works offline,
  * no API keys needed.
  *
+ * Respects `narrationEnabled` and `soundEnabled` from settingsStore:
+ *   - speak()   → skipped when narrationEnabled is false
+ *   - stop()    → always honoured regardless of settings
+ *
  * Future: swap individual lessons to pre-recorded mp3 via expo-av
  * without changing the interface.
  */
 
 import * as Speech from 'expo-speech';
+import { useSettingsStore } from '../stores/settingsStore';
 
 export interface SpeechOptions {
-    /** Speech rate: 0.5 (slow) to 2.0 (fast). Default: 0.85 for children. */
+    /** Speech rate: 0.5 (slow) to 2.0 (fast). Default: falls back to settingsStore.speechRate. */
     rate?: number;
     /** Voice pitch: 0.5 to 2.0. Default: 1.1 (slightly higher for kids). */
     pitch?: number;
@@ -24,8 +29,7 @@ export interface SpeechOptions {
     onError?: (error: Error) => void;
 }
 
-const CHILD_DEFAULTS: Required<Pick<SpeechOptions, 'rate' | 'pitch' | 'language'>> = {
-    rate: 0.85,
+const CHILD_DEFAULTS = {
     pitch: 1.1,
     language: 'en-US',
 };
@@ -33,12 +37,17 @@ const CHILD_DEFAULTS: Required<Pick<SpeechOptions, 'rate' | 'pitch' | 'language'
 export const audioService = {
     /**
      * Speak text using system TTS.
+     * Silently returns if narration or sound is disabled in settings.
      * Stops any currently playing speech first.
      */
     async speak(text: string, options: SpeechOptions = {}): Promise<void> {
+        const { narrationEnabled, soundEnabled, speechRate } = useSettingsStore.getState();
+        if (!narrationEnabled || !soundEnabled) return;
+
         await this.stop();
 
-        const { rate, pitch, language, onDone, onError } = { ...CHILD_DEFAULTS, ...options };
+        const rate = options.rate ?? speechRate;
+        const { pitch, language, onDone, onError } = { ...CHILD_DEFAULTS, ...options };
 
         Speech.speak(text, {
             rate,

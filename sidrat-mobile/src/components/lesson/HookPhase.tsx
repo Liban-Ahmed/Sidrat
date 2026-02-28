@@ -1,15 +1,6 @@
 /**
- * HookPhase — Immersive, full-screen attention grabber with layered
- * depth, floating Islamic motifs, and polished micro-interactions.
- *
- * Features:
- *  • Layered radial gradient background with decorative circles
- *  • Floating animated star particles
- *  • Large breathing icon with soft glow ring
- *  • Typing-style entrance for prompt text
- *  • Pulsing speaker button with waveform ring
- *  • Bouncing CTA with haptic feedback
- *  • Warm, inviting tone for children
+ * HookPhase -- Immersive attention grabber with category-colored icon,
+ * gentle breathing animation, and narration speaker button.
  */
 
 import React, { useEffect } from 'react';
@@ -37,18 +28,19 @@ interface Props {
     isNarrating: boolean;
     onNarrate: (text: string) => void;
     onContinue: () => void;
+    accentColor: string;
+    categoryIcon: keyof typeof Ionicons.glyphMap;
 }
 
-export function HookPhase({ hook, isNarrating, onNarrate, onContinue }: Props) {
-    const { brand, colors, typography, radius, isDark } = useTheme();
+export function HookPhase({ hook, isNarrating, onNarrate, onContinue, accentColor, categoryIcon }: Props) {
+    const { colors, typography, radius, isDark } = useTheme();
 
-    // Auto-narrate on mount
     useEffect(() => {
         const timer = setTimeout(() => onNarrate(hook.narration), 600);
         return () => clearTimeout(timer);
     }, [hook.narration, onNarrate]);
 
-    // ── Breathing icon glow ──
+    // Gentle breathing icon scale
     const breathe = useSharedValue(0);
     useEffect(() => {
         breathe.value = withRepeat(
@@ -61,23 +53,18 @@ export function HookPhase({ hook, isNarrating, onNarrate, onContinue }: Props) {
         );
     }, [breathe]);
 
-    const iconGlowStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: interpolate(breathe.value, [0, 1], [1, 1.08]) }],
-        opacity: interpolate(breathe.value, [0, 1], [0.85, 1]),
+    const iconStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: interpolate(breathe.value, [0, 1], [1, 1.06]) }],
+        opacity: interpolate(breathe.value, [0, 1], [0.9, 1]),
     }));
 
-    const glowRingStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: interpolate(breathe.value, [0, 1], [1, 1.25]) }],
-        opacity: interpolate(breathe.value, [0, 1], [0.3, 0.08]),
-    }));
-
-    // ── Pulsing speaker ──
+    // Speaker pulse while narrating
     const pulseScale = useSharedValue(1);
     useEffect(() => {
         if (isNarrating) {
             pulseScale.value = withRepeat(
                 withSequence(
-                    withTiming(1.12, { duration: 400, easing: Easing.inOut(Easing.ease) }),
+                    withTiming(1.1, { duration: 400, easing: Easing.inOut(Easing.ease) }),
                     withTiming(1, { duration: 400, easing: Easing.inOut(Easing.ease) }),
                 ),
                 -1,
@@ -92,101 +79,38 @@ export function HookPhase({ hook, isNarrating, onNarrate, onContinue }: Props) {
         transform: [{ scale: pulseScale.value }],
     }));
 
-    // Speaker waveform ring
-    const waveScale = useSharedValue(1);
-    useEffect(() => {
-        if (isNarrating) {
-            waveScale.value = withRepeat(
-                withSequence(
-                    withTiming(1.6, { duration: 600 }),
-                    withTiming(1, { duration: 600 }),
-                ),
-                -1,
-                true,
-            );
-        }
-    }, [isNarrating, waveScale]);
-
-    const waveStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: waveScale.value }],
-        opacity: isNarrating ? interpolate(waveScale.value, [1, 1.6], [0.4, 0]) : 0,
-    }));
-
-    // ── CTA bounce ──
-    const ctaScale = useSharedValue(1);
-    useEffect(() => {
-        ctaScale.value = withRepeat(
-            withSequence(
-                withTiming(1.03, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
-                withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
-            ),
-            -1,
-            true,
-        );
-    }, [ctaScale]);
-
-    const ctaAnimStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: ctaScale.value }],
-    }));
-
     const handleContinue = () => {
         haptics.medium();
         onContinue();
     };
 
-    const accentBg = brand.accent;
-
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-            {/* Decorative background orbs */}
-            <View style={[styles.decorOrb, styles.orb1, { backgroundColor: accentBg + '08' }]} />
-            <View style={[styles.decorOrb, styles.orb2, { backgroundColor: brand.primary + '06' }]} />
-            <View style={[styles.decorOrb, styles.orb3, { backgroundColor: brand.lavender + '06' }]} />
-
-            {/* Icon with glow */}
-            <Animated.View
-                entering={FadeInDown.delay(100).duration(600)}
-                style={styles.iconArea}
-            >
-                {/* Outer glow ring */}
-                <Animated.View
-                    style={[
-                        styles.glowRing,
-                        { borderColor: accentBg + '30' },
-                        glowRingStyle,
-                    ]}
-                />
-                {/* Main icon circle */}
+            {/* Category icon */}
+            <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.iconArea}>
                 <Animated.View
                     style={[
                         styles.iconCircle,
                         {
-                            backgroundColor: accentBg + (isDark ? '20' : '12'),
-                            shadowColor: accentBg,
-                            shadowOffset: { width: 0, height: 8 },
-                            shadowOpacity: 0.2,
-                            shadowRadius: 20,
+                            backgroundColor: accentColor + (isDark ? '20' : '10'),
+                            shadowColor: accentColor,
+                            shadowOffset: { width: 0, height: 6 },
+                            shadowOpacity: 0.15,
+                            shadowRadius: 16,
                         },
-                        iconGlowStyle,
+                        iconStyle,
                     ]}
                 >
-                    <Ionicons name="bulb" size={52} color={accentBg} />
+                    <Ionicons name={categoryIcon} size={48} color={accentColor} />
                 </Animated.View>
             </Animated.View>
 
-            {/* Prompt text */}
-            <Animated.View
-                entering={FadeInDown.delay(300).duration(600)}
-                style={styles.promptArea}
-            >
+            {/* Prompt */}
+            <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.promptArea}>
                 <FormattedText
                     style={[
                         typography.title1,
-                        {
-                            color: colors.text,
-                            textAlign: 'center',
-                            lineHeight: 34,
-                        },
+                        { color: colors.text, textAlign: 'center', lineHeight: 34 },
                     ]}
                 >
                     {hook.prompt}
@@ -194,10 +118,7 @@ export function HookPhase({ hook, isNarrating, onNarrate, onContinue }: Props) {
             </Animated.View>
 
             {/* Speaker button */}
-            <Animated.View
-                entering={FadeIn.delay(600).duration(500)}
-                style={styles.speakerArea}
-            >
+            <Animated.View entering={FadeIn.delay(600).duration(500)} style={styles.speakerArea}>
                 <Pressable
                     onPress={() => {
                         haptics.light();
@@ -205,35 +126,27 @@ export function HookPhase({ hook, isNarrating, onNarrate, onContinue }: Props) {
                     }}
                     style={styles.speakerOuter}
                 >
-                    {/* Waveform ring */}
-                    <Animated.View
-                        style={[
-                            styles.waveRing,
-                            { borderColor: isNarrating ? brand.primary : 'transparent' },
-                            waveStyle,
-                        ]}
-                    />
                     <Animated.View
                         style={[
                             styles.speakerButton,
                             {
                                 backgroundColor: isNarrating
-                                    ? brand.primary
+                                    ? accentColor
                                     : isDark
-                                        ? brand.primary + '25'
-                                        : brand.primary + '12',
-                                shadowColor: isNarrating ? brand.primary : 'transparent',
+                                        ? accentColor + '22'
+                                        : accentColor + '10',
+                                shadowColor: isNarrating ? accentColor : 'transparent',
                                 shadowOffset: { width: 0, height: 4 },
-                                shadowOpacity: isNarrating ? 0.3 : 0,
-                                shadowRadius: 12,
+                                shadowOpacity: isNarrating ? 0.25 : 0,
+                                shadowRadius: 10,
                             },
                             speakerStyle,
                         ]}
                     >
                         <Ionicons
                             name={isNarrating ? 'volume-high' : 'volume-medium-outline'}
-                            size={26}
-                            color={isNarrating ? '#FFF' : brand.primary}
+                            size={24}
+                            color={isNarrating ? '#FFF' : accentColor}
                         />
                     </Animated.View>
                 </Pressable>
@@ -241,7 +154,7 @@ export function HookPhase({ hook, isNarrating, onNarrate, onContinue }: Props) {
                     style={[
                         typography.caption,
                         {
-                            color: isNarrating ? brand.primary : colors.textTertiary,
+                            color: isNarrating ? accentColor : colors.textTertiary,
                             fontWeight: isNarrating ? '600' : '400',
                             marginTop: 8,
                         },
@@ -251,35 +164,29 @@ export function HookPhase({ hook, isNarrating, onNarrate, onContinue }: Props) {
                 </Text>
             </Animated.View>
 
-            {/* CTA button */}
-            <Animated.View
-                entering={FadeInUp.delay(800).duration(500)}
-                style={styles.ctaArea}
-            >
-                <Animated.View style={ctaAnimStyle}>
-                    <Pressable
-                        onPress={handleContinue}
-                        style={({ pressed }) => [
-                            styles.ctaButton,
-                            {
-                                backgroundColor: brand.primary,
-                                borderRadius: radius.lg,
-                                shadowColor: brand.primary,
-                                shadowOffset: { width: 0, height: 6 },
-                                shadowOpacity: pressed ? 0.15 : 0.3,
-                                shadowRadius: 16,
-                                elevation: 6,
-                                transform: [{ scale: pressed ? 0.97 : 1 }],
-                            },
-                        ]}
-                    >
-                        <Ionicons name="sparkles" size={20} color="#FFF" />
-                        <Text style={[typography.headlineBold, { color: '#FFF' }]}>
-                            Let&apos;s Learn!
-                        </Text>
-                        <Ionicons name="arrow-forward" size={20} color="rgba(255,255,255,0.7)" />
-                    </Pressable>
-                </Animated.View>
+            {/* CTA */}
+            <Animated.View entering={FadeInUp.delay(800).duration(500)} style={styles.ctaArea}>
+                <Pressable
+                    onPress={handleContinue}
+                    style={({ pressed }) => [
+                        styles.ctaButton,
+                        {
+                            backgroundColor: accentColor,
+                            borderRadius: radius.lg,
+                            shadowColor: accentColor,
+                            shadowOffset: { width: 0, height: 6 },
+                            shadowOpacity: pressed ? 0.15 : 0.25,
+                            shadowRadius: 14,
+                            elevation: 5,
+                            transform: [{ scale: pressed ? 0.97 : 1 }],
+                        },
+                    ]}
+                >
+                    <Text style={[typography.headlineBold, { color: '#FFF' }]}>
+                        Let&apos;s Learn!
+                    </Text>
+                    <Ionicons name="arrow-forward" size={20} color="rgba(255,255,255,0.7)" />
+                </Pressable>
             </Animated.View>
         </View>
     );
@@ -293,67 +200,39 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-
-    /* Decorative orbs */
-    decorOrb: { position: 'absolute', borderRadius: 9999 },
-    orb1: { width: 200, height: 200, top: -40, right: -60 },
-    orb2: { width: 160, height: 160, bottom: 60, left: -50 },
-    orb3: { width: 120, height: 120, top: 100, left: 30 },
-
-    /* Icon */
     iconArea: {
         marginBottom: 32,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    glowRing: {
-        position: 'absolute',
-        width: 140,
-        height: 140,
-        borderRadius: 70,
-        borderWidth: 2,
-    },
     iconCircle: {
-        width: 110,
-        height: 110,
-        borderRadius: 55,
+        width: 100,
+        height: 100,
+        borderRadius: 50,
         alignItems: 'center',
         justifyContent: 'center',
     },
-
-    /* Prompt */
     promptArea: {
         marginBottom: 28,
         maxWidth: 320,
     },
-
-    /* Speaker */
     speakerArea: {
         alignItems: 'center',
         marginBottom: 44,
     },
     speakerOuter: {
-        width: 60,
-        height: 60,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    waveRing: {
-        position: 'absolute',
         width: 56,
         height: 56,
-        borderRadius: 28,
-        borderWidth: 2,
-    },
-    speakerButton: {
-        width: 54,
-        height: 54,
-        borderRadius: 27,
         alignItems: 'center',
         justifyContent: 'center',
     },
-
-    /* CTA */
+    speakerButton: {
+        width: 52,
+        height: 52,
+        borderRadius: 26,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     ctaArea: { width: '100%' },
     ctaButton: {
         height: 56,

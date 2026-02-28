@@ -1,15 +1,14 @@
 /**
- * Family Screen
- *
- * Weekly family activities with parent scripts.
- * Data-driven from a rotating activity bank.
- * Tracks completion via the family store.
+ * Family Screen -- Weekly family activities with parent scripts.
+ * Compact warm header, open activity layout, collapsible tips,
+ * horizontal conversation pills, and staggered entrance animations.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
+import React, { useMemo, useCallback, useState } from 'react';
+import { View, Text, ScrollView, Pressable, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/theme';
 import { useAppStore, useFamilyStore } from '../../src/stores';
@@ -20,21 +19,21 @@ import {
     getNextActivity,
 } from '../../src/stores/familyStore';
 import type { FamilyActivity } from '../../src/stores/familyStore';
-import { Card, Button, IslamicDivider, BismillahHeader } from '../../src/components';
+import { Button, BismillahHeader, ScalePress } from '../../src/components';
 import { analyticsService } from '../../src/services/analyticsService';
 import { ANALYTICS_EVENTS } from '../../src/constants/config';
 
 export default function FamilyScreen() {
-    const { brand, colors, typography, spacing, radius, gradients } = useTheme();
+    const { brand, colors, typography, spacing, radius, gradients, shadows, isDark } = useTheme();
 
     const activeChildId = useAppStore((s) => s.activeChildId);
     const { markComplete, isCompleted } = useFamilyStore();
 
-    // Rotate activities weekly
     const weekNum = getWeekOfYear();
     const activity = useMemo(() => getActivityForWeek(weekNum), [weekNum]);
-
     const completed = isCompleted(weekNum, activeChildId);
+
+    const [tipsExpanded, setTipsExpanded] = useState(false);
 
     const handleComplete = useCallback(() => {
         markComplete(weekNum, activeChildId);
@@ -56,121 +55,91 @@ export default function FamilyScreen() {
         knowledge: brand.lavender,
     };
 
+    const catColor = CATEGORY_COLORS[activity.category];
+    const next = useMemo(() => getNextActivity(weekNum), [weekNum]);
+
     return (
         <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['left', 'right']}>
             <ScrollView
                 contentContainerStyle={{ paddingBottom: 100 }}
                 showsVerticalScrollIndicator={false}
             >
-                {/* ── Gradient Hero Header ──────────────────── */}
-                <LinearGradient
-                    colors={gradients.familyHero as unknown as [string, string]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={[
-                        styles.heroGradient,
-                        {
-                            paddingHorizontal: spacing.lg,
-                            paddingTop: spacing.xl + 54,
-                            paddingBottom: spacing.xxl + 12,
-                        },
-                    ]}
-                >
-                    {/* Decorative orbs */}
-                    <View style={[styles.heroOrb, styles.heroOrbLarge]} />
-                    <View style={[styles.heroOrb, styles.heroOrbSmall]} />
-                    <View style={[styles.heroOrb, styles.heroOrbMedium]} />
-
-                    <Text style={[typography.largeTitle, { color: '#FFFFFF' }]}>Family</Text>
-                    <Text style={[typography.body, { color: 'rgba(255,255,255,0.8)', marginTop: spacing.xxs }]}>
-                        Weekly activities to do together
-                    </Text>
-                </LinearGradient>
-                {/* Bottom curve blending into background */}
-                <View
-                    style={{
-                        height: 24,
-                        marginTop: -24,
-                        backgroundColor: colors.background,
-                        borderTopLeftRadius: radius.xl,
-                        borderTopRightRadius: radius.xl,
-                    }}
-                />
-
-                <View style={{ paddingHorizontal: spacing.md }}>
-
-                    {/* This Week's Activity */}
-                    <Card variant="premium" style={{ marginTop: spacing.lg }}>
-                        <View style={styles.activityHeader}>
-                            <View
-                                style={[
-                                    styles.weekBadge,
-                                    { backgroundColor: brand.accent + '20', borderRadius: radius.full },
-                                ]}
-                            >
-                                <Text style={[typography.labelSmall, { color: brand.accent }]}>
+                {/* ── Compact warm header ── */}
+                <Animated.View entering={FadeIn.duration(400)}>
+                    <LinearGradient
+                        colors={gradients.familyHero as unknown as [string, string]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={[styles.header, { paddingHorizontal: spacing.lg, paddingTop: spacing.xl + 54, paddingBottom: spacing.lg }]}
+                    >
+                        <View style={styles.headerTop}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={[typography.largeTitle, { color: '#FFF' }]}>Family</Text>
+                                <Text style={[typography.bodySmall, { color: 'rgba(255,255,255,0.75)', marginTop: spacing.xxxs }]}>
+                                    Weekly activities to do together
+                                </Text>
+                            </View>
+                            <View style={[styles.weekBadge, { backgroundColor: 'rgba(255,255,255,0.18)', borderRadius: radius.full }]}>
+                                <Ionicons name="calendar" size={12} color="rgba(255,255,255,0.8)" />
+                                <Text style={[typography.labelSmall, { color: '#FFF', marginLeft: 4 }]}>
                                     Week {weekNum}
                                 </Text>
                             </View>
-                            <View style={styles.durationBadge}>
-                                <Ionicons name="time-outline" size={14} color={colors.textTertiary} />
-                                <Text style={[typography.caption, { color: colors.textTertiary, marginLeft: 4 }]}>
-                                    {activity.duration} min
-                                </Text>
-                            </View>
                         </View>
-
-                        <BismillahHeader size="sm" color={CATEGORY_COLORS[activity.category] + '40'} align="left" />
-
-                        <View
-                            style={{
-                                width: 48,
-                                height: 48,
-                                borderRadius: 24,
-                                backgroundColor: CATEGORY_COLORS[activity.category] + '15',
-                                borderWidth: 1.5,
-                                borderColor: CATEGORY_COLORS[activity.category] + '25',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginTop: spacing.sm,
-                            }}
-                        >
-                            <Ionicons
-                                name={ACTIVITY_ICONS[activity.id] ?? 'sparkles-outline'}
-                                size={24}
-                                color={CATEGORY_COLORS[activity.category]}
-                            />
+                        <View style={{ marginTop: spacing.sm }}>
+                            <BismillahHeader size="sm" color="rgba(255,255,255,0.15)" align="center" />
                         </View>
-                        <Text style={[typography.title1, { color: colors.text, marginTop: spacing.xs }]}>
-                            {activity.title}
-                        </Text>
-                        <View
-                            style={[
-                                styles.categoryBadge,
-                                {
-                                    backgroundColor: CATEGORY_COLORS[activity.category] + '15',
-                                    borderRadius: radius.sm,
-                                    marginTop: spacing.xs,
-                                    alignSelf: 'flex-start',
-                                },
-                            ]}
-                        >
-                            <Text
+                    </LinearGradient>
+                    {/* Bottom curve blending into background */}
+                    <View
+                        style={{
+                            height: 24,
+                            marginTop: -24,
+                            backgroundColor: colors.background,
+                            borderTopLeftRadius: radius.xl,
+                            borderTopRightRadius: radius.xl,
+                        }}
+                    />
+                </Animated.View>
+
+                <View style={{ paddingHorizontal: spacing.lg }}>
+
+                    {/* ── This Week's Activity (open layout) ── */}
+                    <Animated.View entering={FadeInDown.delay(100).duration(400)} style={{ marginTop: spacing.lg }}>
+                        <View style={styles.activityRow}>
+                            <View
                                 style={[
-                                    typography.caption,
+                                    styles.activityIcon,
                                     {
-                                        color: CATEGORY_COLORS[activity.category],
-                                        textTransform: 'capitalize',
-                                        fontWeight: '600',
+                                        backgroundColor: catColor + (isDark ? '20' : '10'),
+                                        borderColor: catColor + '25',
                                     },
                                 ]}
                             >
-                                {activity.category}
-                            </Text>
+                                <Ionicons
+                                    name={ACTIVITY_ICONS[activity.id] ?? 'sparkles-outline'}
+                                    size={30}
+                                    color={catColor}
+                                />
+                            </View>
+                            <View style={{ flex: 1, marginLeft: spacing.md }}>
+                                <Text style={[typography.title1, { color: colors.text }]}>
+                                    {activity.title}
+                                </Text>
+                                <View style={styles.activityMeta}>
+                                    <Ionicons name="time-outline" size={13} color={colors.textTertiary} />
+                                    <Text style={[typography.caption, { color: colors.textTertiary, marginLeft: 3 }]}>
+                                        {activity.duration} min
+                                    </Text>
+                                    <View style={[styles.metaDot, { backgroundColor: colors.textTertiary }]} />
+                                    <Text style={[typography.caption, { color: catColor, fontWeight: '600', textTransform: 'capitalize' }]}>
+                                        {activity.category}
+                                    </Text>
+                                </View>
+                            </View>
                         </View>
-                        <Text
-                            style={[typography.body, { color: colors.textSecondary, marginTop: spacing.sm }]}
-                        >
+
+                        <Text style={[typography.body, { color: colors.textSecondary, marginTop: spacing.sm, lineHeight: 24 }]}>
                             {activity.description}
                         </Text>
 
@@ -184,104 +153,122 @@ export default function FamilyScreen() {
                             accessibilityLabel={completed ? 'Activity completed' : 'Mark this family activity as done'}
                             accessibilityRole="button"
                         />
-                    </Card>
+                    </Animated.View>
 
-                    {/* Parent Tips */}
-                    <IslamicDivider spacing={12} variant="rich" />
-                    <View
-                        style={{
-                            backgroundColor: brand.secondary + '06',
-                            borderRadius: radius.lg,
-                            padding: spacing.md,
-                            marginTop: spacing.xs,
-                        }}
-                    >
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: spacing.xs }}>
+                    {/* ── Parent Tips (collapsible) ── */}
+                    <Animated.View entering={FadeInDown.delay(200).duration(400)} style={{ marginTop: spacing.xxl }}>
+                        <Pressable
+                            onPress={() => setTipsExpanded((v) => !v)}
+                            style={styles.tipsTitleRow}
+                            accessibilityRole="button"
+                            accessibilityLabel={tipsExpanded ? 'Collapse parent tips' : 'Expand parent tips'}
+                        >
                             <Ionicons name="leaf" size={18} color={brand.secondary} />
-                            <Text style={[typography.title3, { color: colors.text }]}>
+                            <Text style={[typography.title3, { color: colors.text, flex: 1, marginLeft: spacing.xs }]}>
                                 Parent Tips
                             </Text>
+                            <Ionicons
+                                name={tipsExpanded ? 'chevron-up' : 'chevron-down'}
+                                size={18}
+                                color={colors.textTertiary}
+                            />
+                        </Pressable>
+
+                        {tipsExpanded && (
+                            <Animated.View entering={FadeInDown.duration(300)} style={{ marginTop: spacing.sm }}>
+                                {activity.tips.map((tip, i) => (
+                                    <View key={i} style={[styles.tipRow, { marginTop: i > 0 ? spacing.sm : 0 }]}>
+                                        <Text style={[typography.labelSmall, { color: brand.secondary, width: 20 }]}>
+                                            {i + 1}.
+                                        </Text>
+                                        <Text style={[typography.bodySmall, { color: colors.textSecondary, flex: 1, lineHeight: 20 }]}>
+                                            {tip}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </Animated.View>
+                        )}
+                    </Animated.View>
+
+                    {/* ── Conversation Starters (horizontal pills) ── */}
+                    <Animated.View entering={FadeInDown.delay(300).duration(400)} style={{ marginTop: spacing.xxl }}>
+                        <View style={styles.sectionTitleRow}>
+                            <Ionicons name="chatbubble-ellipses-outline" size={18} color={brand.primary} />
+                            <Text style={[typography.title3, { color: colors.text, marginLeft: spacing.xs }]}>
+                                Conversation Starters
+                            </Text>
                         </View>
-                        {activity.tips.map((tip, i) => (
-                            <View key={i} style={[styles.tipRow, { marginTop: spacing.sm }]}>
-                                <Ionicons name="leaf" size={16} color={brand.secondary} />
-                                <Text
+                    </Animated.View>
+                </View>
+
+                {/* ScrollView needs to break out of padding */}
+                <Animated.View entering={FadeInDown.delay(320).duration(400)}>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{ paddingHorizontal: spacing.lg, gap: spacing.sm, paddingTop: spacing.sm }}
+                    >
+                        {activity.prompts.map((prompt, i) => (
+                            <ScalePress key={i} pressScale={0.97} haptic>
+                                <View
                                     style={[
-                                        typography.bodySmall,
-                                        { color: colors.textSecondary, flex: 1, marginLeft: spacing.xs },
+                                        styles.promptPill,
+                                        {
+                                            backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
+                                            borderRadius: radius.xl,
+                                            borderWidth: 1,
+                                            borderColor: isDark ? colors.surfaceTertiary : colors.separator,
+                                            ...shadows.subtle,
+                                        },
                                     ]}
                                 >
-                                    {tip}
-                                </Text>
-                            </View>
+                                    <Ionicons name="chatbubble" size={14} color={brand.primary + '60'} />
+                                    <Text
+                                        style={[typography.bodySmall, { color: colors.text, maxWidth: 220 }]}
+                                        numberOfLines={3}
+                                    >
+                                        &ldquo;{prompt}&rdquo;
+                                    </Text>
+                                </View>
+                            </ScalePress>
                         ))}
-                    </View>
+                    </ScrollView>
+                </Animated.View>
 
-                    {/* Conversation Starters */}
-                    <IslamicDivider spacing={12} variant="rich" />
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                        <Ionicons name="chatbubble-ellipses-outline" size={18} color={brand.primary} />
-                        <Text style={[typography.title3, { color: colors.text }]}>
-                            Conversation Starters
-                        </Text>
-                    </View>
-                    {activity.prompts.map((prompt, i) => (
-                        <Card key={i} variant="glass" style={{ marginTop: spacing.sm }}>
-                            <Text style={[typography.body, { color: colors.text }]}>
-                                &ldquo;{prompt}&rdquo;
+                {/* ── Coming Next (muted footer row) ── */}
+                <Animated.View
+                    entering={FadeInDown.delay(380).duration(400)}
+                    style={[styles.comingNext, { paddingHorizontal: spacing.lg, marginTop: spacing.xxl }]}
+                >
+                    <Text style={[typography.caption, { color: colors.textTertiary, marginBottom: spacing.xs }]}>
+                        Next week
+                    </Text>
+                    <View style={styles.comingNextRow}>
+                        <View
+                            style={[
+                                styles.comingNextIcon,
+                                {
+                                    backgroundColor: CATEGORY_COLORS[next.category] + '12',
+                                    borderRadius: radius.md,
+                                },
+                            ]}
+                        >
+                            <Ionicons
+                                name={ACTIVITY_ICONS[next.id] ?? 'sparkles-outline'}
+                                size={16}
+                                color={CATEGORY_COLORS[next.category]}
+                            />
+                        </View>
+                        <View style={{ flex: 1, marginLeft: spacing.sm }}>
+                            <Text style={[typography.label, { color: colors.textSecondary }]}>
+                                {next.title}
                             </Text>
-                        </Card>
-                    ))}
-
-                    {/* Coming Next */}
-                    <IslamicDivider spacing={12} variant="rich" />
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                        <Ionicons name="calendar-outline" size={18} color={brand.lavender} />
-                        <Text style={[typography.title3, { color: colors.text }]}>
-                            Coming Next Week
-                        </Text>
+                            <Text style={[typography.caption, { color: colors.textTertiary }]}>
+                                {next.duration} min · {next.category}
+                            </Text>
+                        </View>
                     </View>
-                    {(() => {
-                        const next = getNextActivity(weekNum);
-                        return (
-                            <Card
-                                variant="filled"
-                                accentColor={CATEGORY_COLORS[next.category]}
-                                style={{
-                                    marginTop: spacing.sm,
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <View
-                                    style={{
-                                        width: 44,
-                                        height: 44,
-                                        borderRadius: 22,
-                                        backgroundColor: CATEGORY_COLORS[next.category] + '15',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                    }}
-                                >
-                                    <Ionicons
-                                        name={ACTIVITY_ICONS[next.id] ?? 'sparkles-outline'}
-                                        size={20}
-                                        color={CATEGORY_COLORS[next.category]}
-                                    />
-                                </View>
-                                <View style={{ marginLeft: spacing.sm, flex: 1 }}>
-                                    <Text style={[typography.label, { color: colors.text }]}>
-                                        {next.title}
-                                    </Text>
-                                    <Text style={[typography.caption, { color: colors.textSecondary }]}>
-                                        {next.duration} min · {next.category}
-                                    </Text>
-                                </View>
-                                <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
-                            </Card>
-                        );
-                    })()}
-                </View>
+                </Animated.View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -289,41 +276,82 @@ export default function FamilyScreen() {
 
 const styles = StyleSheet.create({
     safe: { flex: 1 },
-    heroGradient: {
-        overflow: 'hidden',
-        position: 'relative',
-    },
-    heroOrb: {
-        position: 'absolute',
-        borderRadius: 999,
-        backgroundColor: 'rgba(255,255,255,0.06)',
-    },
-    heroOrbLarge: {
-        width: 200,
-        height: 200,
-        top: -40,
-        right: -60,
-    },
-    heroOrbSmall: {
-        width: 80,
-        height: 80,
-        bottom: 20,
-        left: -20,
-    },
-    heroOrbMedium: {
-        width: 120,
-        height: 120,
-        top: 30,
-        left: '40%' as unknown as number,
-        backgroundColor: 'rgba(255,255,255,0.03)',
-    },
-    activityHeader: {
+
+    // Header
+    header: { overflow: 'hidden' },
+    headerTop: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
     },
-    weekBadge: { paddingHorizontal: 12, paddingVertical: 4 },
-    durationBadge: { flexDirection: 'row', alignItems: 'center' },
-    tipRow: { flexDirection: 'row', alignItems: 'flex-start' },
-    categoryBadge: { paddingHorizontal: 10, paddingVertical: 3 },
+    weekBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 5,
+    },
+
+    // Activity
+    activityRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    activityIcon: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        borderWidth: 1.5,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    activityMeta: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 4,
+    },
+    metaDot: {
+        width: 3,
+        height: 3,
+        borderRadius: 1.5,
+        marginHorizontal: 8,
+    },
+
+    // Tips
+    tipsTitleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    tipRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+
+    // Section title
+    sectionTitleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+
+    // Conversation pills
+    promptPill: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 8,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        maxWidth: 280,
+    },
+
+    // Coming next
+    comingNext: { opacity: 0.6 },
+    comingNextRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    comingNextIcon: {
+        width: 32,
+        height: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
 });

@@ -1,14 +1,8 @@
 /**
- * Learn Screen — Curriculum Dashboard (v3)
+ * Learn Screen -- Curriculum Dashboard
  *
- * Premium learning experience with:
- * - "Continue Learning" hero card with lesson hook preview
- * - Mini-stat pills matching the progress page pattern
- * - Unit cards with tinted header wash + category subtitle
- * - Proper timeline layout (dedicated track column, no absolute hacks)
- * - Difficulty badges per lesson
- * - Completed-unit celebration state
- * - "Coming Soon" roadmap footer
+ * Flat header with ProgressRing, category-colored unit cards
+ * with left-edge accents, timeline layout, and interactive feedback.
  */
 
 import React, { useMemo } from 'react';
@@ -16,23 +10,20 @@ import {
     View,
     Text,
     ScrollView,
-    Pressable,
     StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, FadeInRight } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../src/theme';
 import { useAppStore, useLessonStore } from '../../src/stores';
-import { MiniStatPill } from '../../src/components';
+import { MiniStatPill, ProgressRing, ScalePress, ProgressBar } from '../../src/components';
 import { allUnits, allCurriculumLessons } from '../../src/data/curriculum';
 import { categoryColors } from '../../src/theme/colors';
+import { haptics } from '../../src/utils/haptics';
 import type { CurriculumUnit, CurriculumLesson } from '../../src/types/curriculum';
 import type { LessonCategory } from '../../src/types/models';
-
-// ── Constants ──
 
 const CATEGORY_SUBTITLES: Record<LessonCategory, string> = {
     aqeedah: 'Foundations of belief',
@@ -51,33 +42,25 @@ const ROADMAP_HINTS = [
     { icon: 'moon-outline' as const, label: 'Duaa — Daily Supplications' },
 ];
 
-
-
 export default function LearnScreen() {
-    const { brand, colors, typography, spacing, radius, shadows, gradients, isDark } = useTheme();
+    const { brand, colors, typography, spacing, radius, shadows, isDark } = useTheme();
     const router = useRouter();
     const activeChildId = useAppStore((s) => s.activeChildId);
     const progress = useLessonStore((s) => s.progress);
 
-    // ── Stable lookup maps (module-level data, memoized once) ──
     const lessonMap = useMemo(
         () => new Map(allCurriculumLessons.map((l) => [l.id, l])),
         [],
     );
-    const unitLessonsMap = useMemo(
-        () => {
-            const map = new Map<string, CurriculumLesson[]>();
-            for (const lesson of allCurriculumLessons) {
-                const bucket = map.get(lesson.unitId) ?? [];
-                bucket.push(lesson);
-                map.set(lesson.unitId, bucket);
-            }
-            return map;
-        },
-        [],
-    );
-
-    // ── Derived state ──
+    const unitLessonsMap = useMemo(() => {
+        const map = new Map<string, CurriculumLesson[]>();
+        for (const lesson of allCurriculumLessons) {
+            const bucket = map.get(lesson.unitId) ?? [];
+            bucket.push(lesson);
+            map.set(lesson.unitId, bucket);
+        }
+        return map;
+    }, []);
 
     const getIsCompleted = (lessonId: string) => {
         if (!activeChildId) return false;
@@ -106,7 +89,6 @@ export default function LearnScreen() {
         return { completed, total, xp, pct: total > 0 ? completed / total : 0 };
     }, [activeChildId, progress, lessonMap]);
 
-    // Find the global "next" lesson — first incomplete, unlocked lesson across all units
     const nextLesson = useMemo<{ lesson: CurriculumLesson; unit: CurriculumUnit } | null>(() => {
         for (const unit of allUnits) {
             const unitLessons = unitLessonsMap.get(unit.id) ?? [];
@@ -122,6 +104,7 @@ export default function LearnScreen() {
     }, [activeChildId, progress, unitLessonsMap]);
 
     const handleLessonPress = (lessonId: string) => {
+        haptics.light();
         router.push(`/lesson/${lessonId}`);
     };
 
@@ -131,57 +114,45 @@ export default function LearnScreen() {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 100 }}
             >
-                {/* ── Gradient Hero Header ── */}
-                <Animated.View entering={FadeIn.duration(400)}>
-                    <LinearGradient
-                        colors={gradients.learnHero as unknown as [string, string]}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={[
-                            styles.heroGradient,
-                            {
-                                paddingHorizontal: spacing.lg,
-                                paddingTop: spacing.xl + 54,
-                                paddingBottom: spacing.xxl + 12,
-                            },
-                        ]}
-                    >
-                        {/* Decorative orbs */}
-                        <View style={[styles.heroOrb, styles.heroOrbLarge]} />
-                        <View style={[styles.heroOrb, styles.heroOrbSmall]} />
-                        <View style={[styles.heroOrb, styles.heroOrbMedium]} />
-
-                        <Text style={[typography.largeTitle, { color: '#FFFFFF' }]}>Learn</Text>
-                        <Text style={[typography.body, { color: 'rgba(255,255,255,0.75)', marginTop: spacing.xxs }]}>
-                            Your Islamic learning journey
+                {/* ── Flat header ── */}
+                <Animated.View
+                    entering={FadeIn.duration(400)}
+                    style={[styles.header, { paddingHorizontal: spacing.lg, paddingTop: spacing.xl + 54 }]}
+                >
+                    <View style={styles.headerLeft}>
+                        <Text style={[typography.largeTitle, { color: colors.text }]}>Learn</Text>
+                        <Text style={[typography.bodySmall, { color: colors.textTertiary, marginTop: spacing.xxxs }]}>
+                            {overallStats.completed} of {overallStats.total} lessons
                         </Text>
-                    </LinearGradient>
+                    </View>
+                    <View style={styles.headerRing}>
+                        <ProgressRing
+                            progress={overallStats.pct}
+                            size={52}
+                            strokeWidth={4}
+                            color={brand.secondary}
+                        >
+                            <Text style={[typography.captionBold, { color: brand.secondary, fontSize: 11 }]}>
+                                {overallStats.total > 0 ? Math.round(overallStats.pct * 100) : 0}%
+                            </Text>
+                        </ProgressRing>
+                    </View>
                 </Animated.View>
-                {/* Bottom curve blending into background */}
-                <View
-                    style={{
-                        height: 24,
-                        marginTop: -24,
-                        backgroundColor: colors.background,
-                        borderTopLeftRadius: radius.xl,
-                        borderTopRightRadius: radius.xl,
-                    }}
-                />
 
-                {/* ── Continue Learning Hero ── */}
+                {/* ── Continue Learning hero card ── */}
                 {nextLesson && (
-                    <Animated.View entering={FadeInDown.delay(100).duration(500)}>
-                        <Pressable
+                    <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+                        <ScalePress
                             onPress={() => handleLessonPress(nextLesson.lesson.id)}
-                            style={({ pressed }) => [
+                            haptic
+                            style={[
                                 styles.heroCard,
                                 {
-                                    marginHorizontal: spacing.md,
+                                    marginHorizontal: spacing.lg,
                                     marginTop: spacing.lg,
                                     backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
                                     borderRadius: radius.xl,
                                     overflow: 'hidden',
-                                    opacity: pressed ? 0.92 : 1,
                                     ...shadows.cardPremium,
                                 },
                             ]}
@@ -191,16 +162,15 @@ export default function LearnScreen() {
                                 const unitProg = getUnitProgress(nextLesson.unit);
                                 return (
                                     <>
-                                        {/* Gradient accent strip at top */}
-                                        <LinearGradient
-                                            colors={[heroColor, heroColor + '80']}
-                                            start={{ x: 0, y: 0 }}
-                                            end={{ x: 1, y: 0 }}
-                                            style={{ height: 3 }}
+                                        {/* Left-edge accent bar */}
+                                        <View
+                                            style={[
+                                                styles.leftAccent,
+                                                { backgroundColor: heroColor, borderTopLeftRadius: radius.xl, borderBottomLeftRadius: radius.xl },
+                                            ]}
                                         />
 
-                                        <View style={{ padding: spacing.lg }}>
-                                            {/* Top: unit context */}
+                                        <View style={{ padding: spacing.lg, paddingLeft: spacing.lg + 4 }}>
                                             <View style={styles.heroContext}>
                                                 <View style={[styles.heroBadge, { backgroundColor: heroColor + '18', borderRadius: radius.xs }]}>
                                                     <Ionicons
@@ -217,23 +187,20 @@ export default function LearnScreen() {
                                                 </Text>
                                             </View>
 
-                                            {/* Lesson title */}
                                             <Text style={[typography.title2, { color: colors.text, marginTop: spacing.sm }]}>
                                                 {nextLesson.lesson.title}
                                             </Text>
 
-                                            {/* Hook prompt (the engaging question) */}
                                             <Text
                                                 style={[
                                                     typography.body,
                                                     { color: colors.textSecondary, marginTop: spacing.xxs, lineHeight: 22 },
                                                 ]}
-                                                numberOfLines={2}
+                                                numberOfLines={3}
                                             >
                                                 {nextLesson.lesson.hook.prompt}
                                             </Text>
 
-                                            {/* Bottom row: meta + CTA */}
                                             <View style={[styles.heroBottom, { marginTop: spacing.md }]}>
                                                 <View style={styles.heroMeta}>
                                                     <View style={styles.heroMetaItem}>
@@ -249,74 +216,67 @@ export default function LearnScreen() {
                                                         </Text>
                                                     </View>
                                                 </View>
-                                                <LinearGradient
-                                                    colors={gradients.heroCta as unknown as [string, string]}
-                                                    start={{ x: 0, y: 0 }}
-                                                    end={{ x: 1, y: 0 }}
-                                                    style={[styles.heroCta, { borderRadius: radius.lg }]}
+                                                <View
+                                                    style={[
+                                                        styles.heroCta,
+                                                        { backgroundColor: heroColor, borderRadius: radius.lg },
+                                                    ]}
                                                 >
                                                     <Ionicons name="play" size={16} color="#FFF" />
                                                     <Text style={styles.heroCtaText}>Continue</Text>
-                                                </LinearGradient>
+                                                </View>
                                             </View>
                                         </View>
                                     </>
                                 );
                             })()}
-                        </Pressable>
+                        </ScalePress>
                     </Animated.View>
                 )}
 
-                {/* ── Quick Stats ── */}
-                <Animated.View entering={FadeInDown.delay(200).duration(450)}>
-                    <View style={{ marginHorizontal: spacing.lg, marginTop: spacing.lg, borderRadius: radius.xl, overflow: 'hidden' }}>
-                        <LinearGradient
-                            colors={
-                                isDark
-                                    ? ['rgba(26,58,92,0.08)', 'rgba(26,58,92,0.04)']
-                                    : ['rgba(26,58,92,0.04)', 'rgba(212,152,42,0.03)']
-                            }
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={{ borderRadius: radius.xl, padding: spacing.sm }}
-                        >
-                            <ScrollView
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                contentContainerStyle={{
-                                    gap: spacing.xs,
-                                }}
-                            >
+                {/* ── Quick Stats (2x2 grid) ── */}
+                <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+                    <View style={[styles.statsGrid, { marginHorizontal: spacing.lg, marginTop: spacing.lg, gap: spacing.sm }]}>
+                        <View style={styles.statsGridRow}>
+                            <View style={styles.statCell}>
                                 <MiniStatPill
                                     icon="school-outline"
-                                    value={`${overallStats.completed}`}
-                                    label="done"
+                                    value={overallStats.completed}
+                                    label="Lessons done"
                                     color={brand.primary}
-                                    layout="horizontal"
+                                    layout="vertical"
                                 />
+                            </View>
+                            <View style={styles.statCell}>
                                 <MiniStatPill
                                     icon="library-outline"
-                                    value={`${overallStats.total - overallStats.completed}`}
-                                    label="remaining"
+                                    value={overallStats.total - overallStats.completed}
+                                    label="Remaining"
                                     color={brand.lavender}
-                                    layout="horizontal"
+                                    layout="vertical"
                                 />
+                            </View>
+                        </View>
+                        <View style={styles.statsGridRow}>
+                            <View style={styles.statCell}>
                                 <MiniStatPill
                                     icon="sparkles-outline"
-                                    value={`${overallStats.xp}`}
+                                    value={overallStats.xp}
                                     label="XP earned"
                                     color={brand.accent}
-                                    layout="horizontal"
+                                    layout="vertical"
                                 />
+                            </View>
+                            <View style={styles.statCell}>
                                 <MiniStatPill
                                     icon="layers-outline"
-                                    value={`${allUnits.length}`}
-                                    label="units"
+                                    value={allUnits.length}
+                                    label="Units"
                                     color={brand.secondary}
-                                    layout="horizontal"
+                                    layout="vertical"
                                 />
-                            </ScrollView>
-                        </LinearGradient>
+                            </View>
+                        </View>
                     </View>
                 </Animated.View>
 
@@ -334,11 +294,12 @@ export default function LearnScreen() {
                         const pct = unitProgress.total > 0
                             ? unitProgress.completed / unitProgress.total
                             : 0;
+                        const delay = Math.min(300 + ui * 80, 400);
 
                         return (
                             <Animated.View
                                 key={unit.id}
-                                entering={FadeInDown.delay(320 + ui * 90).duration(500)}
+                                entering={FadeInDown.delay(delay).duration(400)}
                                 style={{ paddingHorizontal: spacing.lg, marginTop: ui === 0 ? 0 : spacing.md }}
                             >
                                 <View
@@ -347,83 +308,71 @@ export default function LearnScreen() {
                                         {
                                             backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
                                             borderRadius: radius.xl,
-                                            borderWidth: StyleSheet.hairlineWidth,
-                                            borderColor: isDark ? colors.border : catColor + '15',
-                                            ...shadows.cardPremium,
+                                            ...shadows.card,
                                         },
                                     ]}
                                 >
-                                    {/* ── Clean unit header ── */}
+                                    {/* Left-edge accent */}
                                     <View
                                         style={[
-                                            styles.unitHeaderWash,
-                                            {
-                                                backgroundColor: catColor + (isDark ? '08' : '04'),
-                                                borderTopLeftRadius: radius.xl,
-                                                borderTopRightRadius: radius.xl,
-                                                padding: spacing.md,
-                                            },
+                                            styles.leftAccent,
+                                            { backgroundColor: unitComplete ? colors.success : catColor, borderTopLeftRadius: radius.xl, borderBottomLeftRadius: radius.xl },
                                         ]}
-                                    >
-                                        <View style={styles.unitHeader}>
-                                            <View style={styles.unitHeaderLeft}>
-                                                <View
-                                                    style={[
-                                                        styles.unitIconWrap,
-                                                        {
-                                                            backgroundColor: unitComplete
-                                                                ? colors.successMuted
-                                                                : (isDark ? catColor + '20' : catMuted),
-                                                            borderRadius: radius.md,
-                                                        },
-                                                    ]}
-                                                >
-                                                    {unitComplete ? (
-                                                        <Ionicons name="checkmark-circle" size={20} color={colors.success} />
-                                                    ) : (
-                                                        <Ionicons
-                                                            name={unit.icon as keyof typeof Ionicons.glyphMap}
-                                                            size={18}
-                                                            color={catColor}
-                                                        />
-                                                    )}
-                                                </View>
-                                                <View style={{ marginLeft: spacing.sm, flex: 1 }}>
-                                                    <Text style={[typography.label, { color: colors.text }]} numberOfLines={1}>
-                                                        {unit.title}
-                                                    </Text>
-                                                    <Text
-                                                        style={[typography.caption, { color: colors.textTertiary, marginTop: 1 }]}
-                                                        numberOfLines={1}
-                                                    >
-                                                        {CATEGORY_SUBTITLES[unit.category] ?? unit.description}
-                                                    </Text>
-                                                </View>
-                                            </View>
+                                    />
 
-                                            {/* Simple fraction counter */}
-                                            <Text style={[typography.caption, { color: unitComplete ? colors.success : catColor, fontWeight: '600' }]}>
-                                                {unitProgress.completed}/{unitProgress.total}
-                                            </Text>
-                                        </View>
-
-                                        {/* Thin progress bar */}
-                                        <View style={[styles.unitProgressTrack, { backgroundColor: catColor + '12', borderRadius: radius.full, marginTop: spacing.sm }]}>
+                                    {/* Unit header */}
+                                    <View style={[styles.unitHeader, { padding: spacing.md, paddingLeft: spacing.md + 4 }]}>
+                                        <View style={styles.unitHeaderLeft}>
                                             <View
                                                 style={[
-                                                    styles.unitProgressFill,
+                                                    styles.unitIconWrap,
                                                     {
-                                                        backgroundColor: unitComplete ? colors.success : catColor,
-                                                        borderRadius: radius.full,
-                                                        width: `${pct * 100}%` as `${number}%`,
+                                                        backgroundColor: unitComplete
+                                                            ? colors.successMuted
+                                                            : (isDark ? catColor + '20' : catMuted),
+                                                        borderRadius: radius.sm,
                                                     },
                                                 ]}
-                                            />
+                                            >
+                                                {unitComplete ? (
+                                                    <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                                                ) : (
+                                                    <Ionicons
+                                                        name={unit.icon as keyof typeof Ionicons.glyphMap}
+                                                        size={16}
+                                                        color={catColor}
+                                                    />
+                                                )}
+                                            </View>
+                                            <View style={{ marginLeft: spacing.sm, flex: 1 }}>
+                                                <Text style={[typography.label, { color: colors.text }]} numberOfLines={1}>
+                                                    {unit.title}
+                                                </Text>
+                                                <Text
+                                                    style={[typography.caption, { color: colors.textTertiary, marginTop: 1 }]}
+                                                    numberOfLines={1}
+                                                >
+                                                    {CATEGORY_SUBTITLES[unit.category] ?? unit.description}
+                                                </Text>
+                                            </View>
                                         </View>
+
+                                        <Text style={[typography.caption, { color: unitComplete ? colors.success : catColor, fontWeight: '600' }]}>
+                                            {unitProgress.completed}/{unitProgress.total}
+                                        </Text>
                                     </View>
 
-                                    {/* ── Lesson timeline ── */}
-                                    <View style={{ paddingTop: spacing.xs, paddingBottom: spacing.sm }}>
+                                    {/* ProgressBar component */}
+                                    <View style={{ paddingHorizontal: spacing.md + 4, paddingBottom: spacing.xs }}>
+                                        <ProgressBar
+                                            progress={pct}
+                                            color={unitComplete ? colors.success : catColor}
+                                            height={4}
+                                        />
+                                    </View>
+
+                                    {/* Lesson timeline */}
+                                    <View style={{ paddingTop: spacing.xxs, paddingBottom: spacing.sm }}>
                                         {unitLessons.map((lesson, li) => {
                                             const isCompleted = getIsCompleted(lesson.id);
                                             const prevCompleted = li === 0 || getIsCompleted(unitLessons[li - 1]?.id ?? '');
@@ -432,30 +381,27 @@ export default function LearnScreen() {
                                             const isLast = li === unitLessons.length - 1;
 
                                             return (
-                                                <Pressable
+                                                <ScalePress
                                                     key={lesson.id}
-                                                    onPress={() => !isLocked && handleLessonPress(lesson.id)}
+                                                    onPress={() => handleLessonPress(lesson.id)}
                                                     disabled={isLocked}
-                                                    accessibilityRole="button"
+                                                    haptic
+                                                    pressScale={0.98}
                                                     accessibilityLabel={`${lesson.title}${isCompleted ? ', completed' : isLocked ? ', locked' : ''}`}
-                                                    accessibilityState={{ disabled: isLocked }}
-                                                    style={({ pressed }) => [
+                                                    style={[
                                                         styles.lessonRow,
                                                         {
                                                             paddingRight: spacing.md,
                                                             paddingVertical: spacing.xs,
-                                                            backgroundColor: pressed && !isLocked
-                                                                ? catColor + '08'
-                                                                : isNext
-                                                                    ? (isDark ? catColor + '06' : catColor + '04')
-                                                                    : 'transparent',
+                                                            backgroundColor: isNext
+                                                                ? (isDark ? catColor + '06' : catColor + '04')
+                                                                : 'transparent',
                                                             opacity: isLocked ? 0.4 : 1,
                                                         },
                                                     ]}
                                                 >
-                                                    {/* ── Timeline track (left column) ── */}
+                                                    {/* Timeline track */}
                                                     <View style={styles.timelineTrack}>
-                                                        {/* Top connector */}
                                                         {li > 0 && (
                                                             <View
                                                                 style={[
@@ -469,7 +415,6 @@ export default function LearnScreen() {
                                                             />
                                                         )}
 
-                                                        {/* Step circle */}
                                                         <View
                                                             style={[
                                                                 styles.stepCircle,
@@ -495,7 +440,6 @@ export default function LearnScreen() {
                                                             )}
                                                         </View>
 
-                                                        {/* Bottom connector */}
                                                         {!isLast && (
                                                             <View
                                                                 style={[
@@ -510,7 +454,7 @@ export default function LearnScreen() {
                                                         )}
                                                     </View>
 
-                                                    {/* ── Content ── */}
+                                                    {/* Content */}
                                                     <View style={[styles.lessonContent, { paddingVertical: spacing.xs }]}>
                                                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                                             <Text
@@ -530,7 +474,6 @@ export default function LearnScreen() {
                                                                 {lesson.title}
                                                             </Text>
 
-                                                            {/* Action */}
                                                             {isCompleted ? (
                                                                 <View style={[styles.statusPill, { backgroundColor: colors.successMuted, borderRadius: radius.full }]}>
                                                                     <Ionicons name="checkmark" size={10} color={colors.success} />
@@ -545,7 +488,6 @@ export default function LearnScreen() {
                                                             ) : null}
                                                         </View>
 
-                                                        {/* Description — show for next/unlocked only */}
                                                         {!isCompleted && (
                                                             <Text
                                                                 style={[
@@ -558,7 +500,6 @@ export default function LearnScreen() {
                                                             </Text>
                                                         )}
 
-                                                        {/* Meta: duration + XP — only for incomplete, unlocked lessons */}
                                                         {!isLocked && !isCompleted && (
                                                             <View style={[styles.metaRow, { marginTop: spacing.xxs }]}>
                                                                 <Ionicons name="time-outline" size={10} color={colors.textTertiary} />
@@ -573,76 +514,53 @@ export default function LearnScreen() {
                                                             </View>
                                                         )}
                                                     </View>
-                                                </Pressable>
+                                                </ScalePress>
                                             );
                                         })}
                                     </View>
                                 </View>
                             </Animated.View>
                         );
-                    })
-                    }
+                    })}
                 </View>
 
-                {/* ── Coming Soon Roadmap ── */}
+                {/* ── Coming Soon (ambient footer) ── */}
                 <Animated.View
-                    entering={FadeInDown.delay(320 + allUnits.length * 90 + 80).duration(500)}
-                    style={{
-                        paddingHorizontal: spacing.lg,
-                        marginTop: spacing.xxl,
-                    }}
+                    entering={FadeInDown.delay(400).duration(400)}
+                    style={[styles.roadmapFooter, { paddingHorizontal: spacing.lg, marginTop: spacing.xxl }]}
                 >
-                    <View
+                    <View style={styles.roadmapTitleRow}>
+                        <Ionicons name="telescope-outline" size={16} color={colors.textTertiary} />
+                        <Text style={[typography.label, { color: colors.textTertiary, marginLeft: spacing.xs }]}>
+                            Coming Soon
+                        </Text>
+                    </View>
+                    {ROADMAP_HINTS.map((hint, i) => (
+                        <View
+                            key={hint.label}
+                            style={[
+                                styles.roadmapRow,
+                                {
+                                    paddingVertical: spacing.xxs,
+                                    borderTopWidth: i > 0 ? StyleSheet.hairlineWidth : 0,
+                                    borderTopColor: colors.separator,
+                                },
+                            ]}
+                        >
+                            <Ionicons name={hint.icon} size={14} color={colors.textTertiary + '80'} />
+                            <Text style={[typography.caption, { color: colors.textTertiary, marginLeft: spacing.xs }]}>
+                                {hint.label}
+                            </Text>
+                        </View>
+                    ))}
+                    <Text
                         style={[
-                            styles.roadmapCard,
-                            {
-                                backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
-                                borderRadius: radius.xl,
-                                overflow: 'hidden',
-                                ...shadows.cardPremium,
-                            },
+                            typography.caption,
+                            { color: colors.textTertiary, textAlign: 'center', fontStyle: 'italic', marginTop: spacing.xs, opacity: 0.7 },
                         ]}
                     >
-                        {/* Premium gradient accent strip */}
-                        <LinearGradient
-                            colors={gradients.primary as unknown as [string, string]}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 0 }}
-                            style={{ height: 3 }}
-                        />
-                        <View style={{ padding: spacing.lg }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
-                                <Ionicons name="telescope-outline" size={18} color={brand.lavender} />
-                                <Text style={[typography.label, { color: colors.text, marginLeft: spacing.xs }]}>
-                                    Coming Soon
-                                </Text>
-                            </View>
-                            {ROADMAP_HINTS.map((hint, i) => (
-                                <Animated.View
-                                    key={hint.label}
-                                    entering={FadeInRight.delay(400 + allUnits.length * 90 + i * 60).duration(400)}
-                                    style={[
-                                        styles.roadmapRow,
-                                        {
-                                            paddingVertical: spacing.xs,
-                                            borderTopWidth: i > 0 ? StyleSheet.hairlineWidth : 0,
-                                            borderTopColor: colors.separator,
-                                        },
-                                    ]}
-                                >
-                                    <Ionicons name={hint.icon} size={16} color={colors.textTertiary} />
-                                    <Text style={[typography.bodySmall, { color: colors.textSecondary, marginLeft: spacing.xs }]}>
-                                        {hint.label}
-                                    </Text>
-                                </Animated.View>
-                            ))}
-                            <View style={{ marginTop: spacing.sm }}>
-                                <Text style={[typography.caption, { color: colors.textTertiary, textAlign: 'center', fontStyle: 'italic' }]}>
-                                    In sha Allah
-                                </Text>
-                            </View>
-                        </View>
-                    </View>
+                        In sha Allah
+                    </Text>
                 </Animated.View>
             </ScrollView>
         </SafeAreaView>
@@ -652,38 +570,24 @@ export default function LearnScreen() {
 const styles = StyleSheet.create({
     safe: { flex: 1 },
 
-    /* Gradient hero header */
-    heroGradient: {
-        overflow: 'hidden',
-        position: 'relative',
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingBottom: 12,
     },
-    heroOrb: {
-        position: 'absolute',
-        borderRadius: 999,
-        backgroundColor: 'rgba(255,255,255,0.06)',
-    },
-    heroOrbLarge: {
-        width: 200,
-        height: 200,
-        top: -40,
-        right: -60,
-    },
-    heroOrbSmall: {
-        width: 80,
-        height: 80,
-        bottom: 20,
-        left: -20,
-    },
-    heroOrbMedium: {
-        width: 120,
-        height: 120,
-        top: 30,
-        left: '40%' as unknown as number,
-        backgroundColor: 'rgba(255,255,255,0.03)',
-    },
+    headerLeft: { flex: 1, minWidth: 0 },
+    headerRing: { marginLeft: 16 },
 
     // Hero card
-    heroCard: {},
+    heroCard: { position: 'relative' },
+    leftAccent: {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: 4,
+    },
     heroContext: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     heroBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4 },
     heroBadgeText: { fontSize: 11, fontWeight: '700', marginLeft: 4 },
@@ -694,15 +598,22 @@ const styles = StyleSheet.create({
     heroCta: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 },
     heroCtaText: { color: '#FFF', fontSize: 14, fontWeight: '700', marginLeft: 6 },
 
+    // Stats 2x2 grid
+    statsGrid: {},
+    statsGridRow: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    statCell: {
+        flex: 1,
+        minWidth: 0,
+    },
+
     // Unit card
-    unitCard: { overflow: 'hidden' },
-    unitHeaderWash: {},
-    unitAccent: { height: 3 },
+    unitCard: { overflow: 'hidden', position: 'relative' },
     unitHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     unitHeaderLeft: { flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 12 },
-    unitIconWrap: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-    unitProgressTrack: { height: 3, overflow: 'hidden' },
-    unitProgressFill: { height: '100%' },
+    unitIconWrap: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
 
     // Timeline layout
     lessonRow: { flexDirection: 'row', alignItems: 'stretch' },
@@ -722,7 +633,8 @@ const styles = StyleSheet.create({
     statusText: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
     playBtn: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
 
-    // Roadmap
-    roadmapCard: {},
+    // Roadmap footer
+    roadmapFooter: { opacity: 0.6 },
+    roadmapTitleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
     roadmapRow: { flexDirection: 'row', alignItems: 'center' },
 });

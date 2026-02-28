@@ -13,12 +13,13 @@
 
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import Animated, { FadeInDown, FadeIn, ZoomIn } from 'react-native-reanimated';
+import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { PracticeMatching } from '../../types/curriculum';
 import { FormattedText } from './FormattedText';
+import { FeedbackCard } from './FeedbackCard';
 
 interface Props {
     block: PracticeMatching;
@@ -233,25 +234,8 @@ export function MatchingCard({ block, onAnswer }: Props) {
                 </View>
             </View>
 
-            {/* ── Completion explanation ── */}
             {allMatched && block.explanation && (
-                <Animated.View
-                    entering={FadeIn.delay(400).duration(400)}
-                    style={[
-                        styles.explanation,
-                        {
-                            backgroundColor: colors.successMuted,
-                            borderRadius: radius.md,
-                            borderLeftWidth: 3,
-                            borderLeftColor: colors.success,
-                        },
-                    ]}
-                >
-                    <Ionicons name="sparkles" size={18} color={colors.success} />
-                    <FormattedText style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
-                        {block.explanation}
-                    </FormattedText>
-                </Animated.View>
+                <FeedbackCard type="success" delay={400} useFormatted>{block.explanation}</FeedbackCard>
             )}
 
             {/* ── Helper text ── */}
@@ -300,13 +284,6 @@ const styles = StyleSheet.create({
         padding: 12,
         borderWidth: 1.5,
         minHeight: 50,
-    },
-    explanation: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        gap: 10,
-        padding: 14,
-        marginTop: 20,
     },
     helperRow: {
         flexDirection: 'row',

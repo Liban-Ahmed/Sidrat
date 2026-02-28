@@ -1,23 +1,11 @@
 /**
- * QuizCard — Premium multiple-choice quiz with letter labels,
- * haptic feedback, themed success/error feedback, and staggered
- * option entrance animations.
- *
- * Features:
- *  • A/B/C/D circled labels for each option
- *  • Shake animation on wrong answer with error-muted background
- *  • Theme-token success / error colors (no hardcoded hex)
- *  • Hint card after first wrong attempt (golden accent)
- *  • Explanation card on correct with sparkle icon
- *  • Haptic feedback on selection
- *  • Dark mode support
+ * QuizCard -- Multiple-choice quiz with letter labels and themed feedback.
  */
 
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, {
     FadeInDown,
-    FadeIn,
     useSharedValue,
     useAnimatedStyle,
     withSequence,
@@ -28,6 +16,7 @@ import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { PracticeQuiz } from '../../types/curriculum';
 import { FormattedText } from './FormattedText';
+import { FeedbackCard } from './FeedbackCard';
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -37,7 +26,7 @@ interface Props {
 }
 
 export function QuizCard({ block, onAnswer }: Props) {
-    const { brand, colors, typography, radius, isDark, shadows } = useTheme();
+    const { colors, typography, radius, isDark, shadows } = useTheme();
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
     const [showResult, setShowResult] = useState(false);
     const [showHint, setShowHint] = useState(false);
@@ -45,7 +34,6 @@ export function QuizCard({ block, onAnswer }: Props) {
 
     const isCorrect = selectedIndex === block.correctIndex;
 
-    // Shake animation for wrong answers
     const shakeX = useSharedValue(0);
     const shakeStyle = useAnimatedStyle(() => ({
         transform: [{ translateX: shakeX.value }],
@@ -68,11 +56,9 @@ export function QuizCard({ block, onAnswer }: Props) {
                     withTiming(8, { duration: 50 }),
                     withTiming(0, { duration: 50 }),
                 );
-                // Show hint after first wrong attempt
                 if (attempts === 0 && block.hint) {
                     setShowHint(true);
                 }
-                // Allow retry after a delay
                 setTimeout(() => {
                     setShowResult(false);
                     setSelectedIndex(null);
@@ -88,20 +74,17 @@ export function QuizCard({ block, onAnswer }: Props) {
 
     return (
         <Animated.View style={[styles.container, shakeStyle]}>
-            {/* ── Question ── */}
             <Animated.View entering={FadeInDown.delay(100).duration(500)}>
                 <FormattedText style={[typography.title3, { color: colors.text, marginBottom: 22 }]}>
                     {block.question}
                 </FormattedText>
             </Animated.View>
 
-            {/* ── Options ── */}
             <View style={styles.options}>
                 {block.options.map((option, i) => {
                     const isSelected = selectedIndex === i;
                     const isCorrectOption = i === block.correctIndex;
 
-                    // Default styling
                     let bgColor: string = isDark ? colors.surfaceSecondary : colors.surface;
                     let borderColor: string = isDark ? colors.surfaceTertiary : colors.separator;
                     let textColor: string = colors.text;
@@ -151,74 +134,27 @@ export function QuizCard({ block, onAnswer }: Props) {
                                     },
                                 ]}
                             >
-                                {/* Letter circle */}
-                                <View
-                                    style={[
-                                        styles.letterCircle,
-                                        {
-                                            backgroundColor: letterBg,
-                                            borderRadius: radius.full,
-                                        },
-                                    ]}
-                                >
+                                <View style={[styles.letterCircle, { backgroundColor: letterBg, borderRadius: radius.full }]}>
                                     <Text style={[typography.labelSmall, { color: letterColor, fontWeight: '700' }]}>
                                         {OPTION_LETTERS[i]}
                                     </Text>
                                 </View>
-
                                 <Text style={[typography.callout, { color: textColor, flex: 1 }]}>
                                     {option}
                                 </Text>
-
-                                {iconName && (
-                                    <Ionicons name={iconName} size={22} color={iconColor} />
-                                )}
+                                {iconName && <Ionicons name={iconName} size={22} color={iconColor} />}
                             </Pressable>
                         </Animated.View>
                     );
                 })}
             </View>
 
-            {/* ── Hint ── */}
             {showHint && block.hint && (
-                <Animated.View
-                    entering={FadeIn.duration(400)}
-                    style={[
-                        styles.hintCard,
-                        {
-                            backgroundColor: colors.warningMuted,
-                            borderRadius: radius.md,
-                            borderLeftWidth: 3,
-                            borderLeftColor: brand.accent,
-                        },
-                    ]}
-                >
-                    <Ionicons name="bulb-outline" size={18} color={brand.accent} />
-                    <Text style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
-                        {block.hint}
-                    </Text>
-                </Animated.View>
+                <FeedbackCard type="hint">{block.hint}</FeedbackCard>
             )}
 
-            {/* ── Explanation (after correct) ── */}
             {showResult && isCorrect && block.explanation && (
-                <Animated.View
-                    entering={FadeIn.delay(400).duration(400)}
-                    style={[
-                        styles.explanationCard,
-                        {
-                            backgroundColor: colors.successMuted,
-                            borderRadius: radius.md,
-                            borderLeftWidth: 3,
-                            borderLeftColor: colors.success,
-                        },
-                    ]}
-                >
-                    <Ionicons name="sparkles" size={18} color={colors.success} />
-                    <FormattedText style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
-                        {block.explanation}
-                    </FormattedText>
-                </Animated.View>
+                <FeedbackCard type="success" delay={400} useFormatted>{block.explanation}</FeedbackCard>
             )}
         </Animated.View>
     );
@@ -242,19 +178,5 @@ const styles = StyleSheet.create({
         height: 32,
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    hintCard: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        gap: 10,
-        padding: 14,
-        marginTop: 16,
-    },
-    explanationCard: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        gap: 10,
-        padding: 14,
-        marginTop: 12,
     },
 });

@@ -2,6 +2,7 @@ export { HookPhase } from './HookPhase';
 export { TeachPhase } from './TeachPhase';
 export { PracticePhase } from './PracticePhase';
 export { RewardPhase } from './RewardPhase';
+export { FeedbackCard } from './FeedbackCard';
 export { QuizCard } from './QuizCard';
 export { TrueFalseCard } from './TrueFalseCard';
 export { OrderingCard } from './OrderingCard';
