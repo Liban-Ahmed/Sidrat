@@ -12,7 +12,8 @@
  *  • Labels use medium tracking for clarity at small sizes
  */
 
-import { Platform, TextStyle } from 'react-native';
+import { Platform } from 'react-native';
+import type { TextStyle } from 'react-native';
 
 const fontFamily = Platform.select({
   ios: 'System',

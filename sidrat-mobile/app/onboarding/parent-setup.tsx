@@ -3,17 +3,17 @@
  * Ensures the parent is setting up the app (COPPA compliance).
  */
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../../src/theme';
-import { Button, BismillahHeader, IslamicDivider } from '../../src/components/ui';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ParentalGate } from '../../src/components/common';
+import { Button, BismillahHeader, IslamicDivider } from '../../src/components/ui';
 import { useAppStore } from '../../src/stores';
+import { useTheme } from '../../src/theme';
 
 export default function ParentSetupScreen() {
   const { brand, colors, typography, radius, gradients, shadows } = useTheme();

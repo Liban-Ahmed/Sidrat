@@ -13,6 +13,7 @@
  * No chart library or SVG required.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
@@ -25,7 +26,6 @@ import Animated, {
   FadeInDown,
   Easing,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { categoryMeta, LESSON_CATEGORIES } from '../../types';
 import type { LessonCategory } from '../../types';

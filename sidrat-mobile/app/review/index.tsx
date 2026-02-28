@@ -9,15 +9,15 @@
  * Empty state shown when no reviews are due, with encouragement.
  */
 
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp, FadeIn } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/theme';
-import { useReviewQueue } from '../../src/hooks/useReviewQueue';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScalePress, ProgressBar, EmptyState } from '../../src/components';
+import { useReviewQueue } from '../../src/hooks/useReviewQueue';
+import { useTheme } from '../../src/theme';
 import { categoryMeta } from '../../src/types';
 import { haptics } from '../../src/utils/haptics';
 import { groupReviewsByUrgency } from '../../src/utils/reviewGroups';

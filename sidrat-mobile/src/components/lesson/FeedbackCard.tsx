@@ -2,12 +2,12 @@
  * FeedbackCard -- Shared hint/explanation/result card used across all practice types.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../theme';
 import { FormattedText } from './FormattedText';
+import { useTheme } from '../../theme';
 
 interface FeedbackCardProps {
   type: 'hint' | 'success' | 'error' | 'info';

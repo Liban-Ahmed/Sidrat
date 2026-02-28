@@ -7,15 +7,15 @@
  */
 
 import { useState, useCallback, useMemo, useRef } from 'react';
+import { audioService } from '../services/audioService';
+import { useLessonStore, useChildStore } from '../stores';
+import { haptics } from '../utils/haptics';
 import type {
   CurriculumLesson,
   LessonPlayerPhase,
   LessonPlayerState,
   PracticeBlock,
 } from '../types/curriculum';
-import { useLessonStore, useChildStore } from '../stores';
-import { audioService } from '../services/audioService';
-import { haptics } from '../utils/haptics';
 
 interface UseLessonPlayerOptions {
   lesson: CurriculumLesson;

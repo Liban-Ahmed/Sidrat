@@ -10,9 +10,9 @@
  *  • glass — Frosted glass surface with subtle border
  */
 
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { View, type ViewStyle, type ViewProps } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme';
 
 type CardVariant = 'default' | 'elevated' | 'filled' | 'outline' | 'premium' | 'glass';

@@ -5,6 +5,7 @@
  * icon support, loading state, and accessible focus styles.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
   Pressable,
@@ -15,7 +16,6 @@ import {
   type TextStyle,
   type PressableProps,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';

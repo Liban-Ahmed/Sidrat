@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import { Text, TextStyle, StyleSheet, I18nManager } from 'react-native';
+import { Text, StyleSheet, I18nManager } from 'react-native';
+import type { TextStyle} from 'react-native';
 
 type ArabicSize = 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
 

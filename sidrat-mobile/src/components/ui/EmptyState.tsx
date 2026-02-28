@@ -4,11 +4,11 @@
  * Renders a centered icon, title, optional subtitle, and optional CTA.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../theme';
 import { Button } from './Button';
+import { useTheme } from '../../theme';
 
 interface EmptyStateProps {
   icon: keyof typeof Ionicons.glyphMap;

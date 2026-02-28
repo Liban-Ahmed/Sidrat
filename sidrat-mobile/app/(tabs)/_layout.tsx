@@ -8,11 +8,11 @@
  * - Refined shadow and border for depth
  */
 
-import React, { useMemo } from 'react';
-import { StyleSheet, Platform } from 'react-native';
-import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import { Tabs } from 'expo-router';
+import React, { useMemo } from 'react';
+import { StyleSheet, Platform } from 'react-native';
 import { useTheme } from '../../src/theme';
 
 function TabBarBackground() {
@@ -59,11 +59,16 @@ export default function TabLayout() {
     [brand.primary, colors, typography, isDark],
   );
 
-  const tabIcon =
-    (name: keyof typeof Ionicons.glyphMap, nameFilled: keyof typeof Ionicons.glyphMap) =>
-    ({ color, focused }: { color: string; size: number; focused: boolean }) => (
+  const tabIcon = (
+    name: keyof typeof Ionicons.glyphMap,
+    nameFilled: keyof typeof Ionicons.glyphMap,
+  ) => {
+    const TabIcon = ({ color, focused }: { color: string; size: number; focused: boolean }) => (
       <Ionicons name={focused ? nameFilled : name} size={22} color={color} />
     );
+    TabIcon.displayName = `TabIcon-${name}`;
+    return TabIcon;
+  };
 
   return (
     <Tabs screenOptions={screenOptions}>

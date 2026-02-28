@@ -9,6 +9,9 @@
  * - Slim salah banner
  */
 
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   View,
@@ -19,10 +22,6 @@ import {
   Platform,
   UIManager,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   FadeInDown,
   useSharedValue,
@@ -35,8 +34,7 @@ import Animated, {
   Extrapolation,
   Easing,
 } from 'react-native-reanimated';
-import { useTheme } from '../../src/theme';
-import { useAppStore, useChildStore, useLessonStore } from '../../src/stores';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card, ScalePress, ProgressBar, EmptyState } from '../../src/components';
 import {
   AyahOfTheDay,
@@ -44,9 +42,11 @@ import {
   HomeSkeletonLoader,
   SalahReminder,
 } from '../../src/components/home';
-import { categoryMeta } from '../../src/types';
 import { allCurriculumLessons } from '../../src/data/curriculum';
 import { useReviewQueue } from '../../src/hooks/useReviewQueue';
+import { useAppStore, useChildStore, useLessonStore } from '../../src/stores';
+import { useTheme } from '../../src/theme';
+import { categoryMeta } from '../../src/types';
 
 const STAGGER = 80;
 
@@ -162,7 +162,7 @@ export default function HomeScreen() {
       const first = children[0];
       if (first) setActiveChild(first.id);
     }
-  }, [children.length, activeChildId, addChild, setActiveChild]);
+  }, [children, activeChildId, addChild, setActiveChild]);
 
   useEffect(() => {
     ensureChild();

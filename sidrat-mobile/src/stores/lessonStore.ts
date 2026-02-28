@@ -10,12 +10,12 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage, subscribeWithSelector } from 'zustand/middleware';
 import { mmkvStorage } from './persist';
-import type { LessonProgress, LessonPhase, LessonCategory } from '../types';
 import { allCurriculumLessons } from '../data/curriculum';
-import type { CurriculumLesson } from '../types/curriculum';
-import { uuid } from '../utils/uuid';
-import { calculateNextReview } from '../utils/spacedRepetition';
 import { queueSync } from '../services/localDatabase';
+import { calculateNextReview } from '../utils/spacedRepetition';
+import { uuid } from '../utils/uuid';
+import type { LessonProgress, LessonPhase, LessonCategory } from '../types';
+import type { CurriculumLesson } from '../types/curriculum';
 
 function progressKey(childId: string, lessonId: string) {
   return `${childId}:${lessonId}`;

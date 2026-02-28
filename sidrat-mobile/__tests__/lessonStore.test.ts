@@ -6,6 +6,9 @@
  * and progress queries.
  */
 
+import { allCurriculumLessons } from '../src/data/curriculum';
+import { useLessonStore } from '../src/stores/lessonStore';
+
 jest.mock('../src/services/localDatabase', () => ({
   queueSync: jest.fn().mockResolvedValue(undefined),
   getDatabase: jest.fn(),
@@ -19,9 +22,6 @@ jest.mock('../src/services/localDatabase', () => ({
   mergeRemoteProgress: jest.fn().mockResolvedValue(false),
   getLocalChildIds: jest.fn().mockResolvedValue([]),
 }));
-
-import { useLessonStore } from '../src/stores/lessonStore';
-import { allCurriculumLessons } from '../src/data/curriculum';
 
 // Reset store before each test
 beforeEach(() => {

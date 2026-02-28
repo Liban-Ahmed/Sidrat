@@ -3,18 +3,18 @@
  * progress bar and score tracking.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { FillBlankCard } from './FillBlankCard';
+import { MatchingCard } from './MatchingCard';
+import { OrderingCard } from './OrderingCard';
+import { QuizCard } from './QuizCard';
+import { TapWordCard } from './TapWordCard';
+import { TrueFalseCard } from './TrueFalseCard';
 import { useTheme } from '../../theme';
 import type { PracticeBlock } from '../../types/curriculum';
-import { QuizCard } from './QuizCard';
-import { TrueFalseCard } from './TrueFalseCard';
-import { OrderingCard } from './OrderingCard';
-import { MatchingCard } from './MatchingCard';
-import { FillBlankCard } from './FillBlankCard';
-import { TapWordCard } from './TapWordCard';
 
 interface Props {
   block: PracticeBlock;

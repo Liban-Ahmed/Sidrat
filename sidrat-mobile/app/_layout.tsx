@@ -8,23 +8,23 @@
  * Renders the global AchievementToast overlay.
  */
 
+import * as Sentry from '@sentry/react-native';
+import { Stack, useRouter, useSegments } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef } from 'react';
 import { AppState as RNAppState } from 'react-native';
-import { Stack, useRouter, useSegments } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import * as Sentry from '@sentry/react-native';
-import * as SplashScreen from 'expo-splash-screen';
-import { useTheme } from '../src/theme';
-import { useAppStore, useAuthStore, useChildStore } from '../src/stores';
-import { ErrorBoundary } from '../src/components/common/ErrorBoundary';
 import { AchievementToast } from '../src/components/common/AchievementToast';
+import { ErrorBoundary } from '../src/components/common/ErrorBoundary';
 import { Toast } from '../src/components/ui/Toast';
-import { authService } from '../src/services/auth';
-import { syncService } from '../src/services/syncService';
-import { closeDatabase } from '../src/services/localDatabase';
-import { analyticsService } from '../src/services/analyticsService';
-import { useAppFonts } from '../src/hooks/useAppFonts';
 import { SENTRY_DSN, IS_DEV, ANALYTICS_EVENTS } from '../src/constants/config';
+import { useAppFonts } from '../src/hooks/useAppFonts';
+import { analyticsService } from '../src/services/analyticsService';
+import { authService } from '../src/services/auth';
+import { closeDatabase } from '../src/services/localDatabase';
+import { syncService } from '../src/services/syncService';
+import { useAppStore, useAuthStore, useChildStore } from '../src/stores';
+import { useTheme } from '../src/theme';
 
 // Keep splash screen visible while fonts load
 SplashScreen.preventAutoHideAsync();

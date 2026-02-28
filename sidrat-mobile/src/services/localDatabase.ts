@@ -189,14 +189,14 @@ export async function queueSync(
  * Get pending sync operations that haven't exceeded the retry limit.
  */
 export async function getPendingSyncOps(): Promise<
-  Array<{
+  {
     id: number;
     table_name: string;
     record_id: string;
     operation: string;
     payload: string;
     retries: number;
-  }>
+  }[]
 > {
   const db = await getDatabase();
   return db.getAllAsync(

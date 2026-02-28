@@ -8,10 +8,10 @@
  *  4. Edge cases — empty progress, unknown lessonIds
  */
 
-import { LESSON_CATEGORIES, categoryMeta } from '../src/types';
-import { categoryColors } from '../src/theme/colors';
-import { sampleLessons } from '../src/data/lessons';
 import { allCurriculumLessons } from '../src/data/curriculum';
+import { sampleLessons } from '../src/data/lessons';
+import { categoryColors } from '../src/theme/colors';
+import { LESSON_CATEGORIES, categoryMeta } from '../src/types';
 import type { LessonCategory } from '../src/types';
 
 // ── 1. Category metadata completeness ─────────────────────────
@@ -30,6 +30,9 @@ describe('Category metadata & colors', () => {
     for (const cat of LESSON_CATEGORIES) {
       const color = categoryColors[cat];
       expect(color).toBeDefined();
+      if (!color) {
+        throw new Error(`Missing category color for ${cat}`);
+      }
       expect(color.solid).toMatch(/^#[0-9A-Fa-f]{6}$/);
       expect(color.muted).toBeTruthy();
     }
@@ -84,9 +87,9 @@ describe('getCompletedByCategory logic', () => {
   // (the store uses zustand with native module persistence — can't instantiate in Jest)
   function computeCompletedByCategory(
     childId: string,
-    progressEntries: Array<{ childId: string; lessonId: string; isCompleted: boolean }>,
-    lessons: Array<{ id: string; category: LessonCategory }>,
-    curriculumLessons: Array<{ id: string; category: LessonCategory }>,
+    progressEntries: { childId: string; lessonId: string; isCompleted: boolean }[],
+    lessons: { id: string; category: LessonCategory }[],
+    curriculumLessons: { id: string; category: LessonCategory }[],
   ): Record<LessonCategory, number> {
     const categoryMap = new Map<string, LessonCategory>();
     for (const l of lessons) categoryMap.set(l.id, l.category);

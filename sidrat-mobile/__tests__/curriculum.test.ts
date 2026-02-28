@@ -11,8 +11,8 @@ import {
   getLessonsForUnit,
   curriculumIndex,
 } from '../src/data/curriculum';
-import type { PracticeBlock } from '../src/types/curriculum';
 import { LESSON_CATEGORIES } from '../src/types/models';
+import type { PracticeBlock } from '../src/types/curriculum';
 
 // ── Unit Integrity ─────────────────────────────────────────────
 

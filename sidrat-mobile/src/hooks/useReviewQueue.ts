@@ -10,8 +10,8 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import { useAppStore, useLessonStore } from '../stores';
 import { getCurriculumLesson } from '../data/curriculum';
+import { useAppStore, useLessonStore } from '../stores';
 import type { CurriculumLesson } from '../types/curriculum';
 import type { LessonCategory } from '../types/models';
 

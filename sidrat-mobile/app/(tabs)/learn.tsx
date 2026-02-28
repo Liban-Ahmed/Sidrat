@@ -5,16 +5,16 @@
  * with left-edge accents, timeline layout, and interactive feedback.
  */
 
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useMemo, useCallback, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/theme';
-import { useAppStore, useLessonStore } from '../../src/stores';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MiniStatPill, ProgressRing, ScalePress, ProgressBar } from '../../src/components';
 import { allUnits, allCurriculumLessons } from '../../src/data/curriculum';
+import { useAppStore, useLessonStore } from '../../src/stores';
+import { useTheme } from '../../src/theme';
 import { categoryColors } from '../../src/theme/colors';
 import { haptics } from '../../src/utils/haptics';
 import type { CurriculumUnit, CurriculumLesson } from '../../src/types/curriculum';
@@ -54,10 +54,13 @@ export default function LearnScreen() {
     return map;
   }, []);
 
-  const getIsCompleted = (lessonId: string) => {
-    if (!activeChildId) return false;
-    return progress[`${activeChildId}:${lessonId}`]?.isCompleted ?? false;
-  };
+  const getIsCompleted = useCallback(
+    (lessonId: string) => {
+      if (!activeChildId) return false;
+      return progress[`${activeChildId}:${lessonId}`]?.isCompleted ?? false;
+    },
+    [activeChildId, progress],
+  );
 
   const getUnitProgress = (unit: CurriculumUnit) => {
     const completed = unit.lessonIds.filter((id) => getIsCompleted(id)).length;
@@ -79,7 +82,7 @@ export default function LearnScreen() {
       }
     }
     return { completed, total, xp, pct: total > 0 ? completed / total : 0 };
-  }, [activeChildId, progress, lessonMap]);
+  }, [lessonMap, getIsCompleted]);
 
   const nextLesson = useMemo<{ lesson: CurriculumLesson; unit: CurriculumUnit } | null>(() => {
     for (const unit of allUnits) {
@@ -93,7 +96,7 @@ export default function LearnScreen() {
       }
     }
     return null;
-  }, [activeChildId, progress, unitLessonsMap]);
+  }, [getIsCompleted, unitLessonsMap]);
 
   const handleLessonPress = (lessonId: string) => {
     haptics.light();

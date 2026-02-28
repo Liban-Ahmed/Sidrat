@@ -4,10 +4,12 @@
  * Offers "Get Started" (anonymous) and "Sign In" (Apple).
  */
 
+import { Ionicons } from '@expo/vector-icons';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -18,13 +20,11 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
-import * as AppleAuthentication from 'expo-apple-authentication';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../src/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, BismillahHeader } from '../src/components/ui';
 import { authService } from '../src/services/auth';
 import { useAppStore, useAuthStore } from '../src/stores';
+import { useTheme } from '../src/theme';
 
 const { width } = Dimensions.get('window');
 

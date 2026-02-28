@@ -10,10 +10,10 @@
  *   </ErrorBoundary>
  */
 
-import React, { Component } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Appearance } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Sentry from '@sentry/react-native';
+import React, { Component } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Appearance } from 'react-native';
 import { brand, palette } from '../../theme/colors';
 
 interface Props {

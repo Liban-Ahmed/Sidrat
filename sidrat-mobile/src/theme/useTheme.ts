@@ -16,8 +16,8 @@
 import { useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 import { brand, palette, categoryColors, rarityColors, gradients, gradientsDark } from './colors';
-import { typography } from './typography';
 import { spacing, layout, radius, shadows, timing, springs } from './spacing';
+import { typography } from './typography';
 import { useSettingsStore } from '../stores/settingsStore';
 
 export type ThemeMode = 'light' | 'dark';

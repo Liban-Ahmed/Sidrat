@@ -5,10 +5,10 @@
  * with prayer dots below. No card wrapper -- renders directly on background.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 
 interface Prayer {

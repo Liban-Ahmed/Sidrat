@@ -4,6 +4,7 @@
  * A single shimmering rectangle used to compose per-screen skeleton loaders.
  */
 
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, {
@@ -14,7 +15,6 @@ import Animated, {
   Easing,
   interpolate,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme';
 
 interface ShimmerBlockProps {

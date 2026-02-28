@@ -3,17 +3,17 @@
  * Threads category accent color through all phases for visual identity.
  */
 
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/theme';
-import { useAppStore } from '../../src/stores';
-import { useLessonPlayer } from '../../src/hooks/useLessonPlayer';
-import { getCurriculumLesson } from '../../src/data/curriculum';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { HookPhase, TeachPhase, PracticePhase, RewardPhase } from '../../src/components/lesson';
+import { getCurriculumLesson } from '../../src/data/curriculum';
+import { useLessonPlayer } from '../../src/hooks/useLessonPlayer';
+import { useAppStore } from '../../src/stores';
+import { useTheme } from '../../src/theme';
 import { categoryMeta } from '../../src/types';
 
 export default function LessonScreen() {

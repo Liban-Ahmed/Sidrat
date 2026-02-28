@@ -5,13 +5,15 @@
  * → weekly goal → overall progress → category chart (no card) → horizontal achievements.
  */
 
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme, brand as brandTokens } from '../../src/theme';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { View, Text, ScrollView, StyleSheet, RefreshControl } from 'react-native';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Card, Avatar, ProgressRing, EmptyState } from '../../src/components';
+import { CategoryBreakdownChart } from '../../src/components/progress';
+import { allCurriculumLessons } from '../../src/data/curriculum';
 import {
   useAppStore,
   useChildStore,
@@ -19,12 +21,10 @@ import {
   useAchievementStore,
   ACHIEVEMENTS,
 } from '../../src/stores';
-import { Card, Avatar, ProgressRing, EmptyState } from '../../src/components';
-import { CategoryBreakdownChart } from '../../src/components/progress';
+import { useTheme, brand as brandTokens } from '../../src/theme';
 import { getAge } from '../../src/types';
-import { allCurriculumLessons } from '../../src/data/curriculum';
-import type { LessonCategory } from '../../src/types';
 import type { AchievementDef, AchievementContext } from '../../src/stores/achievementStore';
+import type { LessonCategory } from '../../src/types';
 
 const ACHIEVEMENT_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   first_lesson: 'leaf-outline',
@@ -81,6 +81,13 @@ function getMotivation(child: {
 
 export default function ProgressScreen() {
   const { brand, colors, typography, spacing, radius, gradients, isDark } = useTheme();
+
+  // Move hooks before any conditional returns
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 600);
+  }, []);
 
   const activeChildId = useAppStore((s) => s.activeChildId);
   const child = useChildStore((s) => s.children.find((c) => c.id === activeChildId));
@@ -230,12 +237,6 @@ export default function ProgressScreen() {
   });
 
   const delay = (i: number) => Math.min(100 + i * 80, 400);
-
-  const [refreshing, setRefreshing] = useState(false);
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 600);
-  }, []);
 
   return (
     <SafeAreaView

@@ -13,9 +13,9 @@
  *  • Haptic press feedback
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { View, Pressable, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import Animated, {
   FadeInUp,
   FadeIn,
@@ -23,8 +23,8 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import { useTheme } from '../../theme';
 import { AnimatedCounter } from './AnimatedCounter';
+import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);

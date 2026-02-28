@@ -3,6 +3,7 @@
  * key terms, and category-colored accents.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import Animated, {
@@ -15,13 +16,12 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
-import { useQuranAudio } from '../../hooks/useQuranAudio';
-import type { TeachBlock } from '../../types/curriculum';
 import { FormattedText } from './FormattedText';
 import { QuranAudioButton } from './QuranAudioButton';
+import { useQuranAudio } from '../../hooks/useQuranAudio';
+import { useTheme } from '../../theme';
+import { haptics } from '../../utils/haptics';
+import type { TeachBlock } from '../../types/curriculum';
 
 interface Props {
   block: TeachBlock;

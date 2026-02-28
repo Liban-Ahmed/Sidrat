@@ -10,9 +10,9 @@
  * Mount <Toast /> once at the root layout (next to AchievementToast).
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -22,8 +22,8 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../../theme';
 import { useToastStore, type ToastType } from '../../stores/toastStore';
+import { useTheme } from '../../theme';
 
 const ICON_MAP: Record<ToastType, keyof typeof Ionicons.glyphMap> = {
   success: 'checkmark-circle',

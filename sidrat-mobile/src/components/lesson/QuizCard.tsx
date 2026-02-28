@@ -2,6 +2,7 @@
  * QuizCard -- Multiple-choice quiz with letter labels and themed feedback.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, {
@@ -11,12 +12,11 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { FeedbackCard } from './FeedbackCard';
+import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { PracticeQuiz } from '../../types/curriculum';
-import { FormattedText } from './FormattedText';
-import { FeedbackCard } from './FeedbackCard';
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 

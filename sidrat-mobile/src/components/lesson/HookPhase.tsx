@@ -3,6 +3,7 @@
  * gentle breathing animation, and narration speaker button.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, {
@@ -17,11 +18,10 @@ import Animated, {
   Easing,
   interpolate,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { HookBlock } from '../../types/curriculum';
-import { FormattedText } from './FormattedText';
 
 interface Props {
   hook: HookBlock;

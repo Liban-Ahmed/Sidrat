@@ -7,9 +7,9 @@
  * Uses the theme system for full dark mode support.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Modal } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 
 interface ParentalGateProps {

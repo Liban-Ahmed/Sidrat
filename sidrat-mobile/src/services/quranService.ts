@@ -128,14 +128,14 @@ async function getSurah(surahNumber: number): Promise<QuranAyahWithTranslation[]
 
   // Fetch Arabic + English translation in one call
   interface RawEdition {
-    ayahs: Array<{
+    ayahs: {
       number: number;
       numberInSurah: number;
       text: string;
       surah: { number: number; name: string; englishName: string };
       juz: number;
       page: number;
-    }>;
+    }[];
   }
 
   const data = await fetchJSON<RawEdition[]>(
@@ -255,7 +255,6 @@ async function playAyah(globalAyahNumber: number, onFinish?: () => void): Promis
   await stopAudio();
 
   const uri = await getAudioUri(globalAyahNumber);
-  console.log('[QuranService] Playing ayah', globalAyahNumber, 'from:', uri);
 
   const { sound } = await Audio.Sound.createAsync({ uri }, { shouldPlay: true, volume: 1.0 });
   currentSound = sound;

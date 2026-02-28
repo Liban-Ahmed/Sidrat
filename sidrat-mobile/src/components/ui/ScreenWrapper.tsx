@@ -1,8 +1,11 @@
-import React, { ReactNode } from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
-import { SafeAreaView, SafeAreaViewProps } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme';
+import type { ReactNode } from 'react';
+import type { ViewStyle } from 'react-native';
+import type { SafeAreaViewProps } from 'react-native-safe-area-context';
 
 interface ScreenWrapperProps extends SafeAreaViewProps {
   children: ReactNode;

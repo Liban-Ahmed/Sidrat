@@ -4,16 +4,16 @@
  * which adapts lesson difficulty and content.
  */
 
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../../src/theme';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, BismillahHeader } from '../../src/components/ui';
 import { useChildStore, useAppStore } from '../../src/stores';
+import { useTheme } from '../../src/theme';
 import { ageToGroup, AGE_GROUP_RANGES } from '../../src/types/curriculum';
 import type { AvatarId } from '../../src/types';
 

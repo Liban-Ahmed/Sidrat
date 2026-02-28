@@ -9,8 +9,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { mmkvStorage } from './persist';
-import type { Child, CreateChild, AvatarId } from '../types';
 import { uuid } from '../utils/uuid';
+import type { Child, CreateChild, AvatarId } from '../types';
 
 interface ChildStore {
   children: Child[];

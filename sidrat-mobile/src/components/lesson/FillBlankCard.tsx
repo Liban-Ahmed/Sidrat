@@ -2,14 +2,14 @@
  * FillBlankCard -- Fill-in-the-blank with inline blank highlight and themed input.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TextInput, Pressable } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { FeedbackCard } from './FeedbackCard';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { PracticeFillBlank } from '../../types/curriculum';
-import { FeedbackCard } from './FeedbackCard';
 
 interface Props {
   block: PracticeFillBlank;

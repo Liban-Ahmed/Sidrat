@@ -6,8 +6,8 @@
  * Respects settingsStore opt-out.
  */
 
-import PostHog from 'posthog-react-native';
 import * as Application from 'expo-application';
+import PostHog from 'posthog-react-native';
 import { IS_PROD } from '../constants/config';
 import { useSettingsStore } from '../stores/settingsStore';
 

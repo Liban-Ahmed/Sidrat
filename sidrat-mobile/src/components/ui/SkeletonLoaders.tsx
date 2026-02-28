@@ -4,8 +4,8 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useTheme } from '../../theme';
 import { ShimmerBlock } from './ShimmerBlock';
+import { useTheme } from '../../theme';
 
 export function LearnSkeletonLoader() {
   const { colors, spacing, radius, isDark } = useTheme();

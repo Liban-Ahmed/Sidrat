@@ -9,9 +9,9 @@
  * inspired by Apple Health / Headspace warm headers.
  */
 
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { View, Text, StyleSheet, type ViewStyle } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme, radius } from '../../theme';
 
 interface ScreenHeaderProps {

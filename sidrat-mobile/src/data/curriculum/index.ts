@@ -5,21 +5,38 @@
  * Import all unit files here. The app loads curriculum from this barrel.
  */
 
-import type { CurriculumLesson, CurriculumUnit, CurriculumIndex } from '../../types/curriculum';
-import { wuduUnit, wuduLessons } from './wudu';
+import { adabUnit, adabLessons } from './adab';
 import { aqeedahUnit, aqeedahLessons } from './aqeedah';
-import { salahUnit, salahLessons } from './salah';
+import { duaaUnit, duaaLessons } from './duaa';
 import { quranUnit, quranLessons } from './quran';
+import { salahUnit, salahLessons } from './salah';
+import { seerahUnit, seerahLessons } from './seerah';
+import { storiesUnit, storiesLessons } from './stories';
+import { wuduUnit, wuduLessons } from './wudu';
+import type { CurriculumLesson, CurriculumUnit, CurriculumIndex } from '../../types/curriculum';
 
 // ── Aggregate all units ────────────────────────────────────────
 
-export const allUnits: CurriculumUnit[] = [aqeedahUnit, wuduUnit, salahUnit, quranUnit];
+export const allUnits: CurriculumUnit[] = [
+  aqeedahUnit,
+  wuduUnit,
+  salahUnit,
+  quranUnit,
+  seerahUnit,
+  adabUnit,
+  duaaUnit,
+  storiesUnit,
+];
 
 export const allCurriculumLessons: CurriculumLesson[] = [
   ...aqeedahLessons,
   ...wuduLessons,
   ...salahLessons,
   ...quranLessons,
+  ...seerahLessons,
+  ...adabLessons,
+  ...duaaLessons,
+  ...storiesLessons,
 ];
 
 /** Lookup a lesson by ID in O(1) */
@@ -54,4 +71,12 @@ export {
   salahLessons,
   quranUnit,
   quranLessons,
+  seerahUnit,
+  seerahLessons,
+  adabUnit,
+  adabLessons,
+  duaaUnit,
+  duaaLessons,
+  storiesUnit,
+  storiesLessons,
 };

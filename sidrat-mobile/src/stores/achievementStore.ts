@@ -9,8 +9,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { mmkvStorage } from './persist';
-import type { AchievementCategory, AchievementRarity, LessonCategory, Child } from '../types';
 import { LESSON_CATEGORIES } from '../types';
+import type { AchievementCategory, AchievementRarity, LessonCategory, Child } from '../types';
 
 // ── Achievement Definition ─────────────────────────────────────
 

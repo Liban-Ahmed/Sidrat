@@ -16,8 +16,8 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../../theme';
 import { useAchievementStore, getAchievementDef } from '../../stores/achievementStore';
+import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 
 // Using theme rarityColors — imported via useTheme

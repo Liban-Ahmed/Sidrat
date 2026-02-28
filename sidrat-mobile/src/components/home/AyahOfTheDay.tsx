@@ -6,11 +6,11 @@
  *   - Compact: slimmed card for 2-column grid layout
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, Share, Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../theme';
 import { getAyahOfTheDay } from '../../data/ayahs';
+import { useTheme } from '../../theme';
 import { ScalePress } from '../ScalePress';
 
 interface AyahOfTheDayProps {

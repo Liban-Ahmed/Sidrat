@@ -14,6 +14,7 @@
  *  • Haptic feedback
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import Animated, {
@@ -27,11 +28,10 @@ import Animated, {
   FadeIn,
   interpolate,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { quranService } from '../../services/quranService';
 import { useTheme } from '../../theme';
 import { brand } from '../../theme/colors';
 import { haptics } from '../../utils/haptics';
-import { quranService } from '../../services/quranService';
 
 interface QuranRef {
   surah: number;
@@ -85,10 +85,6 @@ export function QuranAudioButton({
 
     // If pre-computed numbers are provided, use them immediately (no API call needed)
     if (quranRef.globalAyahNumbers && quranRef.globalAyahNumbers.length > 0) {
-      console.log(
-        '[QuranAudioButton] Using pre-computed global ayah numbers:',
-        quranRef.globalAyahNumbers,
-      );
       setGlobalAyahNumbers(quranRef.globalAyahNumbers);
       setResolving(false);
       return;
@@ -104,32 +100,13 @@ export function QuranAudioButton({
         const end = quranRef.endAyah ?? quranRef.ayah;
         const numbers: number[] = [];
 
-        console.log(
-          '[QuranAudioButton] Resolving surah',
-          quranRef.surah,
-          'ayah',
-          start,
-          '-',
-          end,
-          'via API',
-        );
-
         for (let i = start; i <= end; i++) {
           const ayah = await quranService.getAyah(quranRef.surah, i);
           if (cancelled) return;
           if (ayah) {
             numbers.push(ayah.number);
-          } else {
-            console.warn(
-              '[QuranAudioButton] getAyah returned null for surah',
-              quranRef.surah,
-              'ayah',
-              i,
-            );
           }
         }
-
-        console.log('[QuranAudioButton] Resolved global ayah numbers:', numbers);
 
         if (!cancelled && mountedRef.current) {
           setGlobalAyahNumbers(numbers);

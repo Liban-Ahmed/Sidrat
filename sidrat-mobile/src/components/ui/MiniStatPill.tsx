@@ -6,9 +6,9 @@
  *  • horizontal — icon left, value + label right (for inline display)
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 
 interface MiniStatPillProps {

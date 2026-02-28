@@ -6,9 +6,9 @@
  * Supports a "rich" variant for premium sections with gradient line.
  */
 
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme';
 
 interface IslamicDividerProps {

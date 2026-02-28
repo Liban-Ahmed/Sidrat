@@ -12,7 +12,6 @@
  */
 
 import NetInfo from '@react-native-community/netinfo';
-import { supabase } from './supabase';
 import {
   getPendingSyncOps,
   removeSyncOp,
@@ -23,6 +22,7 @@ import {
   mergeRemoteProgress,
   getLocalChildIds,
 } from './localDatabase';
+import { supabase } from './supabase';
 import { SUPABASE_URL } from '../constants/config';
 
 const BACKOFF_BASE_MS = 1000;

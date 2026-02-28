@@ -2,10 +2,11 @@
  * Ready Screen — Onboarding complete! Celebration before entering the app.
  */
 
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -17,11 +18,10 @@ import Animated, {
   withSpring,
   Easing,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../../src/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, BismillahHeader } from '../../src/components/ui';
 import { useChildStore, useAppStore } from '../../src/stores';
+import { useTheme } from '../../src/theme';
 
 export default function ReadyScreen() {
   const { brand, typography, radius } = useTheme();

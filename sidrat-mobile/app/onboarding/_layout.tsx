@@ -2,8 +2,8 @@
  * Onboarding layout — wraps parent-setup and child-profile screens.
  */
 
-import React from 'react';
 import { Stack } from 'expo-router';
+import React from 'react';
 import { useTheme } from '../../src/theme';
 
 export default function OnboardingLayout() {

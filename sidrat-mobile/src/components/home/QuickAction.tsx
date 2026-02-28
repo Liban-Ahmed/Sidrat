@@ -12,9 +12,9 @@
  *  • Luminous accent border in dark mode
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useTheme } from '../../theme';
 import { ScalePress } from '../ScalePress';

@@ -7,8 +7,9 @@
  *  - QuranRef in curriculum data
  *  - TeachBlock type extension
  */
-
-import type { TeachBlock, CurriculumLesson } from '../src/types/curriculum';
+import { getCurriculumLesson } from '../src/data/curriculum';
+import { quranLessons, quranUnit } from '../src/data/curriculum/quran';
+import type { TeachBlock } from '../src/types/curriculum';
 
 // ── 1. Type Tests: TeachBlock arabic.quranRef ──────────────────
 
@@ -78,11 +79,6 @@ describe('TeachBlock quranRef type', () => {
 // ── 2. Curriculum Data: quranRef presence ──────────────────────
 
 describe('Quran curriculum data has quranRef', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { quranLessons } = require('../src/data/curriculum/quran') as {
-    quranLessons: CurriculumLesson[];
-  };
-
   it('should have 3 Quran lessons', () => {
     expect(quranLessons).toHaveLength(3);
   });
@@ -157,11 +153,6 @@ describe('Quran curriculum data has quranRef', () => {
 // ── 3. getCurriculumLesson resolves Quran lessons ─────────────
 
 describe('getCurriculumLesson for Quran', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { getCurriculumLesson } = require('../src/data/curriculum') as {
-    getCurriculumLesson: (id: string) => CurriculumLesson | undefined;
-  };
-
   it('should resolve quran-01-02 (Al-Fatiha lesson)', () => {
     const lesson = getCurriculumLesson('quran-01-02');
     expect(lesson).toBeDefined();
@@ -195,10 +186,6 @@ describe('quranService.playAyah onFinish callback', () => {
     // which is verified by TypeScript compilation — if the signature
     // was wrong, the hook would fail to compile.
     // This test verifies the curriculum data shape is self-consistent.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { quranLessons } = require('../src/data/curriculum/quran') as {
-      quranLessons: CurriculumLesson[];
-    };
     // Every quranRef should have valid fields for the playAyah pipeline
     const allRefs = quranLessons
       .flatMap((l) => l.teach)
@@ -215,12 +202,6 @@ describe('quranService.playAyah onFinish callback', () => {
 // ── 5. Quran lesson category consistency ──────────────────────
 
 describe('Quran lesson integrity', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { quranLessons, quranUnit } = require('../src/data/curriculum/quran') as {
-    quranLessons: CurriculumLesson[];
-    quranUnit: { id: string; lessonIds: string[]; category: string };
-  };
-
   it('all Quran lessons should have category "quran"', () => {
     for (const lesson of quranLessons) {
       expect(lesson.category).toBe('quran');

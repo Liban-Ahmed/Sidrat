@@ -43,11 +43,11 @@ export function calculateNextReview(
  * Check which lessons need review today.
  */
 export function getLessonsNeedingReview(
-  progressRecords: Array<{
+  progressRecords: {
     lessonId: string;
     nextReviewDate: string | null;
     completedAt: string | null;
-  }>,
+  }[],
   now: Date = new Date(),
 ): string[] {
   return progressRecords

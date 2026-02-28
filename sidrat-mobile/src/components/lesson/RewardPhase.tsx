@@ -3,6 +3,7 @@
  * inline stat pills, fun fact, bonus dua, and category-colored accents.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import Animated, {
@@ -14,11 +15,10 @@ import Animated, {
   withSpring,
   withDelay,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { RewardConfig } from '../../types/curriculum';
-import { FormattedText } from './FormattedText';
 
 interface Props {
   reward: RewardConfig;

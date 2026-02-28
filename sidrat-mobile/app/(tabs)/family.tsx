@@ -4,13 +4,15 @@
  * horizontal conversation pills, and staggered entrance animations.
  */
 
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useMemo, useCallback, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet, Alert, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Button, BismillahHeader, ScalePress } from '../../src/components';
+import { ANALYTICS_EVENTS } from '../../src/constants/config';
+import { analyticsService } from '../../src/services/analyticsService';
 import { useAppStore, useFamilyStore } from '../../src/stores';
 import {
   ACTIVITY_ICONS,
@@ -18,10 +20,8 @@ import {
   getActivityForWeek,
   getNextActivity,
 } from '../../src/stores/familyStore';
+import { useTheme } from '../../src/theme';
 import type { FamilyActivity } from '../../src/stores/familyStore';
-import { Button, BismillahHeader, ScalePress } from '../../src/components';
-import { analyticsService } from '../../src/services/analyticsService';
-import { ANALYTICS_EVENTS } from '../../src/constants/config';
 
 export default function FamilyScreen() {
   const { brand, colors, typography, spacing, radius, gradients, shadows, isDark } = useTheme();
