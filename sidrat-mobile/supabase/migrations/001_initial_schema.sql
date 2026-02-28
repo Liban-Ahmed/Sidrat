@@ -2,14 +2,16 @@
 -- Run this in your Supabase SQL Editor after creating a project.
 --
 -- COPPA Compliance Notes:
--- - Parents table has minimal data (no email stored)
+-- - Parents table uses auth.uid() as PK (no separate ID generation)
 -- - Row Level Security ensures each parent sees only their data
 -- - No PII beyond child's first name
+-- - Account deletion function provided for COPPA / App Store compliance
 
 -- ── Parents ──────────────────────────────────────────────────────
+-- PK is auth.uid() so RLS can reference it directly without subqueries.
 
 CREATE TABLE IF NOT EXISTS parents (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY,
   apple_user_id TEXT UNIQUE,
   is_anonymous BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now()
@@ -31,7 +33,8 @@ CREATE TABLE IF NOT EXISTS children (
   last_lesson_completed_date TIMESTAMPTZ,
   current_week_number INTEGER DEFAULT 1,
   created_at TIMESTAMPTZ DEFAULT now(),
-  last_accessed_at TIMESTAMPTZ DEFAULT now()
+  last_accessed_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- ── Lesson Progress ──────────────────────────────────────────────
@@ -60,6 +63,7 @@ CREATE TABLE IF NOT EXISTS achievements (
   type TEXT NOT NULL,
   category TEXT NOT NULL,
   earned_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(child_id, type)
 );
 
@@ -70,10 +74,39 @@ CREATE TABLE IF NOT EXISTS family_activity_progress (
   child_id UUID NOT NULL REFERENCES children(id) ON DELETE CASCADE,
   activity_id TEXT NOT NULL,
   completed_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(child_id, activity_id)
 );
 
+-- ── Auto-update updated_at trigger ───────────────────────────────
+
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER children_updated_at
+  BEFORE UPDATE ON children
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER lesson_progress_updated_at
+  BEFORE UPDATE ON lesson_progress
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER achievements_updated_at
+  BEFORE UPDATE ON achievements
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER family_activity_progress_updated_at
+  BEFORE UPDATE ON family_activity_progress
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
 -- ── Row Level Security ───────────────────────────────────────────
+-- Since parents.id = auth.uid(), all policies use auth.uid() directly.
+-- No self-referencing subqueries needed.
 
 ALTER TABLE parents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE children ENABLE ROW LEVEL SECURITY;
@@ -81,57 +114,30 @@ ALTER TABLE lesson_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE achievements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE family_activity_progress ENABLE ROW LEVEL SECURITY;
 
--- Parents: users can only access their own record
+-- Parents: users can only access their own record (id = auth.uid())
 CREATE POLICY parents_own_data ON parents
-  FOR ALL USING (
-    id = (
-      SELECT id FROM parents
-      WHERE apple_user_id = auth.uid()::text
-      OR (is_anonymous = true AND id = auth.uid())
-    )
-  );
+  FOR ALL USING (id = auth.uid());
 
--- Children: only parent's children
+-- Children: only the parent's own children
 CREATE POLICY children_of_parent ON children
-  FOR ALL USING (
-    parent_id IN (
-      SELECT id FROM parents
-      WHERE apple_user_id = auth.uid()::text
-      OR (is_anonymous = true AND id = auth.uid())
-    )
-  );
+  FOR ALL USING (parent_id = auth.uid());
 
--- Progress: only for parent's children's progress
+-- Progress: only for the parent's children
 CREATE POLICY progress_of_children ON lesson_progress
   FOR ALL USING (
-    child_id IN (
-      SELECT c.id FROM children c
-      JOIN parents p ON c.parent_id = p.id
-      WHERE p.apple_user_id = auth.uid()::text
-      OR (p.is_anonymous = true AND p.id = auth.uid())
-    )
+    child_id IN (SELECT id FROM children WHERE parent_id = auth.uid())
   );
 
--- Achievements: only for parent's children
+-- Achievements: only for the parent's children
 CREATE POLICY achievements_of_children ON achievements
   FOR ALL USING (
-    child_id IN (
-      SELECT c.id FROM children c
-      JOIN parents p ON c.parent_id = p.id
-      WHERE p.apple_user_id = auth.uid()::text
-      OR (p.is_anonymous = true AND p.id = auth.uid())
-    )
+    child_id IN (SELECT id FROM children WHERE parent_id = auth.uid())
   );
 
--- Family activities: only for parent's children
+-- Family activities: only for the parent's children
 CREATE POLICY family_of_children ON family_activity_progress
   FOR ALL USING (
-    child_id IN (
-      SELECT c.id FROM children c
-      JOIN parents p ON c.parent_id = p.id
-      WHERE p.apple_user_id = auth.uid()::text
-      OR (p.is_anonymous = true AND p.id = auth.uid())
-    )
+    child_id IN (SELECT id FROM children WHERE parent_id = auth.uid())
   );
 
 -- ── Upsert function (progress never decreases) ──────────────────
@@ -157,9 +163,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- ── Account deletion (COPPA / App Store requirement) ─────────────
+-- Cascades to children → lesson_progress, achievements, family_activity_progress
+
+CREATE OR REPLACE FUNCTION delete_user_account()
+RETURNS void AS $$
+BEGIN
+  DELETE FROM parents WHERE id = auth.uid();
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- ── Indices ──────────────────────────────────────────────────────
 
 CREATE INDEX IF NOT EXISTS idx_children_parent ON children(parent_id);
 CREATE INDEX IF NOT EXISTS idx_progress_child ON lesson_progress(child_id);
 CREATE INDEX IF NOT EXISTS idx_progress_lesson ON lesson_progress(lesson_id);
 CREATE INDEX IF NOT EXISTS idx_achievements_child ON achievements(child_id);
+CREATE INDEX IF NOT EXISTS idx_children_updated ON children(updated_at);
+CREATE INDEX IF NOT EXISTS idx_progress_updated ON lesson_progress(updated_at);

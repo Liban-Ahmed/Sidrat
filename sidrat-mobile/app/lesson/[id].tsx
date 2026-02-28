@@ -88,7 +88,7 @@ function LessonPlayerContent({
             {/* Top bar */}
             <Animated.View entering={FadeIn.duration(400)} style={styles.topBar}>
                 {/* Close button */}
-                <Pressable onPress={handleClose} hitSlop={12} style={styles.closeButton}>
+                <Pressable onPress={handleClose} hitSlop={12} style={styles.closeButton} accessibilityRole="button" accessibilityLabel="Close lesson">
                     <Ionicons name="close" size={24} color={colors.textSecondary} />
                 </Pressable>
 

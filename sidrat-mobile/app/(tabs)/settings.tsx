@@ -12,8 +12,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../src/theme';
-import { useAppStore, useChildStore, useSettingsStore } from '../../src/stores';
+import { useAppStore, useAuthStore, useChildStore, useSettingsStore } from '../../src/stores';
 import { Avatar, IslamicDivider, Card } from '../../src/components';
+import { authService } from '../../src/services/auth';
 import { notificationService } from '../../src/services/notificationService';
 import { useParentalGate } from '../../src/hooks';
 import { ParentalGate } from '../../src/components/common/ParentalGate';
@@ -26,6 +27,9 @@ export default function SettingsScreen() {
     const removeChild = useChildStore((s) => s.removeChild);
     const activeChildId = useAppStore((s) => s.activeChildId);
     const setActiveChild = useAppStore((s) => s.setActiveChild);
+    const resetApp = useAppStore((s) => s.reset);
+    const clearAuth = useAuthStore((s) => s.clearAuth);
+    const isAnonymous = useAuthStore((s) => s.isAnonymous);
 
     // Settings store
     const soundEnabled = useSettingsStore((s) => s.soundEnabled);
@@ -38,6 +42,8 @@ export default function SettingsScreen() {
     const setDailyReminder = useSettingsStore((s) => s.setDailyReminder);
     const themePreference = useSettingsStore((s) => s.themePreference);
     const setThemePreference = useSettingsStore((s) => s.setThemePreference);
+    const analyticsEnabled = useSettingsStore((s) => s.analyticsEnabled);
+    const setAnalyticsEnabled = useSettingsStore((s) => s.setAnalyticsEnabled);
 
     // Parental gate
     const { isUnlocked, attemptUnlock } = useParentalGate();
@@ -182,11 +188,69 @@ export default function SettingsScreen() {
         { icon: 'phone-portrait-outline', label: 'Haptic Feedback', value: hapticsEnabled, onToggle: handleToggleHaptics },
         { icon: 'mic-outline', label: 'Voice Narration', value: narrationEnabled, onToggle: handleToggleNarration },
         { icon: 'notifications-outline', label: 'Daily Reminder', value: dailyReminderEnabled, onToggle: handleToggleReminder },
+        { icon: 'analytics-outline', label: 'Usage Analytics', value: analyticsEnabled, onToggle: setAnalyticsEnabled },
     ];
+
+    const handleDeleteAccount = useCallback(() => {
+        requireGate(() => {
+            Alert.alert(
+                'Delete Account',
+                'This will permanently delete your account and all children\'s data. This action cannot be undone.',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Delete Everything',
+                        style: 'destructive',
+                        onPress: async () => {
+                            try {
+                                if (!isAnonymous) {
+                                    await authService.deleteAccount();
+                                }
+                                clearAuth();
+                                resetApp();
+                                router.replace('/welcome');
+                            } catch (error) {
+                                Alert.alert('Error', 'Failed to delete account. Please try again.');
+                                console.error('[Settings] Delete account failed:', error);
+                            }
+                        },
+                    },
+                ],
+            );
+        });
+    }, [requireGate, isAnonymous, clearAuth, resetApp, router]);
+
+    const handleSignOut = useCallback(() => {
+        requireGate(() => {
+            Alert.alert(
+                'Sign Out',
+                'Your local data will be preserved. You can sign in again later.',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Sign Out',
+                        onPress: async () => {
+                            try {
+                                await authService.signOut();
+                                clearAuth();
+                                resetApp();
+                                router.replace('/welcome');
+                            } catch {
+                                clearAuth();
+                                resetApp();
+                                router.replace('/welcome');
+                            }
+                        },
+                    },
+                ],
+            );
+        });
+    }, [requireGate, clearAuth, resetApp, router]);
 
     const parentActions: ActionItem[] = [
         { icon: 'person-add-outline', label: 'Add Child Profile', action: handleAddChild },
         { icon: 'color-palette-outline', label: 'Theme', action: handleThemeChange, detail: themeLabel },
+        { icon: 'log-out-outline', label: 'Sign Out', action: handleSignOut },
     ];
 
     const aboutActions: ActionItem[] = [
@@ -431,6 +495,36 @@ export default function SettingsScreen() {
                         </Pressable>
                     ))}
                 </Card>
+
+                {/* Danger Zone */}
+                <IslamicDivider spacing={12} variant="rich" />
+                <Pressable
+                    onPress={handleDeleteAccount}
+                    accessibilityRole="button"
+                    accessibilityLabel="Delete account and all data"
+                    style={({ pressed }) => [
+                        styles.settingRow,
+                        {
+                            paddingVertical: spacing.md,
+                            paddingHorizontal: spacing.md,
+                            backgroundColor: pressed ? colors.error + '15' : colors.error + '08',
+                            borderRadius: radius.lg,
+                            borderWidth: 1,
+                            borderColor: colors.error + '20',
+                        },
+                    ]}
+                >
+                    <Ionicons name="trash-outline" size={20} color={colors.error} />
+                    <Text
+                        style={[
+                            typography.body,
+                            { color: colors.error, flex: 1, marginLeft: spacing.sm },
+                        ]}
+                    >
+                        Delete Account & Data
+                    </Text>
+                    <Ionicons name="chevron-forward" size={18} color={colors.error + '60'} />
+                </Pressable>
 
                 {/* Version */}
                 <IslamicDivider spacing={16} variant="rich" />

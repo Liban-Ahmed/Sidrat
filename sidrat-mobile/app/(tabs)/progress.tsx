@@ -27,7 +27,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { CategoryBreakdownChart } from '../../src/components/progress';
 import { getAge } from '../../src/types';
 import { allCurriculumLessons } from '../../src/data/curriculum';
-import { sampleLessons } from '../../src/data/lessons';
 import type { LessonCategory } from '../../src/types';
 import type { AchievementDef, AchievementContext } from '../../src/stores/achievementStore';
 
@@ -97,11 +96,9 @@ export default function ProgressScreen() {
 
     // Pull raw progress (stable ref) and derive category counts in useMemo
     const progress = useLessonStore((s) => s.progress);
-    const lessons = useLessonStore((s) => s.lessons);
     const completedByCategory = useMemo(() => {
         if (!activeChildId) return null;
         const categoryMap = new Map<string, LessonCategory>();
-        for (const l of lessons) categoryMap.set(l.id, l.category);
         for (const l of allCurriculumLessons) categoryMap.set(l.id, l.category);
 
         const counts: Record<LessonCategory, number> = {
@@ -114,19 +111,15 @@ export default function ProgressScreen() {
             if (cat) counts[cat]++;
         }
         return counts;
-    }, [activeChildId, progress, lessons]);
+    }, [activeChildId, progress]);
 
     const totalPerCategory = useMemo(() => {
         const counts: Record<LessonCategory, number> = {
             aqeedah: 0, salah: 0, wudu: 0, quran: 0,
             seerah: 0, adab: 0, duaa: 0, stories: 0,
         };
-        const seen = new Set<string>();
-        for (const l of sampleLessons) {
-            if (!seen.has(l.id)) { counts[l.category]++; seen.add(l.id); }
-        }
         for (const l of allCurriculumLessons) {
-            if (!seen.has(l.id)) { counts[l.category]++; seen.add(l.id); }
+            counts[l.category]++;
         }
         return counts;
     }, []);
@@ -139,7 +132,6 @@ export default function ProgressScreen() {
         const completedLessonIds: string[] = [];
         const completedCategoriesSet = new Set<LessonCategory>();
         const categoryMap = new Map<string, LessonCategory>();
-        for (const l of lessons) categoryMap.set(l.id, l.category);
         for (const l of allCurriculumLessons) categoryMap.set(l.id, l.category);
         for (const p of Object.values(progress)) {
             if (p.childId !== activeChildId || !p.isCompleted) continue;
@@ -148,7 +140,7 @@ export default function ProgressScreen() {
             if (cat) completedCategoriesSet.add(cat);
         }
         return { child, completedLessonIds, completedCategories: completedCategoriesSet, reviewCount: 0 };
-    }, [child, activeChildId, progress, lessons]);
+    }, [child, activeChildId, progress]);
 
     const unlockedSet = useMemo(() => {
         if (!achievementCtx) return new Set<string>();

@@ -34,6 +34,9 @@ interface SettingsState {
     /** Whether the user has seen the onboarding tutorial */
     hasSeenTutorial: boolean;
 
+    /** Analytics opt-out (COPPA: parents can disable analytics) */
+    analyticsEnabled: boolean;
+
     // Actions
     setDailyReminder: (enabled: boolean) => void;
     setReminderHour: (hour: number) => void;
@@ -42,6 +45,7 @@ interface SettingsState {
     setNarrationEnabled: (enabled: boolean) => void;
     setSpeechRate: (rate: number) => void;
     setThemePreference: (pref: 'system' | 'light' | 'dark') => void;
+    setAnalyticsEnabled: (enabled: boolean) => void;
     markTutorialSeen: () => void;
     resetSettings: () => void;
 }
@@ -55,6 +59,7 @@ const DEFAULT_SETTINGS = {
     speechRate: 0.85,
     themePreference: 'system' as const,
     hasSeenTutorial: false,
+    analyticsEnabled: true,
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -69,6 +74,7 @@ export const useSettingsStore = create<SettingsState>()(
             setNarrationEnabled: (enabled) => set({ narrationEnabled: enabled }),
             setSpeechRate: (rate) => set({ speechRate: rate }),
             setThemePreference: (pref) => set({ themePreference: pref }),
+            setAnalyticsEnabled: (enabled) => set({ analyticsEnabled: enabled }),
             markTutorialSeen: () => set({ hasSeenTutorial: true }),
             resetSettings: () => set(DEFAULT_SETTINGS),
         }),

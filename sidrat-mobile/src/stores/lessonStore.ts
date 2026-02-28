@@ -8,31 +8,29 @@
  */
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist, createJSONStorage, subscribeWithSelector } from 'zustand/middleware';
 import { mmkvStorage } from './persist';
-import type { Lesson, LessonProgress, LessonPhase, LessonCategory } from '../types';
-import { sampleLessons } from '../data/lessons';
+import type { LessonProgress, LessonPhase, LessonCategory } from '../types';
 import { allCurriculumLessons } from '../data/curriculum';
+import type { CurriculumLesson } from '../types/curriculum';
 import { uuid } from '../utils/uuid';
 import { calculateNextReview } from '../utils/spacedRepetition';
+import { queueSync } from '../services/localDatabase';
 
 function progressKey(childId: string, lessonId: string) {
     return `${childId}:${lessonId}`;
 }
 
 interface LessonStore {
-    lessons: Lesson[];
-
     /** Normalized progress: key = "childId:lessonId" */
     progress: Record<string, LessonProgress>;
 
     // Queries
-    getLessonsForWeek: (week: number) => Lesson[];
     getProgress: (childId: string, lessonId: string) => LessonProgress | undefined;
     getCompletedCount: (childId: string) => number;
     /** Get count of completed lessons grouped by category */
     getCompletedByCategory: (childId: string) => Record<LessonCategory, number>;
-    getTodayLesson: (childId: string) => Lesson | undefined;
+    getTodayLesson: (childId: string) => CurriculumLesson | undefined;
 
     // Mutations
     markPhaseComplete: (
@@ -47,12 +45,10 @@ interface LessonStore {
 }
 
 export const useLessonStore = create<LessonStore>()(
+    subscribeWithSelector(
     persist(
         (set, get) => ({
-            lessons: sampleLessons,
             progress: {},
-
-            getLessonsForWeek: (week) => get().lessons.filter((l) => l.weekNumber === week),
 
             getProgress: (childId, lessonId) =>
                 get().progress[progressKey(childId, lessonId)],
@@ -63,11 +59,9 @@ export const useLessonStore = create<LessonStore>()(
                 ).length,
 
             getCompletedByCategory: (childId) => {
-                const { lessons, progress } = get();
+                const { progress } = get();
 
-                // Build a lessonId → category lookup from both sampleLessons and curriculum
                 const categoryMap = new Map<string, LessonCategory>();
-                for (const l of lessons) categoryMap.set(l.id, l.category);
                 for (const l of allCurriculumLessons) categoryMap.set(l.id, l.category);
 
                 const counts: Record<LessonCategory, number> = {
@@ -85,9 +79,8 @@ export const useLessonStore = create<LessonStore>()(
             },
 
             getTodayLesson: (childId) => {
-                const { lessons, progress } = get();
-                // Find the first incomplete lesson in order
-                return lessons.find((l) => {
+                const { progress } = get();
+                return allCurriculumLessons.find((l) => {
                     const p = progress[progressKey(childId, l.id)];
                     return !p?.isCompleted;
                 });
@@ -185,10 +178,44 @@ export const useLessonStore = create<LessonStore>()(
         {
             name: 'sidrat-lessons',
             storage: createJSONStorage(() => mmkvStorage),
-            // Only persist progress, not lesson data (that's bundled)
             partialize: (state) => ({
                 progress: state.progress,
             }),
         },
     ),
+    ),
+);
+
+/**
+ * Sync bridge: when a lesson is completed or reviewed, queue the
+ * progress record to SQLite for eventual Supabase sync.
+ * Only syncs completed or reviewed entries (not partial phase progress).
+ */
+useLessonStore.subscribe(
+    (state) => state.progress,
+    (progress, prevProgress) => {
+        for (const [key, entry] of Object.entries(progress)) {
+            const prev = prevProgress[key];
+            if (!entry) continue;
+
+            const isNewCompletion = entry.isCompleted && !prev?.isCompleted;
+            const isNewReview = (entry.reviewCount ?? 0) > (prev?.reviewCount ?? 0);
+
+            if (isNewCompletion || isNewReview) {
+                queueSync('lesson_progress', entry.id, 'upsert', {
+                    id: entry.id,
+                    child_id: entry.childId,
+                    lesson_id: entry.lessonId,
+                    is_completed: entry.isCompleted,
+                    completed_at: entry.completedAt ?? null,
+                    score: entry.score,
+                    xp_earned: entry.xpEarned,
+                    attempts: entry.attempts,
+                    last_completed_phase: entry.lastCompletedPhase ?? null,
+                    phase_progress: entry.phaseProgress ?? {},
+                    last_accessed_at: entry.lastAccessedAt ?? null,
+                }).catch(console.error);
+            }
+        }
+    },
 );
