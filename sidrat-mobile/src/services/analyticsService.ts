@@ -20,82 +20,82 @@ let posthogClient: PostHog | null = null;
 
 /** Initialize analytics — call once at app startup */
 function init(): void {
-    if (!POSTHOG_KEY || posthogClient) return;
+  if (!POSTHOG_KEY || posthogClient) return;
 
-    try {
-        posthogClient = new PostHog(POSTHOG_KEY, {
-            host: POSTHOG_HOST,
-            // Disable automatic capture for COPPA compliance
-            captureAppLifecycleEvents: IS_PROD,
-        });
-    } catch (error) {
-        console.warn('[Analytics] Failed to initialize PostHog:', error);
-    }
+  try {
+    posthogClient = new PostHog(POSTHOG_KEY, {
+      host: POSTHOG_HOST,
+      // Disable automatic capture for COPPA compliance
+      captureAppLifecycleEvents: IS_PROD,
+    });
+  } catch (error) {
+    console.warn('[Analytics] Failed to initialize PostHog:', error);
+  }
 }
 
 function isOptedOut(): boolean {
-    return !useSettingsStore.getState().analyticsEnabled;
+  return !useSettingsStore.getState().analyticsEnabled;
 }
 
 /** Track an event with optional properties */
 function track(event: string, properties?: Record<string, string | number | boolean>): void {
-    if (!posthogClient || isOptedOut()) return;
+  if (!posthogClient || isOptedOut()) return;
 
-    try {
-        posthogClient.capture(event, {
-            ...properties,
-            app_version: Application.nativeApplicationVersion ?? '1.0.0',
-        });
-    } catch {
-        // Silently ignore analytics errors
-    }
+  try {
+    posthogClient.capture(event, {
+      ...properties,
+      app_version: Application.nativeApplicationVersion ?? '1.0.0',
+    });
+  } catch {
+    // Silently ignore analytics errors
+  }
 }
 
 /** Identify user session (use anonymous ID only, no PII) */
 function identify(userId: string, traits?: Record<string, string | number | boolean>): void {
-    if (!posthogClient || isOptedOut()) return;
-    try {
-        posthogClient.identify(userId, traits);
-    } catch {
-        // Silently ignore
-    }
+  if (!posthogClient || isOptedOut()) return;
+  try {
+    posthogClient.identify(userId, traits);
+  } catch {
+    // Silently ignore
+  }
 }
 
 /** Reset analytics session (on sign-out) */
 function reset(): void {
-    if (!posthogClient) return;
-    try {
-        posthogClient.reset();
-    } catch {
-        // Silently ignore
-    }
+  if (!posthogClient) return;
+  try {
+    posthogClient.reset();
+  } catch {
+    // Silently ignore
+  }
 }
 
 /** Flush pending events */
 async function flush(): Promise<void> {
-    if (!posthogClient) return;
-    try {
-        posthogClient.flush();
-    } catch {
-        // Silently ignore
-    }
+  if (!posthogClient) return;
+  try {
+    posthogClient.flush();
+  } catch {
+    // Silently ignore
+  }
 }
 
 /** Screen view tracking */
 function screen(name: string, properties?: Record<string, string | number | boolean>): void {
-    if (!posthogClient || isOptedOut()) return;
-    try {
-        posthogClient.screen(name, properties);
-    } catch {
-        // Silently ignore
-    }
+  if (!posthogClient || isOptedOut()) return;
+  try {
+    posthogClient.screen(name, properties);
+  } catch {
+    // Silently ignore
+  }
 }
 
 export const analyticsService = {
-    init,
-    track,
-    identify,
-    reset,
-    flush,
-    screen,
+  init,
+  track,
+  identify,
+  reset,
+  flush,
+  screen,
 };

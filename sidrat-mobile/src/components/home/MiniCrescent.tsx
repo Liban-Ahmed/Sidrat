@@ -17,79 +17,74 @@ import { View, StyleSheet } from 'react-native';
 import { useTheme } from '../../theme';
 
 interface MiniCrescentProps {
-    active: boolean;
-    parentBg: string;
-    size?: number;
-    /** Accent-tinted crescent for today */
-    isToday?: boolean;
+  active: boolean;
+  parentBg: string;
+  size?: number;
+  /** Accent-tinted crescent for today */
+  isToday?: boolean;
 }
 
-export function MiniCrescent({
-    active,
-    parentBg,
-    size = 14,
-    isToday = false,
-}: MiniCrescentProps) {
-    const { brand } = useTheme();
+export function MiniCrescent({ active, parentBg, size = 14, isToday = false }: MiniCrescentProps) {
+  const { brand } = useTheme();
 
-    if (!active) {
-        return (
-            <View
-                style={[
-                    styles.inactive,
-                    {
-                        width: size,
-                        height: size,
-                        borderRadius: size / 2,
-                    },
-                ]}
-            />
-        );
-    }
-
-    const moonColor = isToday ? brand.accentLight : '#FFFFFF';
-    const outerSize = size + 2;
-
+  if (!active) {
     return (
-        <View
-            style={{
-                width: outerSize,
-                height: outerSize,
-                alignItems: 'center',
-                justifyContent: 'center',
-            }}
-        >
-            {/* Main moon circle */}
-            <View
-                style={{
-                    width: size,
-                    height: size,
-                    borderRadius: size / 2,
-                    backgroundColor: moonColor,
-                    opacity: isToday ? 1 : 0.9,
-                }}
-            />
-
-            {/* Cutout circle for crescent shape */}
-            <View
-                style={{
-                    position: 'absolute',
-                    width: size * 0.72,
-                    height: size * 0.72,
-                    borderRadius: (size * 0.72) / 2,
-                    backgroundColor: parentBg,
-                    top: outerSize / 2 - (size * 0.72) / 2 - size * 0.02,
-                    left: outerSize / 2 - (size * 0.72) / 2 + size * 0.26,
-                }}
-            />
-        </View>
+      <View
+        style={[
+          styles.inactive,
+          {
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+          },
+        ]}
+      />
     );
+  }
+
+  const moonColor = isToday ? brand.accentLight : '#FFFFFF';
+  const outerSize = size + 2;
+
+  return (
+    <View
+      style={{
+        width: outerSize,
+        height: outerSize,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {/* Main moon circle */}
+      <View
+        style={{
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: moonColor,
+          opacity: isToday ? 1 : 0.9,
+        }}
+      />
+
+      {/* Cutout circle for crescent shape */}
+      <View
+        style={{
+          position: 'absolute',
+          width: size * 0.72,
+          height: size * 0.72,
+          borderRadius: (size * 0.72) / 2,
+          backgroundColor: parentBg,
+          top: outerSize / 2 - (size * 0.72) / 2 - size * 0.02,
+          left: outerSize / 2 - (size * 0.72) / 2 + size * 0.26,
+        }}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    inactive: {
-        borderWidth: 1.5,
-        borderColor: 'rgba(255,255,255,0.15)',
-        backgroundColor: 'rgba(255,255,255,0.04)',
-    },
+  inactive: {
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+  },
 });

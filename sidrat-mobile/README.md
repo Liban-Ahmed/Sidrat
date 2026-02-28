@@ -4,7 +4,7 @@ Islamic education app for children, built with Expo and React Native.
 
 ## Architecture
 
-```
+```bash
 app/                  Expo Router file-based navigation
   (tabs)/             Tab screens: home, learn, family, progress, settings
   lesson/[id].tsx     Dynamic lesson player (4-phase flow)
@@ -70,6 +70,7 @@ cp .env.example .env
 ```
 
 Required variables:
+
 - `EXPO_PUBLIC_SUPABASE_URL` — Supabase project URL
 - `EXPO_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon/public key
 - `EXPO_PUBLIC_SENTRY_DSN` — Sentry error tracking DSN
@@ -127,6 +128,7 @@ npm run test:coverage
 ```
 
 Test suites cover:
+
 - Curriculum data integrity
 - Spaced repetition scheduling
 - Lesson store (phase completion, scoring, review flow)
@@ -157,14 +159,14 @@ npm run format
 
 ## Key Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| expo ~54 | Framework and build system |
-| expo-router ~6 | File-based navigation |
-| @supabase/supabase-js | Backend (auth, database, storage) |
-| zustand 5 | State management |
-| react-native-mmkv | Fast synchronous persistence |
-| expo-sqlite | Offline-first local database |
-| react-native-reanimated | Animations |
-| posthog-react-native | Analytics |
-| @sentry/react-native | Error tracking |
+| Package                 | Purpose                           |
+| ----------------------- | --------------------------------- |
+| expo ~54                | Framework and build system        |
+| expo-router ~6          | File-based navigation             |
+| @supabase/supabase-js   | Backend (auth, database, storage) |
+| zustand 5               | State management                  |
+| react-native-mmkv       | Fast synchronous persistence      |
+| expo-sqlite             | Offline-first local database      |
+| react-native-reanimated | Animations                        |
+| posthog-react-native    | Analytics                         |
+| @sentry/react-native    | Error tracking                    |

@@ -16,13 +16,13 @@ const mmkv = new MMKV({ id: 'sidrat-store' });
  * Zustand-compatible storage adapter backed by MMKV.
  */
 export const mmkvStorage: StateStorage = {
-    getItem: (name: string): string | null => {
-        return mmkv.getString(name) ?? null;
-    },
-    setItem: (name: string, value: string): void => {
-        mmkv.set(name, value);
-    },
-    removeItem: (name: string): void => {
-        mmkv.delete(name);
-    },
+  getItem: (name: string): string | null => {
+    return mmkv.getString(name) ?? null;
+  },
+  setItem: (name: string, value: string): void => {
+    mmkv.set(name, value);
+  },
+  removeItem: (name: string): void => {
+    mmkv.delete(name);
+  },
 };

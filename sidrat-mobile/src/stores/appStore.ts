@@ -11,60 +11,60 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { mmkvStorage } from './persist';
 
 interface AppState {
-    /** Whether onboarding is complete */
-    hasCompletedOnboarding: boolean;
+  /** Whether onboarding is complete */
+  hasCompletedOnboarding: boolean;
 
-    /** ID of the currently active child profile */
-    activeChildId: string | null;
+  /** ID of the currently active child profile */
+  activeChildId: string | null;
 
-    /** Whether parental gate was recently unlocked (NOT persisted) */
-    parentalGateUnlocked: boolean;
+  /** Whether parental gate was recently unlocked (NOT persisted) */
+  parentalGateUnlocked: boolean;
 
-    /** Whether the app has been initialized */
-    isReady: boolean;
+  /** Whether the app has been initialized */
+  isReady: boolean;
 
-    // Actions
-    completeOnboarding: () => void;
-    setActiveChild: (id: string) => void;
-    unlockParentalGate: () => void;
-    lockParentalGate: () => void;
-    setReady: () => void;
-    reset: () => void;
+  // Actions
+  completeOnboarding: () => void;
+  setActiveChild: (id: string) => void;
+  unlockParentalGate: () => void;
+  lockParentalGate: () => void;
+  setReady: () => void;
+  reset: () => void;
 }
 
 export const useAppStore = create<AppState>()(
-    persist(
-        (set) => ({
-            hasCompletedOnboarding: false,
-            activeChildId: null,
-            parentalGateUnlocked: false,
-            isReady: false,
+  persist(
+    (set) => ({
+      hasCompletedOnboarding: false,
+      activeChildId: null,
+      parentalGateUnlocked: false,
+      isReady: false,
 
-            completeOnboarding: () => set({ hasCompletedOnboarding: true }),
+      completeOnboarding: () => set({ hasCompletedOnboarding: true }),
 
-            setActiveChild: (id) => set({ activeChildId: id }),
+      setActiveChild: (id) => set({ activeChildId: id }),
 
-            unlockParentalGate: () => set({ parentalGateUnlocked: true }),
+      unlockParentalGate: () => set({ parentalGateUnlocked: true }),
 
-            lockParentalGate: () => set({ parentalGateUnlocked: false }),
+      lockParentalGate: () => set({ parentalGateUnlocked: false }),
 
-            setReady: () => set({ isReady: true }),
+      setReady: () => set({ isReady: true }),
 
-            reset: () =>
-                set({
-                    hasCompletedOnboarding: false,
-                    activeChildId: null,
-                    parentalGateUnlocked: false,
-                }),
+      reset: () =>
+        set({
+          hasCompletedOnboarding: false,
+          activeChildId: null,
+          parentalGateUnlocked: false,
         }),
-        {
-            name: 'sidrat-app',
-            storage: createJSONStorage(() => mmkvStorage),
-            // Don't persist volatile state
-            partialize: (state) => ({
-                hasCompletedOnboarding: state.hasCompletedOnboarding,
-                activeChildId: state.activeChildId,
-            }),
-        },
-    ),
+    }),
+    {
+      name: 'sidrat-app',
+      storage: createJSONStorage(() => mmkvStorage),
+      // Don't persist volatile state
+      partialize: (state) => ({
+        hasCompletedOnboarding: state.hasCompletedOnboarding,
+        activeChildId: state.activeChildId,
+      }),
+    },
+  ),
 );

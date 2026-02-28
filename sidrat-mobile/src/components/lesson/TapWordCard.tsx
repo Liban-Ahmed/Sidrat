@@ -348,12 +348,12 @@ export function TapWordCard({ block, onAnswer }: Props) {
         })}
       </Animated.View>
 
-      {showHint && block.hint && (
-        <FeedbackCard type="hint">{block.hint}</FeedbackCard>
-      )}
+      {showHint && block.hint && <FeedbackCard type="hint">{block.hint}</FeedbackCard>}
 
       {showResult && block.explanation && (
-        <FeedbackCard type="success" delay={600} useFormatted>{block.explanation}</FeedbackCard>
+        <FeedbackCard type="success" delay={600} useFormatted>
+          {block.explanation}
+        </FeedbackCard>
       )}
     </Animated.View>
   );

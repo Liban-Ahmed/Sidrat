@@ -10,4 +10,8 @@ export { ScreenWrapper } from './ScreenWrapper';
 export { EmptyState } from './EmptyState';
 export { Toast } from './Toast';
 export { ShimmerBlock } from './ShimmerBlock';
-export { LearnSkeletonLoader, ProgressSkeletonLoader, FamilySkeletonLoader } from './SkeletonLoaders';
+export {
+  LearnSkeletonLoader,
+  ProgressSkeletonLoader,
+  FamilySkeletonLoader,
+} from './SkeletonLoaders';

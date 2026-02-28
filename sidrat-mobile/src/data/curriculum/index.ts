@@ -16,33 +16,42 @@ import { quranUnit, quranLessons } from './quran';
 export const allUnits: CurriculumUnit[] = [aqeedahUnit, wuduUnit, salahUnit, quranUnit];
 
 export const allCurriculumLessons: CurriculumLesson[] = [
-    ...aqeedahLessons,
-    ...wuduLessons,
-    ...salahLessons,
-    ...quranLessons,
+  ...aqeedahLessons,
+  ...wuduLessons,
+  ...salahLessons,
+  ...quranLessons,
 ];
 
 /** Lookup a lesson by ID in O(1) */
 const lessonMap = new Map<string, CurriculumLesson>();
 for (const lesson of allCurriculumLessons) {
-    lessonMap.set(lesson.id, lesson);
+  lessonMap.set(lesson.id, lesson);
 }
 
 export function getCurriculumLesson(id: string): CurriculumLesson | undefined {
-    return lessonMap.get(id);
+  return lessonMap.get(id);
 }
 
 /** Get all lessons for a given unit */
 export function getLessonsForUnit(unitId: string): CurriculumLesson[] {
-    return allCurriculumLessons.filter((l) => l.unitId === unitId);
+  return allCurriculumLessons.filter((l) => l.unitId === unitId);
 }
 
 /** Curriculum version index */
 export const curriculumIndex: CurriculumIndex = {
-    version: 1,
-    lastUpdated: '2025-01-01',
-    units: allUnits,
+  version: 1,
+  lastUpdated: '2025-01-01',
+  units: allUnits,
 };
 
 // Re-export unit data
-export { wuduUnit, wuduLessons, aqeedahUnit, aqeedahLessons, salahUnit, salahLessons, quranUnit, quranLessons };
+export {
+  wuduUnit,
+  wuduLessons,
+  aqeedahUnit,
+  aqeedahLessons,
+  salahUnit,
+  salahLessons,
+  quranUnit,
+  quranLessons,
+};
