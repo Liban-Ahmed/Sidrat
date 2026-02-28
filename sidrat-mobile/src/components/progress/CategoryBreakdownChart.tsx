@@ -7,7 +7,7 @@
  *  • Count badge on the right
  *  • Staggered entrance animations
  *  • Empty state with motivational message
- *  • Proportional bar widths relative to the max category
+ *  • Bar width = completion within that category (e.g. 15/15 → full bar)
  *
  * Built entirely with react-native-reanimated + plain Views.
  * No chart library or SVG required.
@@ -43,29 +43,31 @@ interface BarRowProps {
     category: LessonCategory;
     count: number;
     total: number;
-    maxCount: number;
     index: number;
 }
 
-function BarRow({ category, count, total, maxCount, index }: BarRowProps) {
+function BarRow({ category, count, total, index }: BarRowProps) {
     const { colors, typography, spacing, radius, categoryColors } = useTheme();
 
     const meta = categoryMeta[category];
     const catColor = categoryColors[category]?.solid ?? '#888';
 
-    // Animated bar fill — proportion of max category, minimum 4% so color is visible
+    // Bar fill = completion within this category (count/total). Full when e.g. 15/15 or 5/5.
     const fillWidth = useSharedValue(0);
 
     useEffect(() => {
-        const target = maxCount > 0 ? Math.max(count / maxCount, count > 0 ? 0.06 : 0) : 0;
+        const ratio = total > 0 ? count / total : 0;
+        const target = total > 0
+            ? Math.max(Math.min(ratio, 1), count > 0 ? 0.06 : 0)
+            : (count > 0 ? 0.06 : 0);
         fillWidth.value = withDelay(
-            index * 80, // Stagger each row
+            index * 80,
             withTiming(target, {
                 duration: 700,
                 easing: Easing.out(Easing.cubic),
             }),
         );
-    }, [count, maxCount, index, fillWidth]);
+    }, [count, total, index, fillWidth]);
 
     const fillStyle = useAnimatedStyle(() => ({
         width: `${fillWidth.value * 100}%` as `${number}%`,
@@ -185,10 +187,6 @@ export function CategoryBreakdownChart({
         });
     }, [data, totalPerCategory]);
 
-    const maxCount = useMemo(() => {
-        return Math.max(1, ...categories.map((cat) => data[cat] ?? 0));
-    }, [data, categories]);
-
     const totalCompleted = useMemo(
         () => Object.values(data).reduce((sum, n) => sum + n, 0),
         [data],
@@ -286,7 +284,6 @@ export function CategoryBreakdownChart({
                     category={cat}
                     count={data[cat] ?? 0}
                     total={totalPerCategory?.[cat] ?? 0}
-                    maxCount={maxCount}
                     index={i}
                 />
             ))}
