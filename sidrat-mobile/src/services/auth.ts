@@ -5,6 +5,7 @@
  * - Sign in with Apple (no email collected)
  * - Anonymous auth (offline-first, upgrade later)
  * - No social logins (minimizes data collection)
+ * - Session rehydration on app launch
  */
 
 import { supabase } from './supabase';
@@ -27,11 +28,38 @@ export const authService = {
     },
 
     /**
-     * Get current user.
+     * Get current user (makes a network call to validate the session).
      */
     async getUser(): Promise<User | null> {
         const { data } = await supabase.auth.getUser();
         return data.user;
+    },
+
+    /**
+     * Rehydrate auth state on app launch.
+     * Checks if there's a valid cached session and returns the auth state.
+     * If the session has expired, Supabase SDK auto-refreshes it.
+     */
+    async rehydrate(): Promise<AuthState> {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+                return {
+                    user: session.user,
+                    session,
+                    isAuthenticated: true,
+                    isAnonymous: session.user.is_anonymous ?? false,
+                };
+            }
+        } catch {
+            // Session expired and refresh failed — user needs to re-auth
+        }
+        return {
+            user: null,
+            session: null,
+            isAuthenticated: false,
+            isAnonymous: false,
+        };
     },
 
     /**
@@ -73,18 +101,23 @@ export const authService = {
 
     /**
      * Link an Apple account to an existing anonymous session.
-     * Preserves all existing data.
+     * Uses signInWithIdToken which merges with the current anonymous user
+     * when called while already authenticated.
      */
-    async linkAppleAccount(idToken: string): Promise<void> {
-        const { error } = await supabase.auth.linkIdentity({
+    async linkAppleAccount(idToken: string): Promise<AuthState> {
+        const { data, error } = await supabase.auth.signInWithIdToken({
             provider: 'apple',
-            options: {
-                // @ts-expect-error - Supabase types don't include idToken yet
-                idToken,
-            },
+            token: idToken,
         });
 
         if (error) throw error;
+
+        return {
+            user: data.user,
+            session: data.session,
+            isAuthenticated: true,
+            isAnonymous: false,
+        };
     },
 
     /**
@@ -96,7 +129,17 @@ export const authService = {
     },
 
     /**
-     * Listen for auth state changes.
+     * Delete the user's account and all associated data.
+     * Calls the Supabase delete_user_account() RPC which cascades.
+     */
+    async deleteAccount(): Promise<void> {
+        const { error } = await supabase.rpc('delete_user_account');
+        if (error) throw error;
+        await supabase.auth.signOut();
+    },
+
+    /**
+     * Listen for auth state changes (token refresh, sign-in, sign-out).
      */
     onAuthStateChange(callback: (state: AuthState) => void) {
         return supabase.auth.onAuthStateChange((_event, session) => {

@@ -9,15 +9,19 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import { AppState as RNAppState } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as Sentry from '@sentry/react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { useTheme } from '../src/theme';
-import { useAppStore, useChildStore } from '../src/stores';
+import { useAppStore, useAuthStore, useChildStore } from '../src/stores';
 import { ErrorBoundary } from '../src/components/common/ErrorBoundary';
 import { AchievementToast } from '../src/components/common/AchievementToast';
+import { Toast } from '../src/components/ui/Toast';
+import { authService } from '../src/services/auth';
 import { syncService } from '../src/services/syncService';
+import { closeDatabase } from '../src/services/localDatabase';
 import { analyticsService } from '../src/services/analyticsService';
 import { useAppFonts } from '../src/hooks/useAppFonts';
 import { SENTRY_DSN, IS_DEV, ANALYTICS_EVENTS } from '../src/constants/config';
@@ -44,21 +48,53 @@ function AppLayout() {
     const setReady = useAppStore((s) => s.setReady);
     const isReady = useAppStore((s) => s.isReady);
     const hasCompletedOnboarding = useAppStore((s) => s.hasCompletedOnboarding);
+    const setAuthenticated = useAuthStore((s) => s.setAuthenticated);
+    const clearAuth = useAuthStore((s) => s.clearAuth);
     const { fontsLoaded, fontError } = useAppFonts();
 
-    // Initialize services on first mount
+    // Initialize services and rehydrate auth on first mount
     useEffect(() => {
         checkStreaks();
         syncService.startListening();
         analyticsService.init();
         analyticsService.track(ANALYTICS_EVENTS.APP_OPENED);
-        setReady();
+
+        // Rehydrate session — validates cached JWT, auto-refreshes if expired
+        authService.rehydrate().then((state) => {
+            if (state.isAuthenticated && state.user) {
+                setAuthenticated(state.user.id, state.isAnonymous);
+            } else {
+                clearAuth();
+            }
+            setReady();
+        }).catch(() => {
+            setReady();
+        });
+
+        // Listen for auth state changes (token refresh, sign-out, etc.)
+        const { data: { subscription } } = authService.onAuthStateChange((state) => {
+            if (state.isAuthenticated && state.user) {
+                setAuthenticated(state.user.id, state.isAnonymous);
+            } else {
+                clearAuth();
+            }
+        });
+
+        // Close database on app background for clean WAL checkpointing
+        const appStateSubscription = RNAppState.addEventListener('change', (nextState) => {
+            if (nextState === 'background') {
+                closeDatabase().catch(console.error);
+                analyticsService.flush();
+            }
+        });
 
         return () => {
+            subscription.unsubscribe();
+            appStateSubscription.remove();
             syncService.stopListening();
             analyticsService.flush();
         };
-    }, [checkStreaks, setReady]);
+    }, [checkStreaks, setReady, setAuthenticated, clearAuth]);
 
     // Hide splash screen once fonts are loaded
     useEffect(() => {
@@ -118,6 +154,7 @@ function AppLayout() {
                 />
             </Stack>
             <AchievementToast />
+            <Toast />
         </>
     );
 }

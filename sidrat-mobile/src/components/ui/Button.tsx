@@ -143,6 +143,7 @@ export function Button({
             disabled={isDisabled}
             style={[animatedStyle, containerStyle]}
             accessibilityRole="button"
+            accessibilityLabel={rest.accessibilityLabel ?? title}
             accessibilityState={{ disabled: isDisabled }}
             {...rest}
         >

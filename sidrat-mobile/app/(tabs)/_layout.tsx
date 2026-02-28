@@ -75,6 +75,7 @@ export default function TabLayout() {
                 options={{
                     title: 'Home',
                     tabBarIcon: tabIcon('home-outline', 'home'),
+                    tabBarAccessibilityLabel: 'Home tab',
                 }}
             />
             <Tabs.Screen
@@ -82,6 +83,7 @@ export default function TabLayout() {
                 options={{
                     title: 'Learn',
                     tabBarIcon: tabIcon('book-outline', 'book'),
+                    tabBarAccessibilityLabel: 'Learn tab — browse lessons',
                 }}
             />
             <Tabs.Screen
@@ -89,6 +91,7 @@ export default function TabLayout() {
                 options={{
                     title: 'Family',
                     tabBarIcon: tabIcon('people-outline', 'people'),
+                    tabBarAccessibilityLabel: 'Family activities tab',
                 }}
             />
             <Tabs.Screen
@@ -96,6 +99,7 @@ export default function TabLayout() {
                 options={{
                     title: 'Progress',
                     tabBarIcon: tabIcon('stats-chart-outline', 'stats-chart'),
+                    tabBarAccessibilityLabel: 'Progress and achievements tab',
                 }}
             />
             <Tabs.Screen
@@ -103,6 +107,7 @@ export default function TabLayout() {
                 options={{
                     title: 'Settings',
                     tabBarIcon: tabIcon('settings-outline', 'settings'),
+                    tabBarAccessibilityLabel: 'Settings tab',
                 }}
             />
         </Tabs>

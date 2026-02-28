@@ -1,24 +1,15 @@
 /**
- * FillBlankCard — Fill-in-the-blank with inline blank highlight,
- * themed input, haptic feedback, and polished result cards.
- *
- * Features:
- *  • Inline sentence with underlined blank styled in brand color
- *  • Themed input border that turns success/error on submit
- *  • Character count badge in submit button
- *  • Theme-token success/error/warning colors (no hardcoded hex)
- *  • Hint card with accent left border
- *  • Haptic feedback on submit
- *  • Dark mode aware
+ * FillBlankCard -- Fill-in-the-blank with inline blank highlight and themed input.
  */
 
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TextInput, Pressable } from 'react-native';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { PracticeFillBlank } from '../../types/curriculum';
+import { FeedbackCard } from './FeedbackCard';
 
 interface Props {
     block: PracticeFillBlank;
@@ -54,12 +45,10 @@ export function FillBlankCard({ block, onAnswer }: Props) {
         }
     }, [answer, isCorrect, block, onAnswer, attempts]);
 
-    // Split sentence around ___
     const parts = block.sentence.split('___');
 
     return (
         <View style={styles.container}>
-            {/* ── Sentence with blank ── */}
             <Animated.View
                 entering={FadeInDown.delay(100).duration(500)}
                 style={[
@@ -76,15 +65,11 @@ export function FillBlankCard({ block, onAnswer }: Props) {
                     <Text
                         style={{
                             color: showResult
-                                ? isCorrect
-                                    ? colors.success
-                                    : colors.error
+                                ? isCorrect ? colors.success : colors.error
                                 : brand.primary,
                             textDecorationLine: 'underline',
                             textDecorationColor: showResult
-                                ? isCorrect
-                                    ? colors.success
-                                    : colors.error
+                                ? isCorrect ? colors.success : colors.error
                                 : brand.primary + '60',
                             fontWeight: '700',
                         }}
@@ -95,7 +80,6 @@ export function FillBlankCard({ block, onAnswer }: Props) {
                 </Text>
             </Animated.View>
 
-            {/* ── Input ── */}
             <Animated.View entering={FadeInDown.delay(300).duration(500)} style={styles.inputRow}>
                 <TextInput
                     style={[
@@ -106,14 +90,10 @@ export function FillBlankCard({ block, onAnswer }: Props) {
                             color: colors.text,
                             borderRadius: radius.lg,
                             borderColor: showResult
-                                ? isCorrect
-                                    ? colors.success
-                                    : colors.error
+                                ? isCorrect ? colors.success : colors.error
                                 : answer.length > 0
                                     ? brand.primary
-                                    : isDark
-                                        ? colors.surfaceTertiary
-                                        : colors.separator,
+                                    : isDark ? colors.surfaceTertiary : colors.separator,
                             ...shadows.subtle,
                         },
                     ]}
@@ -133,12 +113,9 @@ export function FillBlankCard({ block, onAnswer }: Props) {
                     style={({ pressed }) => [
                         styles.submitButton,
                         {
-                            backgroundColor:
-                                answer.trim().length > 0 && !showResult
-                                    ? brand.primary
-                                    : isDark
-                                        ? colors.surfaceTertiary
-                                        : colors.backgroundTertiary,
+                            backgroundColor: answer.trim().length > 0 && !showResult
+                                ? brand.primary
+                                : isDark ? colors.surfaceTertiary : colors.backgroundTertiary,
                             borderRadius: radius.lg,
                             shadowColor: brand.primary,
                             shadowOffset: { width: 0, height: 3 },
@@ -156,94 +133,25 @@ export function FillBlankCard({ block, onAnswer }: Props) {
                 </Pressable>
             </Animated.View>
 
-            {/* ── Hint ── */}
             {showHint && block.hint && (
-                <Animated.View
-                    entering={FadeIn.duration(400)}
-                    style={[
-                        styles.hintCard,
-                        {
-                            backgroundColor: colors.warningMuted,
-                            borderRadius: radius.md,
-                            borderLeftWidth: 3,
-                            borderLeftColor: brand.accent,
-                        },
-                    ]}
-                >
-                    <Ionicons name="bulb-outline" size={18} color={brand.accent} />
-                    <Text style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
-                        {block.hint}
-                    </Text>
-                </Animated.View>
+                <FeedbackCard type="hint">{block.hint}</FeedbackCard>
             )}
 
-            {/* ── Result feedback ── */}
             {showResult && (
-                <Animated.View
-                    entering={FadeIn.delay(200).duration(400)}
-                    style={[
-                        styles.resultCard,
-                        {
-                            backgroundColor: isCorrect ? colors.successMuted : colors.errorMuted,
-                            borderRadius: radius.md,
-                            borderLeftWidth: 3,
-                            borderLeftColor: isCorrect ? colors.success : colors.error,
-                        },
-                    ]}
-                >
-                    <Ionicons
-                        name={isCorrect ? 'checkmark-circle' : 'close-circle'}
-                        size={20}
-                        color={isCorrect ? colors.success : colors.error}
-                    />
-                    <Text style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
-                        {isCorrect
-                            ? block.explanation ?? 'Correct!'
-                            : `Try again! The answer starts with "${block.acceptedAnswers[0]?.charAt(0) ?? ''}..."`}
-                    </Text>
-                </Animated.View>
+                <FeedbackCard type={isCorrect ? 'success' : 'error'} delay={200}>
+                    {isCorrect
+                        ? block.explanation ?? 'Correct!'
+                        : `Try again! The answer starts with "${block.acceptedAnswers[0]?.charAt(0) ?? ''}..."`}
+                </FeedbackCard>
             )}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        paddingHorizontal: 24,
-        paddingTop: 20,
-    },
-    sentenceCard: {
-        padding: 20,
-        marginBottom: 20,
-    },
-    inputRow: {
-        flexDirection: 'row',
-        gap: 10,
-    },
-    input: {
-        flex: 1,
-        height: 52,
-        paddingHorizontal: 16,
-        borderWidth: 1.5,
-    },
-    submitButton: {
-        width: 52,
-        height: 52,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    hintCard: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        gap: 10,
-        padding: 14,
-        marginTop: 16,
-    },
-    resultCard: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        gap: 10,
-        padding: 14,
-        marginTop: 12,
-    },
+    container: { paddingHorizontal: 24, paddingTop: 20 },
+    sentenceCard: { padding: 20, marginBottom: 20 },
+    inputRow: { flexDirection: 'row', gap: 10 },
+    input: { flex: 1, height: 52, paddingHorizontal: 16, borderWidth: 1.5 },
+    submitButton: { width: 52, height: 52, alignItems: 'center', justifyContent: 'center' },
 });

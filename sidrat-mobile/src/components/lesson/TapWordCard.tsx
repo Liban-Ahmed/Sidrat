@@ -30,6 +30,7 @@ import { useTheme } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import type { PracticeTapWord } from '../../types/curriculum';
 import { FormattedText } from './FormattedText';
+import { FeedbackCard } from './FeedbackCard';
 
 interface Props {
   block: PracticeTapWord;
@@ -347,44 +348,12 @@ export function TapWordCard({ block, onAnswer }: Props) {
         })}
       </Animated.View>
 
-      {/* ── Hint Card ── */}
       {showHint && block.hint && (
-        <Animated.View
-          entering={FadeIn.duration(400)}
-          style={[
-            styles.hintCard,
-            {
-              backgroundColor: colors.warningMuted,
-              borderRadius: radius.md,
-              borderLeftWidth: 3,
-              borderLeftColor: brand.accent,
-            },
-          ]}
-        >
-          <Ionicons name="bulb-outline" size={18} color={brand.accent} />
-          <Text style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>{block.hint}</Text>
-        </Animated.View>
+        <FeedbackCard type="hint">{block.hint}</FeedbackCard>
       )}
 
-      {/* ── Explanation (after completion) ── */}
       {showResult && block.explanation && (
-        <Animated.View
-          entering={FadeIn.delay(600).duration(400)}
-          style={[
-            styles.explanationCard,
-            {
-              backgroundColor: colors.successMuted,
-              borderRadius: radius.md,
-              borderLeftWidth: 3,
-              borderLeftColor: colors.success,
-            },
-          ]}
-        >
-          <Ionicons name="sparkles" size={18} color={colors.success} />
-          <FormattedText style={[typography.bodySmall, { color: colors.text, flex: 1 }]}>
-            {block.explanation}
-          </FormattedText>
-        </Animated.View>
+        <FeedbackCard type="success" delay={600} useFormatted>{block.explanation}</FeedbackCard>
       )}
     </Animated.View>
   );
@@ -450,19 +419,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 12,
     borderWidth: 1,
-  },
-  hintCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    padding: 14,
-    marginTop: 16,
-  },
-  explanationCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    padding: 14,
-    marginTop: 12,
   },
 });

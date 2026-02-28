@@ -7,7 +7,9 @@
  */
 
 import PostHog from 'posthog-react-native';
+import * as Application from 'expo-application';
 import { IS_PROD } from '../constants/config';
+import { useSettingsStore } from '../stores/settingsStore';
 
 // ── PostHog Client ─────────────────────────────────────────────
 
@@ -31,15 +33,18 @@ function init(): void {
     }
 }
 
+function isOptedOut(): boolean {
+    return !useSettingsStore.getState().analyticsEnabled;
+}
+
 /** Track an event with optional properties */
 function track(event: string, properties?: Record<string, string | number | boolean>): void {
-    if (!posthogClient) return;
+    if (!posthogClient || isOptedOut()) return;
 
     try {
         posthogClient.capture(event, {
             ...properties,
-            // Never include PII — only aggregate metrics
-            app_version: '1.0.0',
+            app_version: Application.nativeApplicationVersion ?? '1.0.0',
         });
     } catch {
         // Silently ignore analytics errors
@@ -48,7 +53,7 @@ function track(event: string, properties?: Record<string, string | number | bool
 
 /** Identify user session (use anonymous ID only, no PII) */
 function identify(userId: string, traits?: Record<string, string | number | boolean>): void {
-    if (!posthogClient) return;
+    if (!posthogClient || isOptedOut()) return;
     try {
         posthogClient.identify(userId, traits);
     } catch {
@@ -78,7 +83,7 @@ async function flush(): Promise<void> {
 
 /** Screen view tracking */
 function screen(name: string, properties?: Record<string, string | number | boolean>): void {
-    if (!posthogClient) return;
+    if (!posthogClient || isOptedOut()) return;
     try {
         posthogClient.screen(name, properties);
     } catch {

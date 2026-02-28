@@ -153,6 +153,7 @@ export default function WelcomeScreen() {
                         <Button
                             title="Get Started"
                             onPress={handleGetStarted}
+                            accessibilityLabel="Get started with Sidrat — no account needed"
                             style={[
                                 styles.primaryButton,
                                 {
@@ -172,6 +173,7 @@ export default function WelcomeScreen() {
                             <Button
                                 title=" Sign in with Apple"
                                 onPress={handleSignIn}
+                                accessibilityLabel="Sign in with Apple"
                                 style={[
                                     styles.secondaryButton,
                                     {

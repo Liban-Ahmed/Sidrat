@@ -22,6 +22,7 @@ const SPRING_RELEASE = { damping: 20, stiffness: 300, mass: 0.8 };
 interface ScalePressProps {
     children: React.ReactNode;
     onPress?: () => void;
+    onLongPress?: () => void;
     style?: StyleProp<ViewStyle>;
     /** Scale factor when pressed (default 0.95) */
     pressScale?: number;
@@ -35,6 +36,7 @@ interface ScalePressProps {
 export function ScalePress({
     children,
     onPress,
+    onLongPress,
     style,
     pressScale = 0.95,
     haptic = false,
@@ -57,6 +59,7 @@ export function ScalePress({
             onPressIn={() => { scale.value = withSpring(pressScale, SPRING_PRESS); }}
             onPressOut={() => { scale.value = withSpring(1, SPRING_RELEASE); }}
             onPress={handlePress}
+            onLongPress={onLongPress}
             disabled={disabled}
             style={[animatedStyle, style, disabled && { opacity: 0.5 }]}
             accessibilityRole={accessibilityRole}

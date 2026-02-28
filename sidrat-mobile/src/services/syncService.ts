@@ -8,12 +8,33 @@
  * - Queue entries are pushed to Supabase when online
  * - Pull remote changes and merge (progress never decreases)
  * - Conflict resolution: keep the highest/latest value
+ * - Failed ops are retried with exponential backoff, then dead-lettered
  */
 
 import NetInfo from '@react-native-community/netinfo';
 import { supabase } from './supabase';
-import { getPendingSyncOps, removeSyncOp } from './localDatabase';
+import {
+    getPendingSyncOps,
+    removeSyncOp,
+    incrementSyncRetry,
+    purgeDeadLetterOps,
+    getSyncMeta,
+    setSyncMeta,
+    mergeRemoteProgress,
+    getLocalChildIds,
+} from './localDatabase';
 import { SUPABASE_URL } from '../constants/config';
+
+const BACKOFF_BASE_MS = 1000;
+const BACKOFF_MAX_MS = 30_000;
+
+function backoffDelay(retries: number): number {
+    return Math.min(BACKOFF_BASE_MS * Math.pow(2, retries), BACKOFF_MAX_MS);
+}
+
+function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 class SyncService {
     private isSyncing = false;
@@ -51,7 +72,6 @@ class SyncService {
      * Run a full sync cycle: push local changes, then pull remote.
      */
     async sync(): Promise<{ pushed: number; pulled: number }> {
-        // Skip sync if no Supabase URL configured
         if (!SUPABASE_URL) {
             return { pushed: 0, pulled: 0 };
         }
@@ -66,6 +86,7 @@ class SyncService {
         let pulled = 0;
 
         try {
+            await purgeDeadLetterOps();
             pushed = await this.pushChanges();
             pulled = await this.pullChanges();
         } catch (error) {
@@ -79,6 +100,7 @@ class SyncService {
 
     /**
      * Push all pending local changes to Supabase.
+     * Failed operations get their retry count incremented instead of blocking the queue.
      */
     private async pushChanges(): Promise<number> {
         const ops = await getPendingSyncOps();
@@ -102,9 +124,10 @@ class SyncService {
                 await removeSyncOp(op.id);
                 count++;
             } catch (error) {
-                console.error(`[Sync] Push failed for ${op.table_name}/${op.record_id}:`, error);
-                // Stop on first failure to maintain ordering
-                break;
+                console.error(`[Sync] Push failed for ${op.table_name}/${op.record_id} (retry ${op.retries}):`, error);
+                await incrementSyncRetry(op.id);
+                // Backoff before trying next operation
+                await sleep(backoffDelay(op.retries));
             }
         }
 
@@ -113,16 +136,65 @@ class SyncService {
 
     /**
      * Pull remote changes and merge into local DB.
-     * Only pulls data for the authenticated user.
+     * Only pulls data for the authenticated user's children.
+     * Uses updated_at watermark to fetch only new changes.
      */
     private async pullChanges(): Promise<number> {
-        // TODO: Implement pull logic once Supabase tables are provisioned
-        // This will:
-        //   1. Query lesson_progress for the authenticated user's children
-        //   2. Compare updated_at timestamps
-        //   3. Merge using "progress never decreases" rule
-        //   4. Update local SQLite
-        return 0;
+        const childIds = await getLocalChildIds();
+        if (childIds.length === 0) return 0;
+
+        const lastPull = await getSyncMeta('last_pull_at');
+        let pulled = 0;
+
+        try {
+            let query = supabase
+                .from('lesson_progress')
+                .select('*')
+                .in('child_id', childIds)
+                .order('updated_at', { ascending: true })
+                .limit(200);
+
+            if (lastPull) {
+                query = query.gt('updated_at', lastPull);
+            }
+
+            const { data, error } = await query;
+            if (error) throw error;
+            if (!data || data.length === 0) return 0;
+
+            let latestTimestamp = lastPull ?? '';
+
+            for (const row of data) {
+                const merged = await mergeRemoteProgress({
+                    id: row.id as string,
+                    child_id: row.child_id as string,
+                    lesson_id: row.lesson_id as string,
+                    is_completed: row.is_completed as boolean,
+                    completed_at: row.completed_at as string | null,
+                    score: row.score as number,
+                    xp_earned: row.xp_earned as number,
+                    attempts: row.attempts as number,
+                    last_completed_phase: row.last_completed_phase as string | null,
+                    phase_progress: JSON.stringify(row.phase_progress ?? {}),
+                    last_accessed_at: row.last_accessed_at as string | null,
+                    updated_at: row.updated_at as string,
+                });
+                if (merged) pulled++;
+
+                const rowUpdated = row.updated_at as string;
+                if (rowUpdated > latestTimestamp) {
+                    latestTimestamp = rowUpdated;
+                }
+            }
+
+            if (latestTimestamp) {
+                await setSyncMeta('last_pull_at', latestTimestamp);
+            }
+        } catch (error) {
+            console.error('[Sync] Pull failed:', error);
+        }
+
+        return pulled;
     }
 }
 

@@ -171,7 +171,10 @@ export function ProgressRing({
             {/* Center content */}
             <View style={styles.center}>
                 {children ?? (
-                    <Text style={[typography.labelLarge, { color: fillColor }]}>
+                    <Text style={[
+                        size < 48 ? typography.captionBold : size < 64 ? typography.label : typography.labelLarge,
+                        { color: fillColor, fontSize: Math.max(9, Math.round((size - strokeWidth * 2) * 0.26)) },
+                    ]}>
                         {Math.round(pct * 100)}%
                     </Text>
                 )}

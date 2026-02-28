@@ -64,16 +64,11 @@ export const gradients = {
     shimmer: ['rgba(255,255,255,0)', 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0)'] as const,
 
     // ── Screen Hero Gradients — cross-hue Headspace personality ───
-
-    /** Home screen — warm teal to deep navy */
+    // Light mode hero gradients
     homeHero: ['#055F6E', '#0A3F5C'] as const,
-    /** Learn screen — deep forest to warm teal */
     learnHero: ['#1A4A2E', '#055F6E'] as const,
-    /** Family screen — dark gold to deep coral */
     familyHero: ['#8A5E10', '#C74E59'] as const,
-    /** Progress screen — warm teal to deep purple */
     progressHero: ['#055F6E', '#3D2B7A'] as const,
-    /** Settings screen — deep dark navy to navy-indigo */
     settingsHero: ['#0F2440', '#1A3A5C'] as const,
 
     // ── Card & Surface Gradients ──────────────────────────────
@@ -88,6 +83,15 @@ export const gradients = {
     warmSurface: ['rgba(212,152,42,0.04)', 'rgba(26,58,92,0.04)'] as const,
     /** Hero card — navy to warm teal for CTAs */
     heroCta: ['#1A3A5C', '#055F6E'] as const,
+} as const;
+
+// Dark-mode hero gradients — deeper, richer stops for OLED-friendly dark theme
+export const gradientsDark = {
+    homeHero: ['#033A44', '#071F30'] as const,
+    learnHero: ['#0E2A1A', '#033A44'] as const,
+    familyHero: ['#5A3E0A', '#822F38'] as const,
+    progressHero: ['#033A44', '#261750'] as const,
+    settingsHero: ['#080E18', '#0F2440'] as const,
 } as const;
 
 // ── Semantic Palette ──────────────────────────────────────────────

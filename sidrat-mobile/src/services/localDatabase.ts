@@ -11,7 +11,8 @@
 import * as SQLite from 'expo-sqlite';
 
 const DB_NAME = 'sidrat.db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
+const MAX_SYNC_RETRIES = 5;
 
 let dbInstance: SQLite.SQLiteDatabase | null = null;
 
@@ -32,13 +33,11 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
  * Run all pending schema migrations.
  */
 async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
-    // Enable WAL mode and foreign keys
     await db.execAsync(`
     PRAGMA journal_mode = WAL;
     PRAGMA foreign_keys = ON;
   `);
 
-    // Version tracking
     await db.execAsync(`
     CREATE TABLE IF NOT EXISTS schema_version (
       version INTEGER NOT NULL
@@ -53,8 +52,10 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
     if (currentVersion < 1) {
         await migrateV1(db);
     }
+    if (currentVersion < 2) {
+        await migrateV2(db);
+    }
 
-    // Upsert version
     if (currentVersion === 0) {
         await db.runAsync('INSERT INTO schema_version (version) VALUES (?)', [DB_VERSION]);
     } else {
@@ -67,7 +68,6 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
  */
 async function migrateV1(db: SQLite.SQLiteDatabase): Promise<void> {
     await db.execAsync(`
-    -- Children profiles (stored locally, synced to Supabase)
     CREATE TABLE IF NOT EXISTS children (
       id TEXT PRIMARY KEY NOT NULL,
       name TEXT NOT NULL,
@@ -82,10 +82,10 @@ async function migrateV1(db: SQLite.SQLiteDatabase): Promise<void> {
       current_week_number INTEGER DEFAULT 1,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       last_accessed_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
       synced INTEGER DEFAULT 0
     );
 
-    -- Lesson progress (per-child, per-lesson)
     CREATE TABLE IF NOT EXISTS lesson_progress (
       id TEXT PRIMARY KEY NOT NULL,
       child_id TEXT NOT NULL REFERENCES children(id) ON DELETE CASCADE,
@@ -98,32 +98,32 @@ async function migrateV1(db: SQLite.SQLiteDatabase): Promise<void> {
       last_completed_phase TEXT,
       phase_progress TEXT DEFAULT '{}',
       last_accessed_at TEXT,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
       synced INTEGER DEFAULT 0,
       UNIQUE(child_id, lesson_id)
     );
 
-    -- Achievements earned by children
     CREATE TABLE IF NOT EXISTS achievements (
       id TEXT PRIMARY KEY NOT NULL,
       child_id TEXT NOT NULL REFERENCES children(id) ON DELETE CASCADE,
       type TEXT NOT NULL,
       category TEXT NOT NULL,
       earned_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
       synced INTEGER DEFAULT 0,
       UNIQUE(child_id, type)
     );
 
-    -- Family activity completions
     CREATE TABLE IF NOT EXISTS family_activity_progress (
       id TEXT PRIMARY KEY NOT NULL,
       child_id TEXT NOT NULL REFERENCES children(id) ON DELETE CASCADE,
       activity_id TEXT NOT NULL,
       completed_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
       synced INTEGER DEFAULT 0,
       UNIQUE(child_id, activity_id)
     );
 
-    -- Sync queue: pending changes to push to Supabase
     CREATE TABLE IF NOT EXISTS sync_queue (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       table_name TEXT NOT NULL,
@@ -134,17 +134,27 @@ async function migrateV1(db: SQLite.SQLiteDatabase): Promise<void> {
       retries INTEGER DEFAULT 0
     );
 
-    -- Settings (key-value store)
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY NOT NULL,
       value TEXT NOT NULL
     );
 
-    -- Indices for common queries
     CREATE INDEX IF NOT EXISTS idx_progress_child ON lesson_progress(child_id);
     CREATE INDEX IF NOT EXISTS idx_progress_lesson ON lesson_progress(lesson_id);
     CREATE INDEX IF NOT EXISTS idx_achievements_child ON achievements(child_id);
     CREATE INDEX IF NOT EXISTS idx_sync_queue_table ON sync_queue(table_name);
+  `);
+}
+
+/**
+ * V2 Migration: Add updated_at to tables missing it, add last_synced_at tracking
+ */
+async function migrateV2(db: SQLite.SQLiteDatabase): Promise<void> {
+    await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS sync_metadata (
+      key TEXT PRIMARY KEY NOT NULL,
+      value TEXT NOT NULL
+    );
   `);
 }
 
@@ -176,7 +186,7 @@ export async function queueSync(
 }
 
 /**
- * Get all pending sync operations.
+ * Get pending sync operations that haven't exceeded the retry limit.
  */
 export async function getPendingSyncOps(): Promise<
     Array<{
@@ -190,7 +200,8 @@ export async function getPendingSyncOps(): Promise<
 > {
     const db = await getDatabase();
     return db.getAllAsync(
-        'SELECT * FROM sync_queue ORDER BY created_at ASC LIMIT 50',
+        'SELECT * FROM sync_queue WHERE retries < ? ORDER BY created_at ASC LIMIT 50',
+        [MAX_SYNC_RETRIES],
     );
 }
 
@@ -200,4 +211,122 @@ export async function getPendingSyncOps(): Promise<
 export async function removeSyncOp(id: number): Promise<void> {
     const db = await getDatabase();
     await db.runAsync('DELETE FROM sync_queue WHERE id = ?', [id]);
+}
+
+/**
+ * Increment the retry count for a failed sync operation.
+ */
+export async function incrementSyncRetry(id: number): Promise<void> {
+    const db = await getDatabase();
+    await db.runAsync('UPDATE sync_queue SET retries = retries + 1 WHERE id = ?', [id]);
+}
+
+/**
+ * Remove dead-letter sync operations that have exceeded max retries.
+ * Returns the number of removed operations.
+ */
+export async function purgeDeadLetterOps(): Promise<number> {
+    const db = await getDatabase();
+    const result = await db.runAsync(
+        'DELETE FROM sync_queue WHERE retries >= ?',
+        [MAX_SYNC_RETRIES],
+    );
+    return result.changes;
+}
+
+/**
+ * Get or set a sync metadata value (e.g., last sync timestamp).
+ */
+export async function getSyncMeta(key: string): Promise<string | null> {
+    const db = await getDatabase();
+    const row = await db.getFirstAsync<{ value: string }>(
+        'SELECT value FROM sync_metadata WHERE key = ?',
+        [key],
+    );
+    return row?.value ?? null;
+}
+
+export async function setSyncMeta(key: string, value: string): Promise<void> {
+    const db = await getDatabase();
+    await db.runAsync(
+        'INSERT OR REPLACE INTO sync_metadata (key, value) VALUES (?, ?)',
+        [key, value],
+    );
+}
+
+/**
+ * Upsert a lesson progress row from remote data.
+ * Uses "progress never decreases" merge rule.
+ */
+export async function mergeRemoteProgress(row: {
+    id: string;
+    child_id: string;
+    lesson_id: string;
+    is_completed: boolean;
+    completed_at: string | null;
+    score: number;
+    xp_earned: number;
+    attempts: number;
+    last_completed_phase: string | null;
+    phase_progress: string;
+    last_accessed_at: string | null;
+    updated_at: string;
+}): Promise<boolean> {
+    const db = await getDatabase();
+    const existing = await db.getFirstAsync<{
+        score: number;
+        xp_earned: number;
+        is_completed: number;
+        updated_at: string;
+    }>(
+        'SELECT score, xp_earned, is_completed, updated_at FROM lesson_progress WHERE child_id = ? AND lesson_id = ?',
+        [row.child_id, row.lesson_id],
+    );
+
+    if (existing && existing.updated_at >= row.updated_at) {
+        return false;
+    }
+
+    const mergedScore = Math.max(existing?.score ?? 0, row.score);
+    const mergedXp = Math.max(existing?.xp_earned ?? 0, row.xp_earned);
+    const mergedCompleted = (existing?.is_completed ?? 0) === 1 || row.is_completed;
+
+    await db.runAsync(
+        `INSERT INTO lesson_progress (id, child_id, lesson_id, is_completed, completed_at, score, xp_earned, attempts, last_completed_phase, phase_progress, last_accessed_at, updated_at, synced)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+     ON CONFLICT(child_id, lesson_id) DO UPDATE SET
+       is_completed = ?,
+       completed_at = COALESCE(lesson_progress.completed_at, ?),
+       score = ?,
+       xp_earned = ?,
+       attempts = MAX(lesson_progress.attempts, ?),
+       last_completed_phase = ?,
+       phase_progress = ?,
+       last_accessed_at = ?,
+       updated_at = ?,
+       synced = 1`,
+        [
+            row.id, row.child_id, row.lesson_id,
+            mergedCompleted ? 1 : 0, row.completed_at,
+            mergedScore, mergedXp, row.attempts,
+            row.last_completed_phase, row.phase_progress,
+            row.last_accessed_at, row.updated_at,
+            // ON CONFLICT values
+            mergedCompleted ? 1 : 0, row.completed_at,
+            mergedScore, mergedXp, row.attempts,
+            row.last_completed_phase, row.phase_progress,
+            row.last_accessed_at, row.updated_at,
+        ],
+    );
+
+    return true;
+}
+
+/**
+ * Get all children IDs from local database.
+ */
+export async function getLocalChildIds(): Promise<string[]> {
+    const db = await getDatabase();
+    const rows = await db.getAllAsync<{ id: string }>('SELECT id FROM children');
+    return rows.map((r) => r.id);
 }

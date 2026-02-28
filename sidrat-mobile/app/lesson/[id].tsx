@@ -1,15 +1,13 @@
 /**
- * Lesson Player Screen — The main lesson experience.
- *
- * Receives a lesson ID via route params, loads the curriculum lesson,
- * and renders the 4-phase flow: Hook → Teach → Practice → Reward.
+ * Lesson Player Screen -- 4-phase flow: Hook -> Teach -> Practice -> Reward.
+ * Threads category accent color through all phases for visual identity.
  */
 
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/theme';
 import { useAppStore } from '../../src/stores';
@@ -27,7 +25,6 @@ export default function LessonScreen() {
 
     const lesson = id ? getCurriculumLesson(id) : undefined;
 
-    // Guard: no lesson found
     if (!lesson || !activeChildId) {
         return (
             <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -56,7 +53,7 @@ function LessonPlayerContent({
     childId: string;
     isReview: boolean;
 }) {
-    const { brand, colors, typography, radius } = useTheme();
+    const { brand, colors, typography, radius, categoryColors } = useTheme();
     const router = useRouter();
 
     const player = useLessonPlayer({ lesson, childId, isReview });
@@ -72,13 +69,15 @@ function LessonPlayerContent({
     }, [player, router]);
 
     const categoryInfo = categoryMeta[lesson.category];
+    const accentColor = isReview
+        ? brand.accent
+        : categoryColors[lesson.category]?.solid ?? brand.primary;
+    const categoryIcon = categoryInfo?.icon as keyof typeof Ionicons.glyphMap ?? 'book-outline';
 
-    // Phase labels for the progress bar
     const phaseLabels: Record<string, string> = isReview
         ? { practice: 'Review', reward: 'Done!' }
         : { hook: 'Start', teach: 'Learn', practice: 'Practice', reward: 'Done!' };
 
-    // In review mode, only show practice + reward phases
     const visiblePhases = isReview
         ? (['practice', 'reward'] as const)
         : (['hook', 'teach', 'practice', 'reward'] as const);
@@ -87,14 +86,12 @@ function LessonPlayerContent({
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             {/* Top bar */}
             <Animated.View entering={FadeIn.duration(400)} style={styles.topBar}>
-                {/* Close button */}
-                <Pressable onPress={handleClose} hitSlop={12} style={styles.closeButton}>
+                <Pressable onPress={handleClose} hitSlop={12} style={styles.closeButton} accessibilityRole="button" accessibilityLabel="Close lesson">
                     <Ionicons name="close" size={24} color={colors.textSecondary} />
                 </Pressable>
 
-                {/* Title + category */}
                 <View style={styles.titleArea}>
-                    <Text style={[typography.captionBold, { color: isReview ? brand.accent : brand.primary }]} numberOfLines={1}>
+                    <Text style={[typography.captionBold, { color: accentColor }]} numberOfLines={1}>
                         {isReview ? 'Review' : categoryInfo?.label ?? lesson.category}
                     </Text>
                     <Text style={[typography.footnote, { color: colors.textTertiary }]} numberOfLines={1}>
@@ -102,14 +99,13 @@ function LessonPlayerContent({
                     </Text>
                 </View>
 
-                {/* Phase indicator */}
                 <View
                     style={[
                         styles.phaseBadge,
-                        { backgroundColor: (isReview ? brand.accent : brand.primary) + '12', borderRadius: radius.full },
+                        { backgroundColor: accentColor + '12', borderRadius: radius.full },
                     ]}
                 >
-                    <Text style={[typography.captionBold, { color: isReview ? brand.accent : brand.primary }]}>
+                    <Text style={[typography.captionBold, { color: accentColor }]}>
                         {phaseLabels[player.phase] ?? player.phase}
                     </Text>
                 </View>
@@ -123,7 +119,6 @@ function LessonPlayerContent({
                     const thisIdx = phasesArr.indexOf(phase);
                     const isDone = thisIdx < currentIdx;
                     const isCurrent = phase === player.phase;
-                    const accentColor = isReview ? brand.accent : brand.primary;
                     return (
                         <View
                             key={phase}
@@ -143,14 +138,20 @@ function LessonPlayerContent({
                 })}
             </View>
 
-            {/* Phase content */}
-            <View style={styles.content}>
+            {/* Phase content with fade transition */}
+            <Animated.View
+                key={player.phase}
+                entering={FadeInDown.duration(350).springify().damping(20)}
+                style={styles.content}
+            >
                 {player.phase === 'hook' && (
                     <HookPhase
                         hook={lesson.hook}
                         isNarrating={player.state.isNarrating}
                         onNarrate={player.narrate}
                         onContinue={player.startTeaching}
+                        accentColor={accentColor}
+                        categoryIcon={categoryIcon}
                     />
                 )}
 
@@ -164,6 +165,7 @@ function LessonPlayerContent({
                         onStopNarration={player.stopNarration}
                         onNext={player.nextTeachBlock}
                         isLast={player.isLastTeachBlock}
+                        accentColor={accentColor}
                     />
                 )}
 
@@ -176,6 +178,7 @@ function LessonPlayerContent({
                         score={player.state.score}
                         maxScore={player.state.maxScore}
                         onAnswer={player.submitAnswer}
+                        accentColor={accentColor}
                     />
                 )}
 
@@ -189,9 +192,10 @@ function LessonPlayerContent({
                         xpEarned={lesson.xpReward}
                         onComplete={player.completeLesson}
                         onDone={handleDone}
+                        accentColor={accentColor}
                     />
                 )}
-            </View>
+            </Animated.View>
         </SafeAreaView>
     );
 }

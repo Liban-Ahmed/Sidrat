@@ -1,22 +1,14 @@
 /**
- * DuaOfTheDay — Calming daily dua card for the home screen.
+ * DuaOfTheDay — Daily dua card for the home screen.
  *
- * Shows today's dua with:
- *   • Arabic text
- *   • Transliteration
- *   • English meaning
- *   • Source reference
- *   • Category-themed icon
- *
- * Design: Warm lavender-tinted card with elegant typography,
- * subtle gradient borders, gentle entrance animation.
+ * Supports two modes:
+ *   - Full (default): expanded card with all details
+ *   - Compact: slimmed card for 2-column grid layout
  */
 
 import React, { useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, Share, Platform } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme';
 import { getDuaOfTheDay, type Dua } from '../../data/duas';
 import { ScalePress } from '../ScalePress';
@@ -32,8 +24,12 @@ const CATEGORY_META: Record<Dua['category'], { icon: string; label: string }> = 
     gratitude: { icon: 'sparkles-outline', label: 'Gratitude' },
 };
 
-export function DuaOfTheDay() {
-    const { brand, colors, typography, spacing, radius, shadows, isDark } = useTheme();
+interface DuaOfTheDayProps {
+    compact?: boolean;
+}
+
+export function DuaOfTheDay({ compact = false }: DuaOfTheDayProps) {
+    const { brand, colors, typography, spacing, radius, isDark } = useTheme();
 
     const dua = useMemo(() => getDuaOfTheDay(), []);
     const meta = CATEGORY_META[dua.category];
@@ -50,92 +46,56 @@ export function DuaOfTheDay() {
     }, [dua]);
 
     return (
-        <Animated.View entering={FadeInDown.duration(600).springify().damping(16)}>
+        <ScalePress onPress={handleShare} accessibilityLabel={`Dua of the Day: ${dua.translation}`}>
             <View
                 style={[
                     styles.container,
                     {
-                        backgroundColor: colors.surface,
-                        borderRadius: radius.xl,
+                        backgroundColor: isDark ? colors.surfaceSecondary : brand.lavender + '06',
+                        borderRadius: radius.lg,
                         borderWidth: 1,
-                        borderColor: isDark ? colors.border : brand.lavender + '18',
-                        ...shadows.cardPremium,
+                        borderColor: isDark ? brand.lavender + '25' : brand.lavender + '12',
+                        padding: compact ? spacing.sm : spacing.lg,
                     },
                 ]}
             >
-                {/* Decorative top strip — lavender/gold */}
-                <LinearGradient
-                    colors={[brand.lavender + '30', brand.accent + '20', brand.lavender + '30']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.accentStrip}
-                />
-
-                <View style={{ padding: spacing.lg }}>
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <View
-                            style={[
-                                styles.iconCircle,
-                                { backgroundColor: brand.lavender + '12', borderRadius: radius.full },
-                            ]}
-                        >
-                            <Ionicons name="hand-left" size={16} color={brand.lavender} />
-                        </View>
-                        <Text style={[typography.caption, { color: brand.lavender, marginLeft: spacing.xs, flex: 1 }]}>
-                            Dua of the Day
-                        </Text>
-                        <View
-                            style={[
-                                styles.categoryBadge,
-                                {
-                                    backgroundColor: brand.lavender + '10',
-                                    borderRadius: radius.full,
-                                    paddingHorizontal: spacing.sm,
-                                    paddingVertical: spacing.xxs,
-                                },
-                            ]}
-                        >
-                            <Ionicons
-                                name={meta.icon as any}
-                                size={12}
-                                color={brand.lavender}
-                                style={{ marginRight: 4 }}
-                            />
-                            <Text style={[typography.caption, { color: brand.lavender }]}>
+                <View style={styles.header}>
+                    <Ionicons name="hand-left" size={compact ? 14 : 16} color={brand.lavender} />
+                    <Text
+                        style={[
+                            typography.captionBold,
+                            { color: brand.lavender, marginLeft: 6, flex: 1 },
+                        ]}
+                        numberOfLines={1}
+                    >
+                        Dua of the Day
+                    </Text>
+                    {!compact && (
+                        <View style={styles.categoryTag}>
+                            <Ionicons name={meta.icon as any} size={11} color={brand.lavender + '80'} />
+                            <Text style={[typography.caption, { color: brand.lavender + '80', marginLeft: 3, fontSize: 10 }]}>
                                 {meta.label}
                             </Text>
                         </View>
-                        <ScalePress
-                            onPress={handleShare}
-                            accessibilityLabel="Share this dua"
-                            style={{
-                                width: 32,
-                                height: 32,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginLeft: spacing.xs,
-                            }}
-                        >
-                            <Ionicons name="share-outline" size={18} color={brand.lavender + '80'} />
-                        </ScalePress>
-                    </View>
+                    )}
+                </View>
 
-                    {/* Arabic text */}
-                    <Text
-                        style={[
-                            styles.arabicText,
-                            {
-                                color: colors.text,
-                                marginTop: spacing.md,
-                                lineHeight: 38,
-                            },
-                        ]}
-                    >
-                        {dua.arabic}
-                    </Text>
+                <Text
+                    style={[
+                        styles.arabicText,
+                        {
+                            color: colors.text,
+                            marginTop: compact ? spacing.xs : spacing.md,
+                            fontSize: compact ? 18 : 22,
+                            lineHeight: compact ? 30 : 38,
+                        },
+                    ]}
+                    numberOfLines={compact ? 2 : undefined}
+                >
+                    {dua.arabic}
+                </Text>
 
-                    {/* Transliteration */}
+                {!compact && (
                     <Text
                         style={[
                             typography.bodySmall,
@@ -148,63 +108,50 @@ export function DuaOfTheDay() {
                     >
                         {dua.transliteration}
                     </Text>
+                )}
 
-                    {/* Translation */}
-                    <Text
-                        style={[
-                            typography.body,
-                            {
-                                color: colors.textSecondary,
-                                marginTop: spacing.xs,
-                                lineHeight: 22,
-                            },
-                        ]}
-                    >
-                        "{dua.translation}"
-                    </Text>
+                <Text
+                    style={[
+                        compact ? typography.caption : typography.body,
+                        {
+                            color: colors.textSecondary,
+                            marginTop: spacing.xs,
+                            lineHeight: compact ? 18 : 22,
+                        },
+                    ]}
+                    numberOfLines={compact ? 2 : undefined}
+                >
+                    &ldquo;{dua.translation}&rdquo;
+                </Text>
 
-                    {/* Source */}
-                    <Text
-                        style={[
-                            typography.caption,
-                            {
-                                color: colors.textTertiary,
-                                marginTop: spacing.sm,
-                            },
-                        ]}
-                    >
-                        — {dua.source}
-                    </Text>
-                </View>
+                <Text
+                    style={[
+                        typography.caption,
+                        {
+                            color: brand.lavender + '80',
+                            marginTop: compact ? spacing.xxs : spacing.sm,
+                            fontSize: compact ? 10 : 12,
+                        },
+                    ]}
+                >
+                    — {dua.source}
+                </Text>
             </View>
-        </Animated.View>
+        </ScalePress>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        overflow: 'hidden',
-    },
-    accentStrip: {
-        height: 3,
-        width: '100%',
-    },
+    container: {},
     header: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    iconCircle: {
-        width: 28,
-        height: 28,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    categoryBadge: {
+    categoryTag: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     arabicText: {
-        fontSize: 22,
         textAlign: 'right',
         writingDirection: 'rtl',
     },

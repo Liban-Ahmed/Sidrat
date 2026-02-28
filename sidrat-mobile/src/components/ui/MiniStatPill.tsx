@@ -42,7 +42,7 @@ export function MiniStatPill({
             >
                 <Ionicons name={icon} size={14} color={color} />
                 <Text style={[typography.headlineBold, { color, marginLeft: 6 }]}>{value}</Text>
-                <Text style={[typography.labelXs, { color: color + '90', marginLeft: spacing.xxs, textTransform: 'uppercase' as const }]}>{label}</Text>
+                <Text style={[typography.labelXs, { color: color + '90', marginLeft: spacing.xxs, textTransform: 'uppercase' as const, flexShrink: 1 }]} numberOfLines={1}>{label}</Text>
             </View>
         );
     }
@@ -73,7 +73,7 @@ export function MiniStatPill({
             <Text style={[typography.title3, { color: colors.text, marginTop: 6 }]}>
                 {typeof value === 'number' ? value : value}
             </Text>
-            <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 1 }]}>
+            <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 1 }]} numberOfLines={1}>
                 {label}
             </Text>
         </View>

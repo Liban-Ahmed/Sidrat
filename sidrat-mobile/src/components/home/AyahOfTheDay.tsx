@@ -1,32 +1,29 @@
 /**
- * AyahOfTheDay — Elegant daily Quran verse card for the home screen.
+ * AyahOfTheDay — Daily Quran verse card for the home screen.
  *
- * Shows today's ayah with:
- *   • Arabic text in a distinguished style
- *   • Transliteration
- *   • English translation
- *   • Surah reference badge
- *
- * Design: Subtle emerald-tinted glass card with decorative crescent,
- * warm typography hierarchy, and gentle fade-in animation.
+ * Supports two modes:
+ *   - Full (default): expanded card with arabic, transliteration, translation
+ *   - Compact: slimmed card for 2-column grid layout
  */
 
 import React, { useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, Share, Platform } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../../theme';
 import { getAyahOfTheDay } from '../../data/ayahs';
 import { ScalePress } from '../ScalePress';
 
-export function AyahOfTheDay() {
-    const { brand, colors, typography, spacing, radius, shadows, isDark } = useTheme();
+interface AyahOfTheDayProps {
+    compact?: boolean;
+}
+
+export function AyahOfTheDay({ compact = false }: AyahOfTheDayProps) {
+    const { brand, colors, typography, spacing, radius, isDark } = useTheme();
 
     const ayah = useMemo(() => getAyahOfTheDay(), []);
 
     const handleShare = useCallback(async () => {
-        const message = `بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ\n\n${ayah.arabic}\n\n"${ayah.translation}"\n\n— ${ayah.surahName} ${ayah.ayahNumber}\n\nShared from Sidrat 🌿`;
+        const message = `بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ\n\n${ayah.arabic}\n\n"${ayah.translation}"\n\n— ${ayah.surahName} ${ayah.ayahNumber}\n\nShared from Sidrat 🌿`;
         try {
             await Share.share(
                 Platform.OS === 'ios'
@@ -37,87 +34,51 @@ export function AyahOfTheDay() {
     }, [ayah]);
 
     return (
-        <Animated.View entering={FadeInDown.duration(600).springify().damping(16)}>
+        <ScalePress onPress={handleShare} accessibilityLabel={`Ayah of the Day: ${ayah.translation}`}>
             <View
                 style={[
                     styles.container,
                     {
-                        backgroundColor: colors.surface,
-                        borderRadius: radius.xl,
+                        backgroundColor: isDark ? colors.surfaceSecondary : brand.secondary + '06',
+                        borderRadius: radius.lg,
                         borderWidth: 1,
-                        borderColor: isDark ? colors.border : brand.secondary + '18',
-                        ...shadows.cardPremium,
+                        borderColor: isDark ? brand.secondary + '25' : brand.secondary + '12',
+                        padding: compact ? spacing.sm : spacing.lg,
                     },
                 ]}
             >
-                {/* Decorative top strip */}
-                <LinearGradient
-                    colors={[brand.secondary + '30', brand.primary + '20', brand.secondary + '30']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.accentStrip}
-                />
-
-                <View style={{ padding: spacing.lg }}>
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <View
-                            style={[
-                                styles.iconCircle,
-                                { backgroundColor: brand.secondary + '12', borderRadius: radius.full },
-                            ]}
-                        >
-                            <Ionicons name="book" size={16} color={brand.secondary} />
-                        </View>
-                        <Text style={[typography.caption, { color: brand.secondary, marginLeft: spacing.xs, flex: 1 }]}>
-                            Ayah of the Day
-                        </Text>
-                        <View
-                            style={[
-                                styles.surahBadge,
-                                {
-                                    backgroundColor: brand.secondary + '10',
-                                    borderRadius: radius.full,
-                                    paddingHorizontal: spacing.sm,
-                                    paddingVertical: spacing.xxs,
-                                },
-                            ]}
-                        >
-                            <Text style={[typography.caption, { color: brand.secondary }]}>
-                                {ayah.surahName} {ayah.ayahNumber}
-                            </Text>
-                        </View>
-                        <ScalePress
-                            onPress={handleShare}
-                            accessibilityLabel="Share this ayah"
-                            style={{
-                                width: 32,
-                                height: 32,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginLeft: spacing.xs,
-                            }}
-                        >
-                            <Ionicons name="share-outline" size={18} color={brand.secondary + '80'} />
-                        </ScalePress>
-                    </View>
-
-                    {/* Arabic text */}
+                <View style={styles.header}>
+                    <Ionicons name="book" size={compact ? 14 : 16} color={brand.secondary} />
                     <Text
                         style={[
-                            styles.arabicText,
-                            {
-                                color: colors.text,
-                                marginTop: spacing.md,
-                                fontFamily: undefined, // system Arabic rendering
-                                lineHeight: 38,
-                            },
+                            typography.captionBold,
+                            { color: brand.secondary, marginLeft: 6, flex: 1 },
                         ]}
+                        numberOfLines={1}
                     >
-                        {ayah.arabic}
+                        Ayah of the Day
                     </Text>
+                    {!compact && (
+                        <Ionicons name="share-outline" size={16} color={brand.secondary + '60'} />
+                    )}
+                </View>
 
-                    {/* Transliteration */}
+                <Text
+                    style={[
+                        styles.arabicText,
+                        {
+                            color: colors.text,
+                            marginTop: compact ? spacing.xs : spacing.md,
+                            fontSize: compact ? 18 : 24,
+                            lineHeight: compact ? 30 : 38,
+                        },
+                    ]}
+                    numberOfLines={compact ? 2 : undefined}
+                >
+                    {ayah.arabic}
+                </Text>
+
+                {!compact && (
                     <Text
                         style={[
                             typography.bodySmall,
@@ -130,50 +91,46 @@ export function AyahOfTheDay() {
                     >
                         {ayah.transliteration}
                     </Text>
+                )}
 
-                    {/* Translation */}
-                    <Text
-                        style={[
-                            typography.body,
-                            {
-                                color: colors.textSecondary,
-                                marginTop: spacing.xs,
-                                lineHeight: 22,
-                            },
-                        ]}
-                    >
-                        "{ayah.translation}"
-                    </Text>
-                </View>
+                <Text
+                    style={[
+                        compact ? typography.caption : typography.body,
+                        {
+                            color: colors.textSecondary,
+                            marginTop: spacing.xs,
+                            lineHeight: compact ? 18 : 22,
+                        },
+                    ]}
+                    numberOfLines={compact ? 2 : undefined}
+                >
+                    &ldquo;{ayah.translation}&rdquo;
+                </Text>
+
+                <Text
+                    style={[
+                        typography.caption,
+                        {
+                            color: brand.secondary + '80',
+                            marginTop: compact ? spacing.xxs : spacing.sm,
+                            fontSize: compact ? 10 : 12,
+                        },
+                    ]}
+                >
+                    {ayah.surahName} {ayah.ayahNumber}
+                </Text>
             </View>
-        </Animated.View>
+        </ScalePress>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        overflow: 'hidden',
-    },
-    accentStrip: {
-        height: 3,
-        width: '100%',
-    },
+    container: {},
     header: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    iconCircle: {
-        width: 28,
-        height: 28,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    surahBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
     arabicText: {
-        fontSize: 24,
         textAlign: 'right',
         writingDirection: 'rtl',
     },

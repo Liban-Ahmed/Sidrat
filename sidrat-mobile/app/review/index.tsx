@@ -16,7 +16,6 @@ import {
     StyleSheet,
     ScrollView,
     Pressable,
-    Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -24,12 +23,10 @@ import Animated, { FadeInDown, FadeInUp, FadeIn } from 'react-native-reanimated'
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/theme';
 import { useReviewQueue } from '../../src/hooks/useReviewQueue';
-import { useAppStore, useLessonStore } from '../../src/stores';
-import { ScalePress, ProgressBar } from '../../src/components';
+import { ScalePress, ProgressBar, EmptyState } from '../../src/components';
 import { categoryMeta } from '../../src/types';
 import { haptics } from '../../src/utils/haptics';
 import { groupReviewsByUrgency } from '../../src/utils/reviewGroups';
-import { IS_DEV } from '../../src/constants/config';
 import type { ReviewItem } from '../../src/hooks/useReviewQueue';
 
 // ── Constants ────────────────────────────────────────────────────
@@ -85,39 +82,6 @@ export default function ReviewScreen() {
     const { brand, colors, typography, spacing, radius, isDark } = useTheme();
     const router = useRouter();
     const { reviewQueue, reviewCount, hasReviews, nextReview } = useReviewQueue();
-    const activeChildId = useAppStore((s) => s.activeChildId);
-
-    // ── DEV ONLY: backdate all completed lessons so they appear as due ──
-    const seedTestReviews = useCallback(() => {
-        if (!activeChildId) return;
-        const store = useLessonStore.getState();
-        const progress = { ...store.progress };
-        let seeded = 0;
-
-        for (const [key, p] of Object.entries(progress)) {
-            if (p.childId === activeChildId && p.isCompleted && p.completedAt) {
-                // Set review date to yesterday so it shows up as due
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-                progress[key] = {
-                    ...p,
-                    nextReviewDate: yesterday.toISOString(),
-                    intervalIndex: 0,
-                    reviewCount: p.reviewCount ?? 0,
-                };
-                seeded++;
-            }
-        }
-
-        if (seeded > 0) {
-            useLessonStore.setState({ progress });
-            haptics.success();
-            Alert.alert('Dev', `Seeded ${seeded} lessons for review. They should appear now.`);
-        } else {
-            Alert.alert('Dev', 'No completed lessons found. Complete at least one lesson first.');
-        }
-    }, [activeChildId]);
-
     const navigateToReview = useCallback(
         (lessonId: string) => {
             haptics.light();
@@ -271,82 +235,14 @@ export default function ReviewScreen() {
                 </ScrollView>
             ) : (
                 /* ── Empty State ── */
-                <View style={styles.emptyState}>
-                    <Animated.View
-                        entering={FadeInDown.duration(700).springify().damping(14)}
-                        style={styles.emptyContent}
-                    >
-                        <View
-                            style={[
-                                styles.emptyIcon,
-                                { backgroundColor: brand.secondary + '12', borderRadius: radius.full },
-                            ]}
-                        >
-                            <Ionicons name="checkmark-circle" size={52} color={brand.secondary} />
-                        </View>
-                        <Text style={[typography.title2, { color: colors.text, marginTop: spacing.lg, textAlign: 'center' }]}>
-                            All caught up!
-                        </Text>
-                        <Text
-                            style={[
-                                typography.body,
-                                {
-                                    color: colors.textSecondary,
-                                    marginTop: spacing.xs,
-                                    textAlign: 'center',
-                                    paddingHorizontal: spacing.xl,
-                                    lineHeight: 22,
-                                },
-                            ]}
-                        >
-                            No reviews due right now. Keep completing lessons and reviews will appear automatically.
-                        </Text>
-
-                        <Pressable
-                            onPress={() => router.back()}
-                            style={[
-                                styles.emptyButton,
-                                {
-                                    backgroundColor: brand.primary + '10',
-                                    borderRadius: radius.md,
-                                    marginTop: spacing.xl,
-                                    paddingVertical: spacing.sm,
-                                    paddingHorizontal: spacing.lg,
-                                },
-                            ]}
-                        >
-                            <Ionicons name="arrow-back" size={18} color={brand.primary} />
-                            <Text style={[typography.label, { color: brand.primary, marginLeft: spacing.xs }]}>
-                                Back to Home
-                            </Text>
-                        </Pressable>
-
-                        {/* DEV ONLY: seed test reviews */}
-                        {IS_DEV && (
-                            <Pressable
-                                onPress={seedTestReviews}
-                                style={[
-                                    styles.emptyButton,
-                                    {
-                                        backgroundColor: brand.lavender + '15',
-                                        borderRadius: radius.md,
-                                        marginTop: spacing.sm,
-                                        paddingVertical: spacing.sm,
-                                        paddingHorizontal: spacing.lg,
-                                        borderWidth: 1,
-                                        borderColor: brand.lavender + '30',
-                                        borderStyle: 'dashed',
-                                    },
-                                ]}
-                            >
-                                <Ionicons name="flask" size={18} color={brand.lavender} />
-                                <Text style={[typography.label, { color: brand.lavender, marginLeft: spacing.xs }]}>
-                                    Seed Test Reviews (Dev)
-                                </Text>
-                            </Pressable>
-                        )}
-                    </Animated.View>
-                </View>
+                <EmptyState
+                    icon="checkmark-circle"
+                    title="All caught up!"
+                    subtitle="No reviews due right now. Keep completing lessons and reviews will appear automatically."
+                    actionLabel="Back to Home"
+                    onAction={() => router.back()}
+                    color={brand.secondary}
+                />
             )}
         </SafeAreaView>
     );
@@ -582,23 +478,4 @@ const styles = StyleSheet.create({
     },
 
     // Empty state
-    emptyState: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 32,
-    },
-    emptyContent: {
-        alignItems: 'center',
-    },
-    emptyIcon: {
-        width: 96,
-        height: 96,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    emptyButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
 });
