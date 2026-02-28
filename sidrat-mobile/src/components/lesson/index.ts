@@ -9,3 +9,7 @@ export { OrderingCard } from './OrderingCard';
 export { MatchingCard } from './MatchingCard';
 export { FillBlankCard } from './FillBlankCard';
 export { TapWordCard } from './TapWordCard';
+export { PhaseTransition } from './PhaseTransition';
+export { ConfettiCelebration } from './ConfettiCelebration';
+export { ThinkingCountdown } from './ThinkingCountdown';
+export { AnimatedScoreDisplay } from './AnimatedScoreDisplay';

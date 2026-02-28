@@ -5,11 +5,18 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { HookPhase, TeachPhase, PracticePhase, RewardPhase } from '../../src/components/lesson';
+import {
+  HookPhase,
+  TeachPhase,
+  PracticePhase,
+  RewardPhase,
+  PhaseTransition,
+  ThinkingCountdown,
+} from '../../src/components/lesson';
 import { getCurriculumLesson } from '../../src/data/curriculum';
 import { useLessonPlayer } from '../../src/hooks/useLessonPlayer';
 import { resolveLessonForChild } from '../../src/services/ageAdaptiveService';
@@ -67,10 +74,16 @@ function LessonPlayerContent({
   childId: string;
   isReview: boolean;
 }) {
-  const { brand, colors, typography, radius, categoryColors } = useTheme();
+  const { brand, colors, typography, radius, categoryColors, isDark } = useTheme();
   const router = useRouter();
 
   const player = useLessonPlayer({ lesson, childId, isReview });
+
+  // Thinking countdown state: shows a 3-second "Get Ready" before practice.
+  // In review mode, the player starts directly at practice — show countdown on mount.
+  // In normal mode, countdown triggers when transitioning from teach → practice.
+  const [showCountdown, setShowCountdown] = useState(isReview);
+  const [practiceReady, setPracticeReady] = useState(false);
 
   const handleClose = useCallback(() => {
     player.stopNarration();
@@ -158,24 +171,34 @@ function LessonPlayerContent({
         })}
       </View>
 
-      {/* Phase content with fade transition */}
-      <Animated.View
-        key={player.phase}
-        entering={FadeInDown.duration(350).springify().damping(20)}
-        style={styles.content}
-      >
-        {player.phase === 'hook' && (
+      {/* Phase content with animated cross-fade transitions (Design Spec §3.4) */}
+      <PhaseTransition phaseKey={showCountdown ? 'countdown' : player.phase}>
+        {/* Thinking countdown — shown when transitioning to practice (PRD §2.7) */}
+        {showCountdown && (
+          <ThinkingCountdown
+            accentColor={accentColor}
+            onComplete={() => {
+              setShowCountdown(false);
+              setPracticeReady(true);
+            }}
+          />
+        )}
+
+        {/* Hook phase — with skip button for review mode (PRD §2.7) */}
+        {!showCountdown && player.phase === 'hook' && (
           <HookPhase
             hook={lesson.hook}
             isNarrating={player.state.isNarrating}
             onNarrate={player.narrate}
-            onContinue={player.startTeaching}
+            onContinue={() => {
+              player.startTeaching();
+            }}
             accentColor={accentColor}
             categoryIcon={categoryIcon}
           />
         )}
 
-        {player.phase === 'teach' && player.currentTeachBlock && (
+        {!showCountdown && player.phase === 'teach' && player.currentTeachBlock && (
           <TeachPhase
             block={player.currentTeachBlock}
             index={player.state.teachIndex}
@@ -183,13 +206,21 @@ function LessonPlayerContent({
             isNarrating={player.state.isNarrating}
             onNarrate={player.narrate}
             onStopNarration={player.stopNarration}
-            onNext={player.nextTeachBlock}
+            onNext={() => {
+              // If this is the last teach block, show countdown before practice
+              if (player.isLastTeachBlock && !practiceReady) {
+                setShowCountdown(true);
+                player.nextTeachBlock(); // advance state to practice
+              } else {
+                player.nextTeachBlock();
+              }
+            }}
             isLast={player.isLastTeachBlock}
             accentColor={accentColor}
           />
         )}
 
-        {player.phase === 'practice' && player.currentPracticeBlock && (
+        {!showCountdown && player.phase === 'practice' && player.currentPracticeBlock && (
           <PracticePhase
             key={player.currentPracticeBlock.id}
             block={player.currentPracticeBlock}
@@ -202,7 +233,7 @@ function LessonPlayerContent({
           />
         )}
 
-        {player.phase === 'reward' && (
+        {!showCountdown && player.phase === 'reward' && (
           <RewardPhase
             reward={lesson.reward}
             score={player.state.score}
@@ -215,7 +246,38 @@ function LessonPlayerContent({
             accentColor={accentColor}
           />
         )}
-      </Animated.View>
+      </PhaseTransition>
+
+      {/* Skip Hook button (PRD §2.7) — lets user jump ahead to learn/practice */}
+      {player.phase === 'hook' && !showCountdown && (
+        <Animated.View entering={FadeIn.delay(600).duration(400)} style={styles.skipButtonArea}>
+          <Pressable
+            onPress={() => {
+              player.startTeaching();
+            }}
+            hitSlop={12}
+            style={({ pressed }) => [
+              styles.skipButton,
+              {
+                backgroundColor: pressed
+                  ? colors.surfaceTertiary
+                  : isDark
+                    ? colors.surfaceSecondary
+                    : colors.surface,
+                borderRadius: radius.lg,
+                borderWidth: 1,
+                borderColor: colors.border,
+                transform: [{ scale: pressed ? 0.97 : 1 }],
+              },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Skip introduction"
+          >
+            <Ionicons name="play-skip-forward" size={16} color={colors.textSecondary} />
+            <Text style={[typography.label, { color: colors.textSecondary }]}>Skip Intro</Text>
+          </Pressable>
+        </Animated.View>
+      )}
     </SafeAreaView>
   );
 }
@@ -257,4 +319,20 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   content: { flex: 1 },
+  skipButtonArea: {
+    position: 'absolute',
+    bottom: 32,
+    left: 24,
+    right: 24,
+    alignItems: 'center',
+  },
+  skipButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    minHeight: 48,
+  },
 });
