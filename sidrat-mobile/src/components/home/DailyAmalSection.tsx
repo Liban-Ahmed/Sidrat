@@ -9,6 +9,7 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
@@ -27,6 +28,7 @@ import {
   TYPOGRAPHY,
   type AgeGroup,
 } from '../../theme/tokens';
+import haptic from '../../utils/haptics';
 import { JuicyPressable } from '../common/JuicyPressable';
 
 // ── Types ────────────────────────────────────────────────────────
@@ -82,6 +84,7 @@ function AmalCard({
   ageGroup: AgeGroup;
 }) {
   const { colors: oasis, t, isDark } = useOasisColors();
+  const router = useRouter();
   const isComplete = amal.current >= amal.target;
   const progress = amal.target > 0 ? amal.current / amal.target : 0;
   const bodySize = (TYPOGRAPHY.body as Record<AgeGroup, { fontSize: number; lineHeight: number }>)[
@@ -89,7 +92,26 @@ function AmalCard({
   ];
 
   const handlePress = () => {
-    // TODO: Navigate to specific goal tracking or celebration screen
+    haptic.light();
+
+    // Navigate based on amal type
+    switch (amal.type) {
+      case 'lesson':
+        // Navigate to learn tab
+        router.push('/(tabs)/learn' as any);
+        break;
+      case 'review':
+        // Navigate to review screen
+        router.push('/review' as any);
+        break;
+      case 'streak':
+        // Navigate to progress tab
+        router.push('/(tabs)/progress' as any);
+        break;
+      default:
+        // For other types (like 'listen'), do nothing for now
+        break;
+    }
   };
 
   return (
