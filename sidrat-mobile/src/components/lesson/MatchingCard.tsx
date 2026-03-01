@@ -28,7 +28,7 @@ interface Props {
 }
 
 export function MatchingCard({ block, onAnswer, accentColor }: Props) {
-  const { brand, colors, typography, radius, isDark, shadows } = useTheme();
+  const { colors, typography, radius, isDark, shadows } = useTheme();
 
   // Shuffle right column
   const [shuffledRight] = useState(() =>
