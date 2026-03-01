@@ -23,7 +23,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FormattedText } from './FormattedText';
 import CherryTree from '../../../assets/illustrations/cherry_tree-pana.svg';
 import { useTheme } from '../../theme';
-import { tokens } from '../../theme/tokens';
 import haptic from '../../utils/haptics';
 import type { HookBlock } from '../../types/curriculum';
 
@@ -117,7 +116,7 @@ function SwayingTree() {
 
   return (
     <Animated.View style={[styles.treeWrapper, treeStyle]}>
-      <CherryTree width={SCREEN_WIDTH * 1.1} height={SCREEN_HEIGHT * 0.5} />
+      <CherryTree width={SCREEN_WIDTH * 1.2} height={SCREEN_HEIGHT} />
     </Animated.View>
   );
 }
@@ -138,7 +137,7 @@ interface Props {
 }
 
 export function HookPhase({ hook, unitLabel, onNarrate, onContinue, accentColor }: Props) {
-  const { colors, typography, radius, isDark } = useTheme();
+  const { colors, typography, radius, spacing, shadows, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -172,9 +171,13 @@ export function HookPhase({ hook, unitLabel, onNarrate, onContinue, accentColor 
         style={[
           styles.bottomPanel,
           {
-            backgroundColor: colors.background,
-            paddingBottom: insets.bottom + 8,
-            shadowColor: tokens.color.earth900,
+            backgroundColor: colors.surfaceSecondary,
+            paddingBottom: insets.bottom + spacing.xs,
+            borderTopLeftRadius: radius.xl,
+            borderTopRightRadius: radius.xl,
+            paddingHorizontal: spacing.xl,
+            paddingTop: spacing.lg,
+            ...shadows.elevated,
           },
         ]}
       >
@@ -183,8 +186,8 @@ export function HookPhase({ hook, unitLabel, onNarrate, onContinue, accentColor 
           style={[
             styles.unitPill,
             {
-              backgroundColor: isDark ? accentColor + '20' : tokens.color.sky100,
-              borderColor: isDark ? accentColor + '40' : tokens.color.sky200,
+              backgroundColor: isDark ? accentColor + '20' : accentColor + '10',
+              borderColor: isDark ? accentColor + '40' : accentColor + '30',
             },
           ]}
         >
@@ -196,6 +199,7 @@ export function HookPhase({ hook, unitLabel, onNarrate, onContinue, accentColor 
         <Animated.View entering={FadeInUp.delay(250).duration(500)} style={styles.panelPromptArea}>
           <FormattedText
             style={[typography.body, { color: colors.text, textAlign: 'center', lineHeight: 24 }]}
+            numberOfLines={4}
           >
             {hook.prompt}
           </FormattedText>
@@ -240,10 +244,12 @@ const styles = StyleSheet.create({
   /* ── Tree ── */
   treeWrapper: {
     position: 'absolute',
-    bottom: PANEL_HEIGHT,
-    left: '-5%',
-    width: '110%',
+    bottom: 0,
+    left: '-10%',
+    width: '120%',
+    height: SCREEN_HEIGHT,
     alignItems: 'center',
+    justifyContent: 'flex-end',
     transformOrigin: 'center bottom',
   },
   /* ── Bottom panel ── */
@@ -253,24 +259,18 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: PANEL_HEIGHT,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: 28,
-    paddingTop: 20,
-    shadowOffset: { width: 0, height: -8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 10,
   },
   panelPromptArea: {
     maxWidth: 340,
     alignSelf: 'center',
-    marginTop: 10,
+    marginTop: 12, // spacing.sm
+    flex: 1,
+    maxHeight: 100,
   },
   unitPill: {
     alignSelf: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 12, // spacing.sm
+    paddingVertical: 6, // spacing.xs / custom
     borderRadius: 999,
     borderWidth: 1,
   },
