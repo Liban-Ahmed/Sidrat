@@ -359,7 +359,7 @@ interface HeroProps {
   getUnitProgress: (u: CurriculumUnit) => { completed: number; total: number };
 }
 
-function HeroCard({ lesson, unit, oc, typography, getUnitProgress }: HeroProps) {
+function HeroCard({ lesson, unit, oc, typography, isDark, getUnitProgress }: HeroProps) {
   const cat = OASIS_CAT[unit.category] ?? { primary: oc.primary, tint: oc.primaryLight };
   const unitProg = getUnitProgress(unit);
 
@@ -391,7 +391,15 @@ function HeroCard({ lesson, unit, oc, typography, getUnitProgress }: HeroProps) 
       <View style={{ padding: SPACING.md, paddingLeft: SPACING.md + 4 }}>
         {/* Context badge */}
         <View style={styles.heroContext}>
-          <View style={[styles.heroBadge, { backgroundColor: cat.tint, borderRadius: RADIUS.sm }]}>
+          <View
+            style={[
+              styles.heroBadge,
+              {
+                backgroundColor: isDark ? cat.primary + '28' : cat.tint,
+                borderRadius: RADIUS.sm,
+              },
+            ]}
+          >
             <Ionicons
               name={unit.icon as keyof typeof Ionicons.glyphMap}
               size={12}
