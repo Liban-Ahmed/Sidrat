@@ -110,7 +110,10 @@ function LessonPlayerContent({
     : (['hook', 'teach', 'practice', 'reward'] as const);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={['top', 'left', 'right']}
+    >
       {/* Top bar */}
       <Animated.View entering={FadeIn.duration(400)} style={styles.topBar}>
         <Pressable
@@ -184,13 +187,16 @@ function LessonPlayerContent({
           />
         )}
 
-        {/* Hook phase — with skip button for review mode (PRD §2.7) */}
+        {/* Hook phase */}
         {!showCountdown && player.phase === 'hook' && (
           <HookPhase
             hook={lesson.hook}
             isNarrating={player.state.isNarrating}
             onNarrate={player.narrate}
             onContinue={() => {
+              player.startTeaching();
+            }}
+            onSkip={() => {
               player.startTeaching();
             }}
             accentColor={accentColor}
@@ -247,37 +253,6 @@ function LessonPlayerContent({
           />
         )}
       </PhaseTransition>
-
-      {/* Skip Hook button (PRD §2.7) — lets user jump ahead to learn/practice */}
-      {player.phase === 'hook' && !showCountdown && (
-        <Animated.View entering={FadeIn.delay(600).duration(400)} style={styles.skipButtonArea}>
-          <Pressable
-            onPress={() => {
-              player.startTeaching();
-            }}
-            hitSlop={12}
-            style={({ pressed }) => [
-              styles.skipButton,
-              {
-                backgroundColor: pressed
-                  ? colors.surfaceTertiary
-                  : isDark
-                    ? colors.surfaceSecondary
-                    : colors.surface,
-                borderRadius: radius.lg,
-                borderWidth: 1,
-                borderColor: colors.border,
-                transform: [{ scale: pressed ? 0.97 : 1 }],
-              },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Skip introduction"
-          >
-            <Ionicons name="play-skip-forward" size={16} color={colors.textSecondary} />
-            <Text style={[typography.label, { color: colors.textSecondary }]}>Skip Intro</Text>
-          </Pressable>
-        </Animated.View>
-      )}
     </SafeAreaView>
   );
 }
@@ -319,20 +294,4 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   content: { flex: 1 },
-  skipButtonArea: {
-    position: 'absolute',
-    bottom: 32,
-    left: 24,
-    right: 24,
-    alignItems: 'center',
-  },
-  skipButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    minHeight: 48,
-  },
 });

@@ -18,6 +18,7 @@ import Animated, {
   Easing,
   interpolate,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
 import haptic from '../../utils/haptics';
@@ -28,6 +29,7 @@ interface Props {
   isNarrating: boolean;
   onNarrate: (text: string) => void;
   onContinue: () => void;
+  onSkip: () => void;
   accentColor: string;
   categoryIcon: keyof typeof Ionicons.glyphMap;
 }
@@ -37,10 +39,12 @@ export function HookPhase({
   isNarrating,
   onNarrate,
   onContinue,
+  onSkip,
   accentColor,
   categoryIcon,
 }: Props) {
   const { colors, typography, radius, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const timer = setTimeout(() => onNarrate(hook.narration), 600);
@@ -92,83 +96,91 @@ export function HookPhase({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Category icon */}
-      <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.iconArea}>
-        <Animated.View
-          style={[
-            styles.iconCircle,
-            {
-              backgroundColor: accentColor + (isDark ? '20' : '10'),
-              shadowColor: accentColor,
-              shadowOffset: { width: 0, height: 6 },
-              shadowOpacity: 0.15,
-              shadowRadius: 16,
-            },
-            iconStyle,
-          ]}
-        >
-          <Ionicons name={categoryIcon} size={48} color={accentColor} />
-        </Animated.View>
-      </Animated.View>
-
-      {/* Prompt */}
-      <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.promptArea}>
-        <FormattedText
-          style={[typography.title1, { color: colors.text, textAlign: 'center', lineHeight: 34 }]}
-        >
-          {hook.prompt}
-        </FormattedText>
-      </Animated.View>
-
-      {/* Speaker button */}
-      <Animated.View entering={FadeIn.delay(600).duration(500)} style={styles.speakerArea}>
-        <Pressable
-          onPress={() => {
-            haptic.light();
-            onNarrate(hook.narration);
-          }}
-          style={styles.speakerOuter}
-        >
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.background, paddingBottom: insets.bottom + -24},
+      ]}
+    >
+      {/* Content — centered in available space */}
+      <View style={styles.contentArea}>
+        {/* Category icon */}
+        <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.iconArea}>
           <Animated.View
             style={[
-              styles.speakerButton,
+              styles.iconCircle,
               {
-                backgroundColor: isNarrating
-                  ? accentColor
-                  : isDark
-                    ? accentColor + '22'
-                    : accentColor + '10',
-                shadowColor: isNarrating ? accentColor : 'transparent',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: isNarrating ? 0.25 : 0,
-                shadowRadius: 10,
+                backgroundColor: accentColor + (isDark ? '20' : '10'),
+                shadowColor: accentColor,
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.15,
+                shadowRadius: 16,
               },
-              speakerStyle,
+              iconStyle,
             ]}
           >
-            <Ionicons
-              name={isNarrating ? 'volume-high' : 'volume-medium-outline'}
-              size={24}
-              color={isNarrating ? '#FFF' : accentColor}
-            />
+            <Ionicons name={categoryIcon} size={48} color={accentColor} />
           </Animated.View>
-        </Pressable>
-        <Text
-          style={[
-            typography.caption,
-            {
-              color: isNarrating ? accentColor : colors.textTertiary,
-              fontWeight: isNarrating ? '600' : '400',
-              marginTop: 8,
-            },
-          ]}
-        >
-          {isNarrating ? 'Listening...' : 'Tap to listen'}
-        </Text>
-      </Animated.View>
+        </Animated.View>
 
-      {/* CTA */}
+        {/* Prompt */}
+        <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.promptArea}>
+          <FormattedText
+            style={[typography.title1, { color: colors.text, textAlign: 'center', lineHeight: 34 }]}
+          >
+            {hook.prompt}
+          </FormattedText>
+        </Animated.View>
+
+        {/* Speaker button */}
+        <Animated.View entering={FadeIn.delay(600).duration(500)} style={styles.speakerArea}>
+          <Pressable
+            onPress={() => {
+              haptic.light();
+              onNarrate(hook.narration);
+            }}
+            style={styles.speakerOuter}
+          >
+            <Animated.View
+              style={[
+                styles.speakerButton,
+                {
+                  backgroundColor: isNarrating
+                    ? accentColor
+                    : isDark
+                      ? accentColor + '22'
+                      : accentColor + '10',
+                  shadowColor: isNarrating ? accentColor : 'transparent',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: isNarrating ? 0.25 : 0,
+                  shadowRadius: 10,
+                },
+                speakerStyle,
+              ]}
+            >
+              <Ionicons
+                name={isNarrating ? 'volume-high' : 'volume-medium-outline'}
+                size={24}
+                color={isNarrating ? '#FFF' : accentColor}
+              />
+            </Animated.View>
+          </Pressable>
+          <Text
+            style={[
+              typography.caption,
+              {
+                color: isNarrating ? accentColor : colors.textTertiary,
+                fontWeight: isNarrating ? '600' : '400',
+                marginTop: 8,
+              },
+            ]}
+          >
+            {isNarrating ? 'Listening...' : 'Tap to listen'}
+          </Text>
+        </Animated.View>
+      </View>
+
+      {/* CTA — pinned to bottom */}
       <Animated.View entering={FadeInUp.delay(800).duration(500)} style={styles.ctaArea}>
         <Pressable
           onPress={handleContinue}
@@ -189,6 +201,17 @@ export function HookPhase({
           <Text style={[typography.headlineBold, { color: '#FFF' }]}>Let&apos;s Learn!</Text>
           <Ionicons name="arrow-forward" size={20} color="rgba(255,255,255,0.7)" />
         </Pressable>
+
+        <Pressable
+          onPress={() => {
+            haptic.light();
+            onSkip();
+          }}
+          hitSlop={12}
+          style={styles.skipLink}
+        >
+          <Text style={[typography.caption, { color: colors.textTertiary }]}>Skip Intro</Text>
+        </Pressable>
       </Animated.View>
     </View>
   );
@@ -198,7 +221,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 28,
-    paddingTop: 32,
+    paddingTop: 16,
+    justifyContent: 'space-between',
+  },
+  contentArea: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -242,5 +269,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
+  },
+  skipLink: {
+    alignItems: 'center',
+    paddingVertical: 12,
   },
 });
