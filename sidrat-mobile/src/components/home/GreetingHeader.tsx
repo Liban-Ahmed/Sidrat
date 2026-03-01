@@ -128,7 +128,7 @@ export function GreetingHeader({ childName, streak, ageGroup }: GreetingHeaderPr
                     },
                   ]}
                 >
-                  <Ionicons name="flame" size={18} color={t.gold600} />
+                  <Ionicons name="flame" size={15} color={t.gold600} />
                   <Text style={[styles.streakCount, { color: t.gold600 }]}>{streak}</Text>
                 </LinearGradient>
               </JuicyPressable>
@@ -182,17 +182,17 @@ const styles = StyleSheet.create({
   streakBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: RADIUS.md,
-    borderWidth: 2,
-    gap: 6,
+    borderWidth: 1.5,
+    gap: 4,
   },
 
   streakCount: {
     fontFamily: 'Nunito-Bold',
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 28,
+    lineHeight: 24,
   },
 });
