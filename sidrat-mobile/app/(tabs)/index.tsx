@@ -7,8 +7,7 @@
  *   1. GreetingHeader — olive50→cream gradient, Islamic greeting, streak badge
  *   2. SalahReminder — slim prayer-time banner
  *   3. DailyAmalSection — three daily goal cards
- *   4. ContinueLearning — horizontal category scroll
- *   5. DuaOfTheDay — sky50→sky100 gradient card
+ *   4. DuaOfTheDay — sky50→sky100 gradient card
  *
  * All interactions use JuicyPressable (spring pressable + haptics).
  * All colors use Oasis semantic tokens — no hardcoded hex outside tokens.
@@ -28,10 +27,6 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { JuicyPressable } from '../../src/components/common/JuicyPressable';
 import { AyahOfTheDay } from '../../src/components/home/AyahOfTheDay';
-import {
-  ContinueLearning,
-  type CategoryProgress,
-} from '../../src/components/home/ContinueLearning';
 import { DailyAmalSection, type DailyAmal } from '../../src/components/home/DailyAmalSection';
 import { DuaOfTheDay } from '../../src/components/home/DuaOfTheDayOasis';
 import { GreetingHeader } from '../../src/components/home/GreetingHeader';
@@ -42,7 +37,7 @@ import { useOasisColors } from '../../src/hooks/useOasisColors';
 import { useReviewQueue } from '../../src/hooks/useReviewQueue';
 import { useAppStore, useChildStore, useLessonStore } from '../../src/stores';
 import { SPACING, RADIUS, SHADOW, type AgeGroup } from '../../src/theme/tokens';
-import { categoryMeta, getAge, LESSON_CATEGORIES } from '../../src/types';
+import { categoryMeta, getAge } from '../../src/types';
 import { ageToGroup } from '../../src/types/curriculum';
 import haptic from '../../src/utils/haptics';
 
@@ -91,36 +86,6 @@ function buildDailyAmals(
   ];
 }
 
-/** Build category progress data for Continue Learning section */
-function buildCategoryProgress(
-  progressMap: Record<string, { childId: string; isCompleted: boolean }>,
-  activeChildId: string | null,
-): CategoryProgress[] {
-  if (!activeChildId) return [];
-
-  const catCounts: Record<string, { completed: number; total: number }> = {};
-
-  for (const lesson of allCurriculumLessons) {
-    const cat = lesson.category;
-    if (!catCounts[cat]) {
-      catCounts[cat] = { completed: 0, total: 0 };
-    }
-    catCounts[cat].total++;
-    const key = `${activeChildId}:${lesson.id}`;
-    if (progressMap[key]?.isCompleted) {
-      catCounts[cat].completed++;
-    }
-  }
-
-  return LESSON_CATEGORIES.map((cat) => ({
-    category: cat,
-    label: categoryMeta[cat].label,
-    ionIcon: categoryMeta[cat].icon as keyof typeof Ionicons.glyphMap,
-    completedCount: catCounts[cat]?.completed ?? 0,
-    totalCount: catCounts[cat]?.total ?? 0,
-  })).filter((c) => c.totalCount > 0);
-}
-
 // ── Screen ───────────────────────────────────────────────────────
 
 export default function HomeScreen() {
@@ -166,11 +131,6 @@ export default function HomeScreen() {
   const dailyAmals = useMemo(
     () => buildDailyAmals(completedTodayCount, reviewCount, child?.currentStreak ?? 0),
     [completedTodayCount, reviewCount, child?.currentStreak],
-  );
-
-  const categoryProgress = useMemo(
-    () => buildCategoryProgress(progressMap as any, activeChildId),
-    [progressMap, activeChildId],
   );
 
   // ── Refresh ──────────────────────────────────────────────────
@@ -421,37 +381,31 @@ export default function HomeScreen() {
               </Animated.View>
             )}
 
-            {/* 4. CONTINUE LEARNING */}
-            <Animated.View
-              entering={FadeInDown.delay(STAGGER * 4)
-                .duration(400)
-                .springify()
-                .damping(20)}
-            >
-              <ContinueLearning categories={categoryProgress} ageGroup={ageGroup} />
-            </Animated.View>
+            {/* 4. DAILY DHIKR SECTION */}
+            <View style={{ marginTop: SPACING.xl }}>
+              <Text style={[styles.sectionLabel, { color: oasis.textMuted }]}>DAILY DHIKR</Text>
 
-            {/* 5. DUA OF THE DAY */}
-            <Animated.View
-              entering={FadeInDown.delay(STAGGER * 5)
-                .duration(400)
-                .springify()
-                .damping(20)}
-              style={{ marginTop: SPACING.lg }}
-            >
-              <DuaOfTheDay ageGroup={ageGroup} />
-            </Animated.View>
+              {/* Dua of the Day */}
+              <Animated.View
+                entering={FadeInDown.delay(STAGGER * 4)
+                  .duration(400)
+                  .springify()
+                  .damping(20)}
+              >
+                <DuaOfTheDay ageGroup={ageGroup} />
+              </Animated.View>
 
-            {/* 6. AYAH OF THE DAY */}
-            <Animated.View
-              entering={FadeInDown.delay(STAGGER * 6)
-                .duration(400)
-                .springify()
-                .damping(20)}
-              style={{ marginTop: SPACING.lg }}
-            >
-              <AyahOfTheDay ageGroup={ageGroup} />
-            </Animated.View>
+              {/* Ayah of the Day */}
+              <Animated.View
+                entering={FadeInDown.delay(STAGGER * 5)
+                  .duration(400)
+                  .springify()
+                  .damping(20)}
+                style={{ marginTop: SPACING.md }}
+              >
+                <AyahOfTheDay ageGroup={ageGroup} />
+              </Animated.View>
+            </View>
 
             {/* Offline banner placeholder */}
             {/* TODO: show when NetInfo detects no connectivity */}
