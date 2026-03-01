@@ -437,7 +437,7 @@ export function HookPhase({ hook, unitLabel, onNarrate, onContinue, accentColor 
   return (
     <View style={styles.container}>
       {/* ── Background layer ── */}
-      <View style={StyleSheet.absoluteFill}>
+      <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
         <LinearGradient
           colors={
             isDark

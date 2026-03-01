@@ -119,7 +119,7 @@ function LessonPlayerContent({
       edges={['top', 'left', 'right']}
     >
       {/* Top bar */}
-      <Animated.View entering={FadeIn.duration(400)} style={styles.topBar}>
+      <Animated.View entering={FadeIn.duration(400)} style={[styles.topBar, { zIndex: 10 }]}>
         <Pressable
           onPress={handleClose}
           hitSlop={12}
@@ -152,7 +152,7 @@ function LessonPlayerContent({
       </Animated.View>
 
       {/* Phase progress dots */}
-      <View style={styles.phaseProgress}>
+      <View style={[styles.phaseProgress, { zIndex: 10 }]}>
         {visiblePhases.map((phase) => {
           const phasesArr: string[] = [...visiblePhases];
           const currentIdx = phasesArr.indexOf(player.phase);
