@@ -6,29 +6,34 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ShimmerBlock } from './ShimmerBlock';
 import { useTheme } from '../../theme';
+import { tokens, SPACING, RADIUS } from '../../theme/tokens';
 
 export function LearnSkeletonLoader() {
-  const { colors, spacing, radius, isDark } = useTheme();
+  const { isDark } = useTheme();
+  // Oasis-token card skeleton: sand100 bg, sand200 border
   const card = {
-    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: isDark ? colors.border : 'rgba(0,0,0,0.04)',
+    backgroundColor: isDark ? '#292524' + '0A' : tokens.color.sand100,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    borderWidth: 1.5,
+    borderColor: isDark ? '#534D47' : tokens.color.sand200,
   };
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }]}>
+    <View style={[styles.root, { backgroundColor: 'transparent' }]}>
+      {/* Header skeleton */}
       <View
         style={[
           styles.header,
-          { paddingHorizontal: spacing.lg, paddingTop: spacing.xl + 56, paddingBottom: spacing.lg },
+          { paddingHorizontal: SPACING.md, paddingTop: SPACING.xl + 56, paddingBottom: SPACING.lg },
         ]}
       >
         <ShimmerBlock width={80} height={20} borderRadius={10} />
-        <ShimmerBlock width={48} height={48} borderRadius={24} />
+        <ShimmerBlock width={44} height={44} borderRadius={22} />
       </View>
-      <View style={{ paddingHorizontal: spacing.lg, gap: spacing.sm, marginTop: spacing.md }}>
+
+      {/* Hero card skeleton */}
+      <View style={{ paddingHorizontal: SPACING.md, marginTop: SPACING.md }}>
         <View style={[card, { flexDirection: 'row', alignItems: 'center' }]}>
           <View style={{ flex: 1 }}>
             <ShimmerBlock width={90} height={12} borderRadius={6} />
@@ -36,53 +41,71 @@ export function LearnSkeletonLoader() {
               width="80%"
               height={16}
               borderRadius={8}
-              style={{ marginTop: spacing.xs }}
+              style={{ marginTop: SPACING.xs }}
             />
             <ShimmerBlock
               width={100}
               height={36}
-              borderRadius={radius.md}
-              style={{ marginTop: spacing.sm }}
+              borderRadius={RADIUS.md}
+              style={{ marginTop: SPACING.sm }}
             />
           </View>
           <ShimmerBlock
             width={44}
             height={44}
             borderRadius={22}
-            style={{ marginLeft: spacing.sm }}
+            style={{ marginLeft: SPACING.sm }}
           />
         </View>
-        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-          {[1, 2, 3, 4].map((i) => (
-            <ShimmerBlock key={i} width="23%" height={56} borderRadius={radius.md} />
-          ))}
-        </View>
-        {[1, 2].map((i) => (
-          <View key={i} style={[card, { marginTop: spacing.sm }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <ShimmerBlock width={32} height={32} borderRadius={16} />
-              <View style={{ flex: 1, marginLeft: spacing.sm }}>
-                <ShimmerBlock width="60%" height={14} borderRadius={7} />
-                <ShimmerBlock width="40%" height={10} borderRadius={5} style={{ marginTop: 4 }} />
+      </View>
+
+      {/* 2×N category grid skeleton */}
+      <View style={{ paddingHorizontal: SPACING.md, marginTop: SPACING.lg }}>
+        {[0, 1].map((row) => (
+          <View
+            key={row}
+            style={{ flexDirection: 'row', gap: SPACING.md, marginBottom: SPACING.md }}
+          >
+            {[0, 1].map((col) => (
+              <View key={col} style={[card, { flex: 1, minHeight: 100, alignItems: 'center' }]}>
+                <ShimmerBlock width={48} height={48} borderRadius={24} />
+                <ShimmerBlock
+                  width={80}
+                  height={14}
+                  borderRadius={7}
+                  style={{ marginTop: SPACING.sm }}
+                />
+                <ShimmerBlock width={50} height={10} borderRadius={5} style={{ marginTop: 4 }} />
+                <ShimmerBlock
+                  width={36}
+                  height={36}
+                  borderRadius={18}
+                  style={{ marginTop: SPACING.sm }}
+                />
               </View>
-            </View>
-            <ShimmerBlock
-              width="100%"
-              height={4}
-              borderRadius={2}
-              style={{ marginTop: spacing.sm }}
-            />
-            {[1, 2].map((j) => (
-              <ShimmerBlock
-                key={j}
-                width="100%"
-                height={44}
-                borderRadius={radius.md}
-                style={{ marginTop: spacing.xs }}
-              />
             ))}
           </View>
         ))}
+        {/* Extra row with one card */}
+        <View style={{ flexDirection: 'row', gap: SPACING.md, marginBottom: SPACING.md }}>
+          <View style={[card, { flex: 1, minHeight: 100, alignItems: 'center' }]}>
+            <ShimmerBlock width={48} height={48} borderRadius={24} />
+            <ShimmerBlock
+              width={80}
+              height={14}
+              borderRadius={7}
+              style={{ marginTop: SPACING.sm }}
+            />
+            <ShimmerBlock width={50} height={10} borderRadius={5} style={{ marginTop: 4 }} />
+            <ShimmerBlock
+              width={36}
+              height={36}
+              borderRadius={18}
+              style={{ marginTop: SPACING.sm }}
+            />
+          </View>
+          <View style={{ flex: 1 }} />
+        </View>
       </View>
     </View>
   );

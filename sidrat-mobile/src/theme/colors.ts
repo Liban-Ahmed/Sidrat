@@ -185,17 +185,17 @@ export const palette = {
   },
 } as const;
 
-// ── Category Colors (for lesson categories) ──────────────────────
+// ── Category Colors — Oasis Palette (Design Spec §6.5) ───────────
 
 export const categoryColors: Record<string, { solid: string; muted: string }> = {
-  aqeedah: { solid: '#1A3A5C', muted: '#1A3A5C18' },
-  salah: { solid: '#D4982A', muted: '#D4982A18' },
-  wudu: { solid: '#2A6090', muted: '#2A609018' },
-  quran: { solid: '#1E6B42', muted: '#1E6B4218' },
-  seerah: { solid: '#B07D1E', muted: '#B07D1E18' },
-  adab: { solid: '#C74E59', muted: '#C74E5918' },
-  duaa: { solid: '#5B4FA0', muted: '#5B4FA018' },
-  stories: { solid: '#2E8B57', muted: '#2E8B5718' },
+  aqeedah: { solid: '#38BDF8', muted: '#F0F9FF' }, // sky400 / sky50
+  salah: { solid: '#7EA14B', muted: '#F4F7EE' }, // olive400 / olive50
+  wudu: { solid: '#0EA5E9', muted: '#E0F2FE' }, // sky500 / sky100
+  quran: { solid: '#D4A017', muted: '#FFFBEB' }, // gold500 / gold50
+  seerah: { solid: '#D4B07A', muted: '#FDF8F0' }, // sand400 / sand50
+  adab: { solid: '#FB7185', muted: '#FFF1F2' }, // rose400 / rose50
+  duaa: { solid: '#FBBF24', muted: '#FFFBEB' }, // gold400 / gold50
+  stories: { solid: '#A8C276', muted: '#F4F7EE' }, // olive300 / olive50
 };
 
 // ── Achievement Rarity Colors ────────────────────────────────────
