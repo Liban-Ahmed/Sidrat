@@ -204,7 +204,7 @@ export default function LearnScreen() {
           {/* ════ Header ════ */}
           <Animated.View entering={staggerEnter(0)} style={styles.header}>
             <View style={styles.headerLeft}>
-              <Text style={[typography.largeTitle, { color: oc.textPrimary }]}>Learn</Text>
+              <Text style={[styles.headerPageTitle, { color: oc.textPrimary }]}>Learn</Text>
               <Text style={[styles.headerSub, { color: oc.textMuted }]}>
                 {overallStats.completed} of {overallStats.total} lessons
               </Text>
@@ -459,11 +459,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.md,
-    paddingTop: SPACING.xl + 54,
+    paddingTop: SPACING.xxl + 54,
     paddingBottom: SPACING.md,
     gap: SPACING.md,
   },
   headerLeft: { flex: 1, minWidth: 0 },
+  headerPageTitle: {
+    fontFamily: 'Nunito-Bold',
+    fontSize: 26,
+    fontWeight: '700',
+    lineHeight: 32,
+  },
   headerSub: { fontSize: 13, fontWeight: '500', marginTop: 2 },
   ringLabel: { fontSize: 11, fontWeight: '600', textAlign: 'center' },
 

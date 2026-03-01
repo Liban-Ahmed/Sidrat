@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
   FadeInDown,
   useSharedValue,
@@ -83,7 +83,7 @@ export function GreetingHeader({ childName, streak, ageGroup }: GreetingHeaderPr
         colors={gradientColors}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
-        style={[styles.container, { paddingTop: Platform.OS === 'ios' ? 60 : 44 }]}
+        style={[styles.container, { paddingTop: SPACING.xxl + 54 }]}
       >
         <View style={styles.row}>
           {/* Greeting + name */}

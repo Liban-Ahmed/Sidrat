@@ -508,8 +508,8 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontFamily: 'Nunito-Bold',
-    fontSize: 22,
-    lineHeight: 28,
+    fontSize: 26,
+    lineHeight: 32,
     fontWeight: '700',
   },
   headerSubtitle: {
