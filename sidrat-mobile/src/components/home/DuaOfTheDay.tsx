@@ -35,7 +35,7 @@ export function DuaOfTheDay({ compact = false }: DuaOfTheDayProps) {
   const meta = CATEGORY_META[dua.category];
 
   const handleShare = useCallback(async () => {
-    const message = `${dua.arabic}\n\n"${dua.translation}"\n\n— ${dua.source}\n\nShared from Sidrat 🌿`;
+    const message = `بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ\n\n${dua.arabic}\n\n"${dua.translation}"\n\n— ${dua.source}\n\nShared from Sidrat`;
     try {
       await Share.share(Platform.OS === 'ios' ? { message } : { message, title: 'Dua of the Day' });
     } catch {

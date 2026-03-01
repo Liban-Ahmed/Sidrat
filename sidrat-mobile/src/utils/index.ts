@@ -1,5 +1,5 @@
 export { calculateStreak, updateStreakOnCompletion, getWeekCompletionMap } from './streak';
-export { haptics } from './haptics';
+export { default as haptic } from './haptics';
 export {
   gregorianToHijri,
   formatHijriDate,

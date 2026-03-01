@@ -16,6 +16,7 @@ import Animated, {
   interpolate,
 } from 'react-native-reanimated';
 import { useTheme } from '../../theme';
+import { tokens } from '../../theme/tokens';
 
 interface ShimmerBlockProps {
   width: number | `${number}%`;
@@ -40,8 +41,8 @@ export function ShimmerBlock({ width, height, borderRadius = 8, style }: Shimmer
     transform: [{ translateX: interpolate(shimmerProgress.value, [0, 1], [-200, 200]) }],
   }));
 
-  const baseColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-  const shimmerColor = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)';
+  const baseColor = isDark ? tokens.color.earth700 + '40' : tokens.color.sand100;
+  const shimmerColor = isDark ? tokens.color.earth700 + '80' : tokens.color.sand200;
 
   return (
     <View
