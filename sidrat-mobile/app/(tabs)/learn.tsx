@@ -274,7 +274,7 @@ export default function LearnScreen() {
                               styles.categoryCard,
                               {
                                 backgroundColor: oc.surface,
-                                borderColor: oc.surfaceBorder,
+                                borderColor: pct === 1 ? cat.primary + '60' : oc.surfaceBorder,
                                 ...SHADOW.rnMd,
                               },
                             ]}
@@ -305,28 +305,33 @@ export default function LearnScreen() {
 
                             {/* Lesson count */}
                             <Text style={[styles.catCount, { color: oc.textMuted }]}>
-                              {unitProg.total} lesson{unitProg.total !== 1 ? 's' : ''}
+                              {unitProg.completed > 0
+                                ? `${unitProg.completed}/${unitProg.total} lessons`
+                                : `${unitProg.total} lesson${unitProg.total !== 1 ? 's' : ''}`}
                             </Text>
 
-                            {/* Completion ring */}
-                            <View style={styles.catRingWrap}>
-                              <ProgressRing
-                                progress={pct}
-                                size={36}
-                                strokeWidth={3}
-                                color={oc.primary}
-                                trackColor={tokens.color.sand100}
-                              >
-                                <Text
-                                  style={{
-                                    fontSize: 9,
-                                    fontWeight: '700',
-                                    color: pct === 1 ? oc.primary : oc.textMuted,
-                                  }}
-                                >
-                                  {Math.round(pct * 100)}%
-                                </Text>
-                              </ProgressRing>
+                            {/* Bottom progress strip */}
+                            <View
+                              style={[
+                                styles.catProgressTrack,
+                                {
+                                  backgroundColor: isDark
+                                    ? tokens.color.earth700
+                                    : tokens.color.sand100,
+                                },
+                              ]}
+                            >
+                              {pct > 0 && (
+                                <View
+                                  style={[
+                                    styles.catProgressFill,
+                                    {
+                                      width: `${Math.round(pct * 100)}%` as any,
+                                      backgroundColor: cat.primary,
+                                    },
+                                  ]}
+                                />
+                              )}
                             </View>
                           </View>
                         </JuicyPressable>
@@ -521,9 +526,13 @@ const styles = StyleSheet.create({
   categoryCard: {
     borderWidth: 1.5,
     borderRadius: RADIUS.lg,
-    padding: SPACING.md,
+    paddingTop: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.md + 6, // extra room for progress strip
     minHeight: 100,
     alignItems: 'center',
+    overflow: 'hidden',
+    position: 'relative',
   },
   catIconCircle: {
     width: 48,
@@ -534,5 +543,14 @@ const styles = StyleSheet.create({
   },
   catName: { fontWeight: '700', fontSize: 16, marginTop: SPACING.sm, textAlign: 'center' },
   catCount: { fontSize: 13, marginTop: 2, textAlign: 'center' },
-  catRingWrap: { marginTop: SPACING.sm },
+  catProgressTrack: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+  },
+  catProgressFill: {
+    height: 4,
+  },
 });
