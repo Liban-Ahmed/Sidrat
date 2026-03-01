@@ -45,7 +45,7 @@ function getGrade(
 ): { icon: string; label: string; color: string } {
   if (percent >= 90) return { icon: 'trophy', label: 'Perfect!', color: accentColor };
   if (percent >= 70) return { icon: 'star', label: 'Great Job!', color: brand.secondary };
-  if (percent >= 50) return { icon: 'thumbs-up', label: 'Good Effort!', color: brand.primary };
+  if (percent >= 50) return { icon: 'thumbs-up', label: 'Good Effort!', color: accentColor };
   return { icon: 'refresh', label: 'Keep Trying!', color: brand.coral };
 }
 

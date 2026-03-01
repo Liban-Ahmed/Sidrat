@@ -14,10 +14,11 @@ import type { PracticeFillBlank } from '../../types/curriculum';
 interface Props {
   block: PracticeFillBlank;
   onAnswer: (isCorrect: boolean, pointsEarned: number) => void;
+  accentColor: string;
 }
 
-export function FillBlankCard({ block, onAnswer }: Props) {
-  const { brand, colors, typography, radius, isDark, shadows } = useTheme();
+export function FillBlankCard({ block, onAnswer, accentColor }: Props) {
+  const { colors, typography, radius, isDark, shadows } = useTheme();
   const [answer, setAnswer] = useState('');
   const [showResult, setShowResult] = useState(false);
   const [showHint, setShowHint] = useState(false);
@@ -64,13 +65,13 @@ export function FillBlankCard({ block, onAnswer }: Props) {
           {parts[0]}
           <Text
             style={{
-              color: showResult ? (isCorrect ? colors.success : colors.error) : brand.primary,
+              color: showResult ? (isCorrect ? colors.success : colors.error) : accentColor,
               textDecorationLine: 'underline',
               textDecorationColor: showResult
                 ? isCorrect
                   ? colors.success
                   : colors.error
-                : brand.primary + '60',
+                : accentColor + '60',
               fontWeight: '700',
             }}
           >
@@ -94,7 +95,7 @@ export function FillBlankCard({ block, onAnswer }: Props) {
                   ? colors.success
                   : colors.error
                 : answer.length > 0
-                  ? brand.primary
+                  ? accentColor
                   : isDark
                     ? colors.surfaceTertiary
                     : colors.separator,
@@ -119,12 +120,12 @@ export function FillBlankCard({ block, onAnswer }: Props) {
             {
               backgroundColor:
                 answer.trim().length > 0 && !showResult
-                  ? brand.primary
+                  ? accentColor
                   : isDark
                     ? colors.surfaceTertiary
                     : colors.backgroundTertiary,
               borderRadius: radius.lg,
-              shadowColor: brand.primary,
+              shadowColor: accentColor,
               shadowOffset: { width: 0, height: 3 },
               shadowOpacity: answer.trim().length > 0 && !showResult ? 0.2 : 0,
               shadowRadius: 6,

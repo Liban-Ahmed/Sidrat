@@ -14,6 +14,7 @@ interface FeedbackCardProps {
   children: string;
   delay?: number;
   useFormatted?: boolean;
+  accentColor?: string;
 }
 
 export function FeedbackCard({
@@ -21,6 +22,7 @@ export function FeedbackCard({
   children,
   delay = 0,
   useFormatted = false,
+  accentColor,
 }: FeedbackCardProps) {
   const { brand, colors, radius } = useTheme();
 
@@ -30,8 +32,8 @@ export function FeedbackCard({
     error: { icon: 'close-circle' as const, color: colors.error, bg: colors.errorMuted },
     info: {
       icon: 'information-circle-outline' as const,
-      color: brand.primary,
-      bg: colors.infoMuted,
+      color: accentColor ?? brand.primary,
+      bg: accentColor ? accentColor + '15' : colors.infoMuted,
     },
   }[type];
 

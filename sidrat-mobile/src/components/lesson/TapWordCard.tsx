@@ -35,9 +35,10 @@ import type { PracticeTapWord } from '../../types/curriculum';
 interface Props {
   block: PracticeTapWord;
   onAnswer: (isCorrect: boolean, pointsEarned: number) => void;
+  accentColor: string;
 }
 
-export function TapWordCard({ block, onAnswer }: Props) {
+export function TapWordCard({ block, onAnswer, accentColor }: Props) {
   const { brand, colors, typography, radius, isDark, shadows } = useTheme();
 
   // Shuffle word bank on mount
@@ -218,10 +219,10 @@ export function TapWordCard({ block, onAnswer }: Props) {
                   style={[
                     styles.selectedWord,
                     {
-                      backgroundColor: showResult ? colors.successMuted : brand.primary + '12',
+                      backgroundColor: showResult ? colors.successMuted : accentColor + '12',
                       borderRadius: radius.md,
                       borderLeftWidth: 3,
-                      borderLeftColor: showResult ? colors.success : brand.primary,
+                      borderLeftColor: showResult ? colors.success : accentColor,
                     },
                   ]}
                 >
@@ -229,7 +230,7 @@ export function TapWordCard({ block, onAnswer }: Props) {
                     style={[
                       styles.numberBadge,
                       {
-                        backgroundColor: showResult ? colors.success + '25' : brand.primary + '18',
+                        backgroundColor: showResult ? colors.success + '25' : accentColor + '18',
                         borderRadius: radius.full,
                       },
                     ]}
@@ -238,7 +239,7 @@ export function TapWordCard({ block, onAnswer }: Props) {
                       style={[
                         typography.labelXs,
                         {
-                          color: showResult ? colors.success : brand.primary,
+                          color: showResult ? colors.success : accentColor,
                           fontWeight: '700',
                         },
                       ]}
@@ -268,8 +269,8 @@ export function TapWordCard({ block, onAnswer }: Props) {
       {selected.length > 0 && !showResult && (
         <Animated.View entering={FadeIn.duration(300)} style={styles.controlRow}>
           <Pressable onPress={handleUndo} style={styles.controlButton}>
-            <Ionicons name="arrow-undo" size={15} color={brand.primary} />
-            <Text style={[typography.labelSmall, { color: brand.primary }]}>Undo</Text>
+            <Ionicons name="arrow-undo" size={15} color={accentColor} />
+            <Text style={[typography.labelSmall, { color: accentColor }]}>Undo</Text>
           </Pressable>
           <View style={[styles.controlDivider, { backgroundColor: colors.separator }]} />
           <Pressable onPress={handleReset} style={styles.controlButton}>

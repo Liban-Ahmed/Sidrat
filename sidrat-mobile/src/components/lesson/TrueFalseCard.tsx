@@ -15,9 +15,10 @@ import type { PracticeTrueFalse } from '../../types/curriculum';
 interface Props {
   block: PracticeTrueFalse;
   onAnswer: (isCorrect: boolean, pointsEarned: number) => void;
+  accentColor: string;
 }
 
-export function TrueFalseCard({ block, onAnswer }: Props) {
+export function TrueFalseCard({ block, onAnswer, accentColor }: Props) {
   const { brand, colors, typography, radius, isDark } = useTheme();
   const [selected, setSelected] = useState<boolean | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -49,7 +50,7 @@ export function TrueFalseCard({ block, onAnswer }: Props) {
 
     if (!showResult) {
       return isSelected
-        ? { ...base, bg: brand.primary + '10', border: brand.primary, shadow: brand.primary }
+        ? { ...base, bg: accentColor + '10', border: accentColor, shadow: accentColor }
         : base;
     }
     if (!isSelected) return base;

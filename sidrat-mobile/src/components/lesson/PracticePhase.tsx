@@ -42,15 +42,15 @@ export function PracticePhase({
       case 'quiz':
         return <QuizCard block={block} onAnswer={onAnswer} />;
       case 'true-false':
-        return <TrueFalseCard block={block} onAnswer={onAnswer} />;
+        return <TrueFalseCard block={block} onAnswer={onAnswer} accentColor={accentColor} />;
       case 'ordering':
-        return <OrderingCard block={block} onAnswer={onAnswer} />;
+        return <OrderingCard block={block} onAnswer={onAnswer} accentColor={accentColor} />;
       case 'matching':
-        return <MatchingCard block={block} onAnswer={onAnswer} />;
+        return <MatchingCard block={block} onAnswer={onAnswer} accentColor={accentColor} />;
       case 'fill-blank':
-        return <FillBlankCard block={block} onAnswer={onAnswer} />;
+        return <FillBlankCard block={block} onAnswer={onAnswer} accentColor={accentColor} />;
       case 'tap-word':
-        return <TapWordCard block={block} onAnswer={onAnswer} />;
+        return <TapWordCard block={block} onAnswer={onAnswer} accentColor={accentColor} />;
       default:
         return (
           <View style={{ padding: 24 }}>

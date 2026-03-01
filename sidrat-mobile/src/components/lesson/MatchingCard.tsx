@@ -24,9 +24,10 @@ import type { PracticeMatching } from '../../types/curriculum';
 interface Props {
   block: PracticeMatching;
   onAnswer: (isCorrect: boolean, pointsEarned: number) => void;
+  accentColor: string;
 }
 
-export function MatchingCard({ block, onAnswer }: Props) {
+export function MatchingCard({ block, onAnswer, accentColor }: Props) {
   const { brand, colors, typography, radius, isDark, shadows } = useTheme();
 
   // Shuffle right column
@@ -110,9 +111,9 @@ export function MatchingCard({ block, onAnswer }: Props) {
               border = colors.error;
               textColor = colors.error;
             } else if (isSelected) {
-              bg = brand.primary + '12';
-              border = brand.primary;
-              textColor = brand.primary;
+              bg = accentColor + '12';
+              border = accentColor;
+              textColor = accentColor;
             }
 
             return (
@@ -133,7 +134,7 @@ export function MatchingCard({ block, onAnswer }: Props) {
                       borderLeftColor: isMatched
                         ? colors.success
                         : isSelected
-                          ? brand.primary
+                          ? accentColor
                           : border,
                       ...shadows.subtle,
                       transform: [{ scale: pressed ? 0.97 : 1 }],

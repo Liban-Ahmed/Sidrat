@@ -138,7 +138,7 @@ interface Props {
 }
 
 export function HookPhase({ hook, unitLabel, onNarrate, onContinue, accentColor }: Props) {
-  const { colors, typography, radius } = useTheme();
+  const { colors, typography, radius, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -156,7 +156,11 @@ export function HookPhase({ hook, unitLabel, onNarrate, onContinue, accentColor 
       {/* ── Background layer ── */}
       <View style={StyleSheet.absoluteFill}>
         <LinearGradient
-          colors={['#C5E5F4', '#D8EDF7', '#F0E2C4', '#E2CA96']}
+          colors={
+            isDark
+              ? ['#0B1A22', '#0D1E18', '#181410', '#13100A']
+              : ['#C5E5F4', '#D8EDF7', '#F0E2C4', '#E2CA96']
+          }
           style={StyleSheet.absoluteFill}
         />
         <SwayingTree />
@@ -174,7 +178,16 @@ export function HookPhase({ hook, unitLabel, onNarrate, onContinue, accentColor 
           },
         ]}
       >
-        <Animated.View entering={FadeInUp.delay(150).duration(450)} style={styles.unitPill}>
+        <Animated.View
+          entering={FadeInUp.delay(150).duration(450)}
+          style={[
+            styles.unitPill,
+            {
+              backgroundColor: isDark ? accentColor + '20' : tokens.color.sky100,
+              borderColor: isDark ? accentColor + '40' : tokens.color.sky200,
+            },
+          ]}
+        >
           <Text style={[typography.captionBold, { color: accentColor }]} numberOfLines={1}>
             {unitLabel}
           </Text>
@@ -259,9 +272,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
-    backgroundColor: tokens.color.sky100,
     borderWidth: 1,
-    borderColor: tokens.color.sky200,
   },
   ctaArea: {
     width: '100%',
