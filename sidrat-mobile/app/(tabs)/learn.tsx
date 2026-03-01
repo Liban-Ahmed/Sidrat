@@ -1,28 +1,18 @@
 /**
  * Learn Screen — Curriculum Dashboard
  *
- * 2×N category card grid · collapsible lesson lists · staggered spring
- * enter animations · Oasis palette · spec §8.2.
+ * 2×N category card grid · staggered spring enter
+ * animations · Oasis palette · spec §8.2.
  */
 
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  RefreshControl,
-  LayoutAnimation,
-  Platform,
-  UIManager,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, RefreshControl } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { JuicyPressable } from '../../src/components/common/JuicyPressable';
-import { ProgressBar } from '../../src/components/ProgressBar';
 import { ProgressRing, LearnSkeletonLoader, EmptyState } from '../../src/components/ui';
 import { allUnits, allCurriculumLessons } from '../../src/data/curriculum';
 import { useAppStore, useLessonStore } from '../../src/stores';
@@ -38,25 +28,7 @@ import {
 } from '../../src/theme/tokens';
 import haptic from '../../src/utils/haptics';
 import type { CurriculumUnit, CurriculumLesson } from '../../src/types/curriculum';
-import type { LessonCategory, Difficulty } from '../../src/types/models';
-
-// ── Android LayoutAnimation ────────────────────────────────────
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
-// ── Category metadata ──────────────────────────────────────────
-
-const CATEGORY_SUBTITLES: Record<LessonCategory, string> = {
-  aqeedah: 'Foundations of belief',
-  wudu: 'Purification before prayer',
-  salah: 'The five daily prayers',
-  quran: 'Recitation and understanding',
-  seerah: 'Life of the Prophet ﷺ',
-  adab: 'Islamic manners',
-  duaa: 'Supplications and remembrance',
-  stories: 'Prophets and companions',
-};
+import type { LessonCategory } from '../../src/types/models';
 
 /** Oasis category colors — Design Spec §6.5 */
 const OASIS_CAT: Record<LessonCategory, { primary: string; tint: string }> = {
@@ -68,12 +40,6 @@ const OASIS_CAT: Record<LessonCategory, { primary: string; tint: string }> = {
   seerah: { primary: tokens.color.sand400, tint: tokens.color.sand50 },
   adab: { primary: tokens.color.rose400, tint: tokens.color.rose50 },
   stories: { primary: tokens.color.olive300, tint: tokens.color.olive50 },
-};
-
-const DIFFICULTY_DOTS: Record<Difficulty, number> = {
-  beginner: 1,
-  intermediate: 2,
-  advanced: 3,
 };
 
 const PREMIUM_LESSON_IDS = new Set<string>();
@@ -102,20 +68,17 @@ export default function LearnScreen() {
   const { typography, isDark } = useTheme();
   const router = useRouter();
   const activeChildId = useAppStore((s) => s.activeChildId);
-  const expandedUnitIds = useAppStore((s) => s.expandedUnitIds);
-  const toggleUnitExpanded = useAppStore((s) => s.toggleUnitExpanded);
   const progress = useLessonStore((s) => s.progress);
 
   // Oasis semantic palette (light / dark)
   const oc = isDark ? darkSemanticColors : semanticColors;
 
-  const toggleUnit = useCallback(
+  const handleUnitPress = useCallback(
     (unitId: string) => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       haptic.light();
-      toggleUnitExpanded(unitId);
+      router.push(`/unit/${unitId}`);
     },
-    [toggleUnitExpanded],
+    [router],
   );
 
   // ── Data selectors (unchanged logic) ──────────────────────────
@@ -294,7 +257,6 @@ export default function LearnScreen() {
                       tint: oc.primaryLight,
                     };
                     const pct = unitProg.total > 0 ? unitProg.completed / unitProg.total : 0;
-                    const isExpanded = expandedUnitIds.includes(unit.id);
 
                     return (
                       <Animated.View
@@ -303,20 +265,16 @@ export default function LearnScreen() {
                         style={styles.unitGridItem}
                       >
                         <JuicyPressable
-                          onPress={() => toggleUnit(unit.id)}
-                          accessibilityLabel={`${unit.title}, ${unitProg.completed} of ${unitProg.total} lessons complete. ${isExpanded ? 'Collapse' : 'Expand'}`}
+                          onPress={() => handleUnitPress(unit.id)}
+                          accessibilityLabel={`${unit.title}, ${unitProg.completed} of ${unitProg.total} lessons complete. Tap to view lessons.`}
                           accessibilityRole="button"
                         >
                           <View
                             style={[
                               styles.categoryCard,
                               {
-                                backgroundColor: isExpanded
-                                  ? isDark
-                                    ? oc.primaryLight
-                                    : cat.tint
-                                  : oc.surface,
-                                borderColor: isExpanded ? cat.primary : oc.surfaceBorder,
+                                backgroundColor: oc.surface,
+                                borderColor: oc.surfaceBorder,
                                 ...SHADOW.rnMd,
                               },
                             ]}
@@ -379,161 +337,6 @@ export default function LearnScreen() {
                   {/* Spacer for odd last row */}
                   {row.length === 1 && <View style={styles.unitGridItem} />}
                 </View>
-
-                {/* ── Expanded lesson list for any unit in this row ── */}
-                {row
-                  .filter((u) => expandedUnitIds.includes(u.id))
-                  .map((unit) => {
-                    const unitLessons = allCurriculumLessons
-                      .filter((l) => l.unitId === unit.id)
-                      .sort((a, b) => a.order - b.order);
-
-                    return (
-                      <Animated.View
-                        key={`lessons-${unit.id}`}
-                        entering={staggerEnter(0)}
-                        style={styles.lessonSection}
-                      >
-                        {/* Section label */}
-                        <Text style={[styles.lessonSectionLabel, { color: oc.textMuted }]}>
-                          {CATEGORY_SUBTITLES[unit.category] ?? unit.description}
-                        </Text>
-
-                        {/* Progress bar */}
-                        <ProgressBar
-                          progress={
-                            unitLessons.length > 0
-                              ? unitLessons.filter((l) => getIsCompleted(l.id)).length /
-                                unitLessons.length
-                              : 0
-                          }
-                          color={oc.primary}
-                          trackColor={tokens.color.sand100}
-                          height={4}
-                        />
-
-                        {/* Lesson cards */}
-                        {unitLessons.map((lesson, li) => {
-                          const isCompleted = getIsCompleted(lesson.id);
-                          const prevCompleted =
-                            li === 0 || getIsCompleted(unitLessons[li - 1]?.id ?? '');
-                          const isPremium = isLessonPremium(lesson.id);
-                          const isLocked = isPremium || (li > 0 && !prevCompleted);
-                          const isPremiumLocked = isPremium && !isCompleted;
-                          const filled = DIFFICULTY_DOTS[lesson.difficulty] ?? 1;
-
-                          return (
-                            <JuicyPressable
-                              key={lesson.id}
-                              onPress={() => handleLessonPress(lesson.id)}
-                              disabled={isLocked && !isPremiumLocked}
-                              accessibilityLabel={`${lesson.title}, ${
-                                isCompleted
-                                  ? 'completed'
-                                  : isPremiumLocked
-                                    ? 'premium locked'
-                                    : isLocked
-                                      ? 'locked'
-                                      : 'available'
-                              }`}
-                              accessibilityRole="button"
-                            >
-                              <View
-                                style={[
-                                  styles.lessonCard,
-                                  {
-                                    backgroundColor: isCompleted ? oc.correctBg : oc.surface,
-                                    borderColor: isCompleted ? oc.correct : oc.surfaceBorder,
-                                    opacity: isLocked && !isPremiumLocked ? 0.5 : 1,
-                                    ...SHADOW.rnSm,
-                                  },
-                                ]}
-                              >
-                                {/* Title row */}
-                                <View style={styles.lessonTopRow}>
-                                  <Text
-                                    style={[
-                                      styles.lessonTitle,
-                                      {
-                                        color: isLocked ? oc.textMuted : oc.textPrimary,
-                                      },
-                                    ]}
-                                    numberOfLines={1}
-                                  >
-                                    {lesson.title}
-                                  </Text>
-
-                                  {/* Right indicator */}
-                                  {isCompleted ? (
-                                    <Ionicons
-                                      name="checkmark-circle"
-                                      size={22}
-                                      color={oc.correct}
-                                    />
-                                  ) : isPremiumLocked || isLocked ? (
-                                    <Ionicons
-                                      name="lock-closed"
-                                      size={18}
-                                      color={tokens.color.sand300}
-                                    />
-                                  ) : (
-                                    <Ionicons
-                                      name="chevron-forward"
-                                      size={18}
-                                      color={oc.textMuted}
-                                    />
-                                  )}
-                                </View>
-
-                                {/* Meta row — visible for unlocked, incomplete lessons */}
-                                {!isCompleted && !isLocked && (
-                                  <View style={styles.lessonMeta}>
-                                    {/* Difficulty dots (8pt per spec) */}
-                                    <View style={styles.diffDots}>
-                                      {[1, 2, 3].map((dot) => (
-                                        <View
-                                          key={dot}
-                                          style={[
-                                            styles.diffDot,
-                                            {
-                                              backgroundColor:
-                                                dot <= filled
-                                                  ? tokens.color.olive300
-                                                  : tokens.color.sand200,
-                                            },
-                                          ]}
-                                        />
-                                      ))}
-                                    </View>
-
-                                    <Ionicons
-                                      name="time-outline"
-                                      size={11}
-                                      color={oc.textMuted}
-                                      style={{ marginLeft: SPACING.sm }}
-                                    />
-                                    <Text style={[styles.metaText, { color: oc.textMuted }]}>
-                                      {lesson.durationMinutes}m
-                                    </Text>
-
-                                    <Ionicons
-                                      name="sparkles-outline"
-                                      size={11}
-                                      color={oc.rewardText}
-                                      style={{ marginLeft: SPACING.sm }}
-                                    />
-                                    <Text style={[styles.metaText, { color: oc.rewardText }]}>
-                                      +{lesson.xpReward}
-                                    </Text>
-                                  </View>
-                                )}
-                              </View>
-                            </JuicyPressable>
-                          );
-                        })}
-                      </Animated.View>
-                    );
-                  })}
               </React.Fragment>
             ))}
           </View>
@@ -718,35 +521,4 @@ const styles = StyleSheet.create({
   catName: { fontWeight: '700', fontSize: 16, marginTop: SPACING.sm, textAlign: 'center' },
   catCount: { fontSize: 13, marginTop: 2, textAlign: 'center' },
   catRingWrap: { marginTop: SPACING.sm },
-
-  // ── Lesson Section (expanded) ──
-  lessonSection: { marginBottom: SPACING.md, gap: SPACING.sm },
-  lessonSectionLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    marginBottom: 2,
-  },
-
-  // ── Lesson Card ──
-  lessonCard: {
-    borderWidth: 1.5,
-    borderRadius: RADIUS.lg,
-    padding: SPACING.md,
-    minHeight: 72,
-    justifyContent: 'center',
-  },
-  lessonTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  lessonTitle: { fontWeight: '700', fontSize: 16, flex: 1, marginRight: SPACING.sm },
-  lessonMeta: { flexDirection: 'row', alignItems: 'center', marginTop: SPACING.xs },
-  metaText: { fontSize: 11, fontWeight: '500', marginLeft: 3 },
-
-  // ── Difficulty Dots ──
-  diffDots: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  diffDot: { width: 8, height: 8, borderRadius: 4 },
 });

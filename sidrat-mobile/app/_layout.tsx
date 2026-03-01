@@ -153,6 +153,7 @@ function AppLayout() {
           name="lesson/[id]"
           options={{ animation: 'slide_from_bottom', gestureEnabled: false }}
         />
+        <Stack.Screen name="unit/[id]" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="review" options={{ animation: 'slide_from_right' }} />
       </Stack>
       <AchievementToast />
