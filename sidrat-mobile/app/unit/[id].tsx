@@ -30,7 +30,7 @@ import {
   SHADOW,
 } from '../../src/theme/tokens';
 import haptic from '../../src/utils/haptics';
-import type { LessonCategory, Difficulty } from '../../src/types/models';
+import type { LessonCategory } from '../../src/types/models';
 
 // ── Category metadata ──────────────────────────────────────────
 
@@ -55,12 +55,6 @@ const OASIS_CAT: Record<LessonCategory, { primary: string; tint: string }> = {
   seerah: { primary: tokens.color.sand400, tint: tokens.color.sand50 },
   adab: { primary: tokens.color.rose400, tint: tokens.color.rose50 },
   stories: { primary: tokens.color.olive300, tint: tokens.color.olive50 },
-};
-
-const DIFFICULTY_DOTS: Record<Difficulty, number> = {
-  beginner: 1,
-  intermediate: 2,
-  advanced: 3,
 };
 
 const PREMIUM_LESSON_IDS = new Set<string>();
@@ -315,7 +309,6 @@ export default function UnitScreen() {
                 const isLocked = isPremium || (index > 0 && !prevCompleted);
                 const isPremiumLocked = isPremium && !isCompleted;
                 const isNext = index === nextLessonIndex;
-                const filled = DIFFICULTY_DOTS[lesson.difficulty] ?? 1;
 
                 return (
                   <Animated.View key={lesson.id} entering={staggerEnter(index + 4)}>
@@ -339,53 +332,53 @@ export default function UnitScreen() {
                         style={[
                           styles.lessonCard,
                           {
-                            backgroundColor: isCompleted
-                              ? oc.correctBg
-                              : isNext
-                                ? isDark
-                                  ? oc.primaryLight
-                                  : cat.tint
-                                : oc.surface,
-                            borderColor: isCompleted
-                              ? oc.correct
-                              : isNext
-                                ? cat.primary
-                                : oc.surfaceBorder,
-                            opacity: isLocked && !isPremiumLocked ? 0.5 : 1,
+                            backgroundColor: oc.surface,
+                            borderColor: oc.surfaceBorder,
+                            opacity: isLocked && !isPremiumLocked ? 0.45 : 1,
                             ...SHADOW.rnSm,
                           },
                         ]}
                       >
-                        {/* Left: lesson number circle */}
+                        {/* Left accent strip — state indicator */}
+                        <View
+                          style={[
+                            styles.lessonAccentStrip,
+                            {
+                              backgroundColor: isCompleted
+                                ? tokens.color.olive400
+                                : isNext
+                                  ? cat.primary
+                                  : 'transparent',
+                            },
+                          ]}
+                        />
+
+                        {/* Number circle */}
                         <View
                           style={[
                             styles.lessonNumCircle,
                             {
-                              backgroundColor: isCompleted
-                                ? oc.correct
-                                : isNext
-                                  ? cat.primary
-                                  : isDark
-                                    ? oc.surfaceAlt
-                                    : tokens.color.sand100,
+                              backgroundColor: isDark ? oc.surfaceAlt : tokens.color.sand50,
                               borderColor: isCompleted
-                                ? oc.correct
+                                ? tokens.color.olive300
                                 : isNext
-                                  ? cat.primary
+                                  ? cat.primary + '60'
                                   : tokens.color.sand200,
                             },
                           ]}
                         >
-                          {isCompleted ? (
-                            <Ionicons name="checkmark" size={16} color={tokens.color.white} />
-                          ) : isLocked ? (
-                            <Ionicons name="lock-closed" size={14} color={tokens.color.sand300} />
+                          {isLocked && !isCompleted ? (
+                            <Ionicons name="lock-closed" size={13} color={tokens.color.sand300} />
                           ) : (
                             <Text
                               style={[
                                 styles.lessonNumText,
                                 {
-                                  color: isNext ? tokens.color.white : oc.textMuted,
+                                  color: isCompleted
+                                    ? tokens.color.olive500
+                                    : isNext
+                                      ? cat.primary
+                                      : oc.textMuted,
                                 },
                               ]}
                             >
@@ -410,42 +403,16 @@ export default function UnitScreen() {
 
                           {/* Meta row */}
                           <View style={styles.lessonMeta}>
-                            {/* Difficulty dots */}
-                            <View style={styles.diffDots}>
-                              {[1, 2, 3].map((dot) => (
-                                <View
-                                  key={dot}
-                                  style={[
-                                    styles.diffDot,
-                                    {
-                                      backgroundColor:
-                                        dot <= filled
-                                          ? tokens.color.olive300
-                                          : tokens.color.sand200,
-                                    },
-                                  ]}
-                                />
-                              ))}
-                            </View>
-
-                            <Ionicons
-                              name="time-outline"
-                              size={11}
-                              color={oc.textMuted}
-                              style={{ marginLeft: SPACING.sm }}
-                            />
+                            <Ionicons name="time-outline" size={11} color={oc.textMuted} />
                             <Text style={[styles.metaText, { color: oc.textMuted }]}>
                               {lesson.durationMinutes}m
                             </Text>
 
-                            <Ionicons
-                              name="sparkles-outline"
-                              size={11}
-                              color={oc.rewardText}
-                              style={{ marginLeft: SPACING.sm }}
-                            />
+                            <Text style={[styles.metaDot, { color: oc.textMuted }]}>·</Text>
+
+                            <Ionicons name="sparkles-outline" size={11} color={oc.rewardText} />
                             <Text style={[styles.metaText, { color: oc.rewardText }]}>
-                              +{lesson.xpReward}
+                              +{lesson.xpReward} Hasanat
                             </Text>
                           </View>
                         </View>
@@ -453,7 +420,11 @@ export default function UnitScreen() {
                         {/* Right: status indicator */}
                         <View style={styles.lessonTrailing}>
                           {isCompleted ? (
-                            <Ionicons name="checkmark-circle" size={22} color={oc.correct} />
+                            <Ionicons
+                              name="checkmark-circle"
+                              size={22}
+                              color={tokens.color.olive400}
+                            />
                           ) : isNext ? (
                             <View
                               style={[
@@ -602,20 +573,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1.5,
     borderRadius: RADIUS.lg,
-    padding: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingRight: SPACING.md,
+    paddingLeft: 0, // accent strip sits flush left
     minHeight: 72,
-    gap: SPACING.md,
+    gap: SPACING.sm,
+    overflow: 'hidden',
+  },
+  lessonAccentStrip: {
+    width: 4,
+    alignSelf: 'stretch',
+    borderRadius: 2,
+    marginRight: SPACING.xs,
   },
   lessonNumCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
   lessonNumText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
   },
   lessonContent: {
@@ -624,17 +604,22 @@ const styles = StyleSheet.create({
   },
   lessonTitle: {
     fontWeight: '700',
-    fontSize: 16,
+    fontSize: 15,
   },
   lessonMeta: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 4,
     marginTop: SPACING.xs,
   },
   metaText: {
     fontSize: 11,
     fontWeight: '500',
-    marginLeft: 3,
+  },
+  metaDot: {
+    fontSize: 11,
+    fontWeight: '700',
+    marginHorizontal: 2,
   },
   lessonTrailing: {
     width: 28,
@@ -646,17 +631,5 @@ const styles = StyleSheet.create({
     height: 28,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-
-  // ── Difficulty Dots ──
-  diffDots: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  diffDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
   },
 });
