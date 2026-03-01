@@ -27,6 +27,7 @@ import {
   TYPOGRAPHY,
   type AgeGroup,
 } from '../../theme/tokens';
+import { JuicyPressable } from '../common/JuicyPressable';
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -87,6 +88,10 @@ function AmalCard({
     ageGroup
   ];
 
+  const handlePress = () => {
+    // TODO: Navigate to specific goal tracking or celebration screen
+  };
+
   return (
     <Animated.View
       entering={FadeInDown.delay(60 * index)
@@ -94,70 +99,73 @@ function AmalCard({
         .springify()
         .damping(20)}
     >
-      <View
-        style={[
-          styles.card,
-          {
-            backgroundColor: isComplete ? (isDark ? oasis.correctBg : t.olive50) : oasis.surface,
-            borderColor: isComplete ? oasis.correct : oasis.surfaceBorder,
-            ...SHADOW.rnMd,
-          },
-        ]}
-        accessible
+      <JuicyPressable
+        onPress={handlePress}
         accessibilityLabel={`${amal.title}: ${amal.current} of ${amal.target} complete. ${isComplete ? 'Completed!' : ''} Reward: ${amal.reward}`}
-        accessibilityRole="text"
+        accessibilityRole="button"
       >
-        <View style={styles.cardRow}>
-          {/* Icon circle */}
-          <View
-            style={[
-              styles.iconCircle,
-              {
-                backgroundColor: isDark ? oasis.primaryLight : t.olive100,
-              },
-            ]}
-          >
-            <Ionicons name={amal.icon} size={20} color={oasis.primary} />
-          </View>
-
-          {/* Title + description */}
-          <View style={styles.cardContent}>
-            <Text
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: isComplete ? (isDark ? oasis.correctBg : t.olive50) : oasis.surface,
+              borderColor: isComplete ? oasis.correct : oasis.surfaceBorder,
+              ...SHADOW.rnMd,
+            },
+          ]}
+        >
+          <View style={styles.cardRow}>
+            {/* Icon circle */}
+            <View
               style={[
-                styles.cardTitle,
+                styles.iconCircle,
                 {
-                  color: oasis.textPrimary,
-                  fontSize: Math.max(bodySize.fontSize - 4, 14),
+                  backgroundColor: isDark ? oasis.primaryLight : t.olive100,
                 },
               ]}
-              numberOfLines={1}
             >
-              {amal.title}
-            </Text>
-            <Text style={[styles.cardDesc, { color: oasis.textSecondary }]} numberOfLines={1}>
-              {amal.description}
-            </Text>
-          </View>
+              <Ionicons name={amal.icon} size={20} color={oasis.primary} />
+            </View>
 
-          {/* Reward */}
-          <View style={styles.rewardCol}>
-            <View style={styles.rewardRow}>
-              <Ionicons name="sparkles" size={14} color={t.gold500} />
-              <Text style={[styles.rewardText, { color: t.gold500 }]}>{amal.reward}</Text>
+            {/* Title + description */}
+            <View style={styles.cardContent}>
+              <Text
+                style={[
+                  styles.cardTitle,
+                  {
+                    color: oasis.textPrimary,
+                    fontSize: Math.max(bodySize.fontSize - 4, 14),
+                  },
+                ]}
+                numberOfLines={1}
+              >
+                {amal.title}
+              </Text>
+              <Text style={[styles.cardDesc, { color: oasis.textSecondary }]} numberOfLines={1}>
+                {amal.description}
+              </Text>
+            </View>
+
+            {/* Reward */}
+            <View style={styles.rewardCol}>
+              <View style={styles.rewardRow}>
+                <Ionicons name="sparkles" size={12} color={t.gold500} />
+                <Text style={[styles.rewardText, { color: t.gold500 }]}>{amal.reward}</Text>
+              </View>
             </View>
           </View>
 
           {/* Checkmark for completed */}
           {isComplete && (
             <View style={[styles.checkCircle, { backgroundColor: oasis.correct }]}>
-              <Ionicons name="checkmark" size={14} color={tokens.color.white} />
+              <Ionicons name="checkmark" size={12} color={tokens.color.white} />
             </View>
           )}
-        </View>
 
-        {/* Progress bar */}
-        <AmalProgressBar progress={progress} isDark={isDark} />
-      </View>
+          {/* Progress bar */}
+          <AmalProgressBar progress={progress} isDark={isDark} />
+        </View>
+      </JuicyPressable>
     </Animated.View>
   );
 }
@@ -231,6 +239,7 @@ const styles = StyleSheet.create({
   },
   rewardCol: {
     alignItems: 'flex-end',
+    marginTop: 20,
   },
   rewardRow: {
     flexDirection: 'row',
@@ -239,17 +248,17 @@ const styles = StyleSheet.create({
   },
   rewardText: {
     fontFamily: 'Nunito-Bold',
-    fontWeight: '700',
-    fontSize: 14,
+    fontWeight: '600',
+    fontSize: 12,
     lineHeight: 18,
   },
   checkCircle: {
     position: 'absolute',
-    top: -4,
-    right: -4,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    top: 8,
+    right: 10,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
   },

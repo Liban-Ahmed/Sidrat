@@ -97,7 +97,7 @@ export function AyahOfTheDay({ compact = false, ageGroup = 'early' }: AyahOfTheD
                 style={styles.audioBtn}
               >
                 <View style={[styles.audioBtnInner, { backgroundColor: oasis.primary }]}>
-                  <Ionicons name="play" size={18} color={t.white} />
+                  <Ionicons name="play" size={16} color={t.white} />
                 </View>
               </JuicyPressable>
             )}
@@ -202,9 +202,9 @@ const styles = StyleSheet.create({
     // Outer pressable area
   },
   audioBtnInner: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },

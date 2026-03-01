@@ -367,7 +367,7 @@ export default function HomeScreen() {
 
                         {/* Play button */}
                         <View style={[styles.playBtn, { backgroundColor: oasis.primaryStrong }]}>
-                          <Ionicons name="play" size={18} color={t.white} />
+                          <Ionicons name="play" size={16} color={t.white} />
                         </View>
                       </View>
                     </View>
@@ -529,9 +529,9 @@ const styles = StyleSheet.create({
     marginLeft: 3,
   },
   playBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: SPACING.sm,
