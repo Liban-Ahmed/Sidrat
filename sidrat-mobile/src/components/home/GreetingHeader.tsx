@@ -1,7 +1,10 @@
 /**
- * GreetingHeader — Warm olive50→cream gradient hero area
- * with time-aware Islamic greeting, child name, Hijri date,
- * and Istiqamah streak badge.
+ * GreetingHeader — Warm olive50→cream gradient hero area.
+ *
+ * Layout:
+ *   Caption  — Hijri date (muted, small)
+ *   Top row  — "Good Morning, Yusuf" (hero, 26pt) + 🔥 streak badge
+ *   HR       — full-bleed divider (matches learn/family tabs)
  *
  * Design Spec §8.1 — Home Screen greeting area.
  */
@@ -11,29 +14,22 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, {
-  FadeInDown,
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withSequence,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOasisColors } from '../../hooks/useOasisColors';
-import { SPACING, RADIUS, TYPOGRAPHY, type AgeGroup } from '../../theme/tokens';
+import { SPACING, RADIUS, type AgeGroup } from '../../theme/tokens';
 import haptic from '../../utils/haptics';
 import { formatHijriDate } from '../../utils/hijriDate';
 import { JuicyPressable } from '../common/JuicyPressable';
 
 // ── Helpers ──────────────────────────────────────────────────────
 
-function getGreeting(): { islamic: string; timeOfDay: string } {
+function getTimeGreeting(): string {
   const hour = new Date().getHours();
-  if (hour < 12) return { islamic: 'Assalamu Alaikum', timeOfDay: 'Good Morning' };
-  if (hour < 17) return { islamic: 'Assalamu Alaikum', timeOfDay: 'Good Afternoon' };
-  if (hour < 21) return { islamic: 'Assalamu Alaikum', timeOfDay: 'Good Evening' };
-  return { islamic: 'Assalamu Alaikum', timeOfDay: 'Good Night' };
+  if (hour < 12) return 'Good Morning';
+  if (hour < 17) return 'Good Afternoon';
+  if (hour < 21) return 'Good Evening';
+  return 'Good Night';
 }
 
 // ── Props ────────────────────────────────────────────────────────
@@ -46,36 +42,19 @@ interface GreetingHeaderProps {
 
 // ── Component ────────────────────────────────────────────────────
 
-export function GreetingHeader({ childName, streak, ageGroup }: GreetingHeaderProps) {
+export function GreetingHeader({ childName, streak, ageGroup: _ageGroup }: GreetingHeaderProps) {
   const { colors: oasis, t, isDark } = useOasisColors();
   const router = useRouter();
-  const greeting = useMemo(getGreeting, []);
+  const insets = useSafeAreaInsets();
+  const timeGreeting = useMemo(getTimeGreeting, []);
   const hijriDate = useMemo(() => formatHijriDate(), []);
 
-  // Streak badge gentle pulse
-  const pulseScale = useSharedValue(1);
-  React.useEffect(() => {
-    if (streak > 0) {
-      pulseScale.value = withRepeat(
-        withSequence(
-          withTiming(1.04, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
-          withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.ease) }),
-        ),
-        -1,
-        true,
-      );
-    }
-  }, [streak, pulseScale]);
-
-  const pulseStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulseScale.value }],
-  }));
-
-  const headingSize = (
-    TYPOGRAPHY.heading as Record<AgeGroup, { fontSize: number; lineHeight: number }>
-  )[ageGroup];
-
   const gradientColors: [string, string] = isDark ? [t.earth900, '#1F1D1A'] : [t.olive50, t.cream];
+
+  const navigateToProgress = () => {
+    haptic.light();
+    router.push('/(tabs)/progress' as any);
+  };
 
   return (
     <Animated.View entering={FadeInDown.duration(500).springify().damping(18)}>
@@ -83,58 +62,41 @@ export function GreetingHeader({ childName, streak, ageGroup }: GreetingHeaderPr
         colors={gradientColors}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
-        style={[styles.container, { paddingTop: SPACING.xxl + 54 }]}
+        style={[styles.container, { paddingTop: insets.top + SPACING.sm }]}
       >
-        <View style={styles.row}>
-          {/* Greeting + name */}
-          <View style={styles.greetingArea}>
-            <Text
-              style={[
-                styles.islamicGreeting,
-                {
-                  color: oasis.textPrimary,
-                  fontSize: Math.max(headingSize.fontSize, 26),
-                  lineHeight: Math.max(headingSize.lineHeight, 34),
-                },
-              ]}
-            >
-              {greeting.islamic}
-            </Text>
-            <Text style={[styles.timeGreeting, { color: oasis.textPrimary }]}>
-              {greeting.timeOfDay}
-            </Text>
-            <Text style={[styles.childName, { color: oasis.primaryDark }]}>{childName}</Text>
-            <Text style={[styles.hijriDate, { color: oasis.textMuted }]}>{hijriDate}</Text>
-          </View>
+        {/* ── Hijri date caption ── */}
+        <Text style={[styles.caption, { color: oasis.textMuted }]} numberOfLines={1}>
+          {hijriDate}
+        </Text>
 
-          {/* Istiqamah streak badge */}
+        {/* ── Hero row: greeting + streak badge ── */}
+        <View style={styles.topRow}>
+          <Text style={[styles.hero, { color: oasis.textPrimary }]} numberOfLines={1}>
+            {timeGreeting}, <Text style={{ color: oasis.primaryDark }}>{childName}</Text>
+          </Text>
+
           {streak > 0 && (
-            <Animated.View style={pulseStyle}>
-              <JuicyPressable
-                onPress={() => {
-                  haptic.light();
-                  router.push('/(tabs)/progress' as any);
-                }}
-                accessibilityLabel={`Istiqamah streak: ${streak} days. Tap to view your progress`}
-                accessibilityRole="button"
-                accessibilityHint="Navigate to progress tab"
+            <JuicyPressable
+              onPress={navigateToProgress}
+              accessibilityLabel={`Istiqamah streak: ${streak} days. Tap to view progress.`}
+              accessibilityRole="button"
+            >
+              <LinearGradient
+                colors={isDark ? [oasis.rewardBg, oasis.rewardBg] : [t.gold50, t.gold100]}
+                style={[
+                  styles.streakBadge,
+                  { borderColor: isDark ? oasis.rewardBorder : t.gold200 },
+                ]}
               >
-                <LinearGradient
-                  colors={isDark ? [oasis.rewardBg, oasis.rewardBg] : [t.gold50, t.gold100]}
-                  style={[
-                    styles.streakBadge,
-                    {
-                      borderColor: isDark ? oasis.rewardBorder : t.gold200,
-                    },
-                  ]}
-                >
-                  <Ionicons name="flame" size={15} color={t.gold600} />
-                  <Text style={[styles.streakCount, { color: t.gold600 }]}>{streak}</Text>
-                </LinearGradient>
-              </JuicyPressable>
-            </Animated.View>
+                <Ionicons name="flame" size={15} color={t.gold600} />
+                <Text style={[styles.streakCount, { color: t.gold600 }]}>{streak}</Text>
+              </LinearGradient>
+            </JuicyPressable>
           )}
         </View>
+
+        {/* ── Divider — full-bleed, matches learn/family tabs ── */}
+        <View style={[styles.divider, { backgroundColor: oasis.surfaceBorder }]} />
       </LinearGradient>
     </Animated.View>
   );
@@ -145,39 +107,27 @@ export function GreetingHeader({ childName, streak, ageGroup }: GreetingHeaderPr
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.lg,
+    paddingBottom: SPACING.md,
   },
-  row: {
+  topRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'space-between',
+    gap: SPACING.sm,
   },
-  greetingArea: {
+  caption: {
+    fontFamily: 'Nunito-Regular',
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 3,
+    opacity: 0.75,
+  },
+  hero: {
     flex: 1,
-    marginRight: SPACING.md,
-  },
-  islamicGreeting: {
     fontFamily: 'ReemKufi-Regular',
     fontWeight: '700',
-  },
-  timeGreeting: {
-    fontFamily: 'Nunito-Regular',
-    fontSize: 16,
-    lineHeight: 22,
-    marginTop: 2,
-  },
-  childName: {
-    fontFamily: 'Nunito-Bold',
-    fontSize: 20,
-    lineHeight: 26,
-    fontWeight: '700',
-    marginTop: SPACING.xs,
-  },
-  hijriDate: {
-    fontFamily: 'Nunito-Regular',
-    fontSize: 14,
-    lineHeight: 18,
-    marginTop: SPACING.xs,
+    fontSize: 26,
+    lineHeight: 34,
   },
   streakBadge: {
     flexDirection: 'row',
@@ -188,11 +138,16 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     gap: 4,
   },
-
   streakCount: {
     fontFamily: 'Nunito-Bold',
-    fontSize: 18,
     fontWeight: '700',
+    fontSize: 18,
     lineHeight: 24,
+  },
+  // Full-bleed HR — negative margins cancel the container's paddingHorizontal
+  divider: {
+    height: 1,
+    marginTop: SPACING.md,
+    marginHorizontal: -SPACING.lg,
   },
 });
