@@ -74,7 +74,7 @@ function LessonPlayerContent({
   childId: string;
   isReview: boolean;
 }) {
-  const { brand, colors, typography, radius, categoryColors, isDark } = useTheme();
+  const { brand, colors, typography, radius, categoryColors } = useTheme();
   const router = useRouter();
 
   const player = useLessonPlayer({ lesson, childId, isReview });
