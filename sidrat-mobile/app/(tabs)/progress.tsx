@@ -26,7 +26,6 @@ import Animated, {
   withSpring,
   withTiming,
   withDelay,
-  withRepeat,
   runOnJS,
   FadeIn,
   FadeInDown,
@@ -135,35 +134,6 @@ function AnimatedCounter({ value, style }: { value: number; style: TextStyle }) 
   }, [value, anim]);
 
   return <Text style={style}>{display}</Text>;
-}
-
-// ── TodayPulse – olive300 glow for today's incomplete circle ────
-
-function TodayPulse({ size }: { size: number }) {
-  const opacity = useSharedValue(0.4);
-
-  useEffect(() => {
-    opacity.value = withRepeat(withTiming(1, { duration: 750 }), -1, true);
-  }, [opacity]);
-
-  const pulseStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-  }));
-
-  return (
-    <Animated.View
-      style={[
-        {
-          position: 'absolute',
-          width: size + 8,
-          height: size + 8,
-          borderRadius: (size + 8) / 2,
-          backgroundColor: tokens.color.olive300,
-        },
-        pulseStyle,
-      ]}
-    />
-  );
 }
 
 // CrescentDay replaced by MiniCrescent (see src/components/home/MiniCrescent.tsx)
