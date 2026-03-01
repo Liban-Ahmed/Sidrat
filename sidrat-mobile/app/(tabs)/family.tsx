@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BismillahHeader, ShimmerBlock } from '../../src/components';
+import { ShimmerBlock } from '../../src/components';
 import { JuicyPressable } from '../../src/components/common/JuicyPressable';
 import { ANALYTICS_EVENTS } from '../../src/constants/config';
 import { analyticsService } from '../../src/services/analyticsService';
@@ -166,7 +166,7 @@ export default function FamilyScreen() {
                 {
                   paddingHorizontal: SPACING.md,
                   paddingTop: SPACING.xxl + 54,
-                  paddingBottom: SPACING.lg,
+                  paddingBottom: 0,
                 },
               ]}
             >
@@ -204,14 +204,6 @@ export default function FamilyScreen() {
                   marginTop: SPACING.md,
                 }}
               />
-
-              <View style={{ marginTop: SPACING.md, marginBottom: -SPACING.md }}>
-                <BismillahHeader
-                  size="md"
-                  color={isDark ? tokens.color.olive300 : tokens.color.olive400}
-                  align="center"
-                />
-              </View>
             </View>
           </Animated.View>
 
