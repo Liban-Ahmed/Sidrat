@@ -17,7 +17,7 @@ import {
   PhaseTransition,
   ThinkingCountdown,
 } from '../../src/components/lesson';
-import { getCurriculumLesson } from '../../src/data/curriculum';
+import { allUnits, getCurriculumLesson } from '../../src/data/curriculum';
 import { useLessonPlayer } from '../../src/hooks/useLessonPlayer';
 import { resolveLessonForChild } from '../../src/services/ageAdaptiveService';
 import { useAppStore, useChildStore } from '../../src/stores';
@@ -96,6 +96,10 @@ function LessonPlayerContent({
   }, [player, router]);
 
   const categoryInfo = categoryMeta[lesson.category];
+  const unitLabel = useMemo(() => {
+    const unit = allUnits.find((candidate) => candidate.id === lesson.unitId);
+    return unit ? `Unit: ${unit.title}` : `Unit: ${lesson.unitId}`;
+  }, [lesson.unitId]);
   const accentColor = isReview
     ? brand.accent
     : (categoryColors[lesson.category]?.solid ?? brand.primary);
@@ -191,6 +195,7 @@ function LessonPlayerContent({
         {!showCountdown && player.phase === 'hook' && (
           <HookPhase
             hook={lesson.hook}
+            unitLabel={unitLabel}
             isNarrating={player.state.isNarrating}
             onNarrate={player.narrate}
             onContinue={() => {

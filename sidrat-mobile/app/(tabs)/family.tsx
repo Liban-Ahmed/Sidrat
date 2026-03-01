@@ -8,15 +8,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useMemo, useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  Alert,
-  RefreshControl,
-  useColorScheme,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Alert, RefreshControl } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ShimmerBlock } from '../../src/components';
@@ -30,6 +22,7 @@ import {
   getActivityForWeek,
   getNextActivity,
 } from '../../src/stores/familyStore';
+import { useTheme } from '../../src/theme';
 import {
   tokens,
   semanticColors,
@@ -84,8 +77,8 @@ function FamilySkeleton() {
 }
 
 export default function FamilyScreen() {
-  const scheme = useColorScheme();
-  const isDark = scheme === 'dark';
+  const { mode } = useTheme();
+  const isDark = mode === 'dark';
   const sc = isDark ? darkSemanticColors : semanticColors;
 
   const activeChildId = useAppStore((s) => s.activeChildId);
