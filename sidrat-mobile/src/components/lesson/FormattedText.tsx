@@ -13,24 +13,34 @@ interface FormattedTextProps {
   style?: StyleProp<TextStyle>;
   /** Extra style applied only to **bold** segments */
   boldStyle?: StyleProp<TextStyle>;
+  /** Maximum number of lines to display */
+  numberOfLines?: number;
 }
 
 const BOLD_RE = /(\*\*[^*]+\*\*)/g;
 
-export function FormattedText({ children, style, boldStyle }: FormattedTextProps) {
+export function FormattedText({ children, style, boldStyle, numberOfLines }: FormattedTextProps) {
   if (!children || typeof children !== 'string') {
-    return <Text style={style}>{children}</Text>;
+    return (
+      <Text style={style} numberOfLines={numberOfLines}>
+        {children}
+      </Text>
+    );
   }
 
   const parts = children.split(BOLD_RE);
 
   // Fast path — no bold markers found
   if (parts.length === 1) {
-    return <Text style={style}>{children}</Text>;
+    return (
+      <Text style={style} numberOfLines={numberOfLines}>
+        {children}
+      </Text>
+    );
   }
 
   return (
-    <Text style={style}>
+    <Text style={style} numberOfLines={numberOfLines}>
       {parts.map((part, i) => {
         if (part.startsWith('**') && part.endsWith('**')) {
           return (

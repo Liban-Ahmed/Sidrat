@@ -18,15 +18,16 @@ import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { FeedbackCard } from './FeedbackCard';
 import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 import type { PracticeMatching } from '../../types/curriculum';
 
 interface Props {
   block: PracticeMatching;
   onAnswer: (isCorrect: boolean, pointsEarned: number) => void;
+  accentColor: string;
 }
 
-export function MatchingCard({ block, onAnswer }: Props) {
+export function MatchingCard({ block, onAnswer, accentColor }: Props) {
   const { brand, colors, typography, radius, isDark, shadows } = useTheme();
 
   // Shuffle right column
@@ -43,7 +44,7 @@ export function MatchingCard({ block, onAnswer }: Props) {
   const handleLeftTap = useCallback(
     (left: string) => {
       if (matched.has(left)) return;
-      haptics.light();
+      haptic.light();
       setSelectedLeft(left);
       setWrongPair(null);
     },
@@ -57,7 +58,7 @@ export function MatchingCard({ block, onAnswer }: Props) {
 
       const correctPair = block.pairs.find((p) => p.left === selectedLeft);
       if (correctPair && correctPair.right === right) {
-        haptics.medium();
+        haptic.medium();
         const newMatched = new Map(matched);
         newMatched.set(selectedLeft, right);
         setMatched(newMatched);
@@ -68,7 +69,7 @@ export function MatchingCard({ block, onAnswer }: Props) {
           setTimeout(() => onAnswer(true, block.points), 800);
         }
       } else {
-        haptics.light();
+        haptic.light();
         setWrongPair({ left: selectedLeft, right });
         setTimeout(() => {
           setWrongPair(null);
@@ -110,9 +111,9 @@ export function MatchingCard({ block, onAnswer }: Props) {
               border = colors.error;
               textColor = colors.error;
             } else if (isSelected) {
-              bg = brand.primary + '12';
-              border = brand.primary;
-              textColor = brand.primary;
+              bg = accentColor + '12';
+              border = accentColor;
+              textColor = accentColor;
             }
 
             return (
@@ -133,7 +134,7 @@ export function MatchingCard({ block, onAnswer }: Props) {
                       borderLeftColor: isMatched
                         ? colors.success
                         : isSelected
-                          ? brand.primary
+                          ? accentColor
                           : border,
                       ...shadows.subtle,
                       transform: [{ scale: pressed ? 0.97 : 1 }],

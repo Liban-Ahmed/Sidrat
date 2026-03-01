@@ -15,7 +15,7 @@ import Animated, {
 import { FeedbackCard } from './FeedbackCard';
 import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 import type { PracticeQuiz } from '../../types/curriculum';
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -42,7 +42,7 @@ export function QuizCard({ block, onAnswer }: Props) {
   const handleSelect = useCallback(
     (index: number) => {
       if (showResult) return;
-      haptics.medium();
+      haptic.medium();
       setSelectedIndex(index);
       setShowResult(true);
 
@@ -64,7 +64,7 @@ export function QuizCard({ block, onAnswer }: Props) {
           setSelectedIndex(null);
         }, 1500);
       } else {
-        haptics.light();
+        haptic.light();
         const pointsEarned =
           attempts === 0 ? block.points : Math.max(1, Math.floor(block.points / 2));
         setTimeout(() => onAnswer(true, pointsEarned), 1200);

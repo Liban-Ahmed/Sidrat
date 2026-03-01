@@ -22,9 +22,20 @@ interface MiniCrescentProps {
   size?: number;
   /** Accent-tinted crescent for today */
   isToday?: boolean;
+  /** Override the moon fill colour (defaults to white / accentLight) */
+  moonColor?: string;
+  /** Override the inactive ring border colour */
+  inactiveBorderColor?: string;
 }
 
-export function MiniCrescent({ active, parentBg, size = 14, isToday = false }: MiniCrescentProps) {
+export function MiniCrescent({
+  active,
+  parentBg,
+  size = 14,
+  isToday = false,
+  moonColor: moonColorProp,
+  inactiveBorderColor,
+}: MiniCrescentProps) {
   const { brand } = useTheme();
 
   if (!active) {
@@ -36,13 +47,14 @@ export function MiniCrescent({ active, parentBg, size = 14, isToday = false }: M
             width: size,
             height: size,
             borderRadius: size / 2,
+            ...(inactiveBorderColor ? { borderColor: inactiveBorderColor } : {}),
           },
         ]}
       />
     );
   }
 
-  const moonColor = isToday ? brand.accentLight : '#FFFFFF';
+  const moonColor = moonColorProp ?? (isToday ? brand.accentLight : '#FFFFFF');
   const outerSize = size + 2;
 
   return (

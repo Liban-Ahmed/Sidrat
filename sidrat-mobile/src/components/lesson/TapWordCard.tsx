@@ -29,15 +29,16 @@ import Animated, {
 import { FeedbackCard } from './FeedbackCard';
 import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 import type { PracticeTapWord } from '../../types/curriculum';
 
 interface Props {
   block: PracticeTapWord;
   onAnswer: (isCorrect: boolean, pointsEarned: number) => void;
+  accentColor: string;
 }
 
-export function TapWordCard({ block, onAnswer }: Props) {
+export function TapWordCard({ block, onAnswer, accentColor }: Props) {
   const { brand, colors, typography, radius, isDark, shadows } = useTheme();
 
   // Shuffle word bank on mount
@@ -80,7 +81,7 @@ export function TapWordCard({ block, onAnswer }: Props) {
 
       if (word === expectedWord) {
         // Correct word tapped
-        haptics.light();
+        haptic.light();
         const newSelected = [...selected, word];
         const newUsed = new Set(usedIndices);
         newUsed.add(bankIndex);
@@ -91,14 +92,14 @@ export function TapWordCard({ block, onAnswer }: Props) {
         // Check if sentence is complete
         if (newSelected.length === block.correctSentence.length) {
           setShowResult(true);
-          haptics.medium();
+          haptic.medium();
           const pointsEarned =
             attempts === 0 ? block.points : Math.max(1, Math.floor(block.points / 2));
           setTimeout(() => onAnswer(true, pointsEarned), 1500);
         }
       } else {
         // Wrong word tapped
-        haptics.medium();
+        haptic.medium();
         setAttempts((a) => a + 1);
         setWrongIndex(bankIndex);
         triggerShake();
@@ -117,7 +118,7 @@ export function TapWordCard({ block, onAnswer }: Props) {
 
   const handleUndo = useCallback(() => {
     if (showResult || selected.length === 0) return;
-    haptics.light();
+    haptic.light();
     const lastWord = selected[selected.length - 1];
 
     // Find the last used bank index matching this word
@@ -135,7 +136,7 @@ export function TapWordCard({ block, onAnswer }: Props) {
   }, [showResult, selected, shuffled, usedIndices]);
 
   const handleReset = useCallback(() => {
-    haptics.light();
+    haptic.light();
     setSelected([]);
     setUsedIndices(new Set());
     setShowResult(false);
@@ -144,7 +145,7 @@ export function TapWordCard({ block, onAnswer }: Props) {
 
   const handleHint = useCallback(() => {
     if (showResult) return;
-    haptics.light();
+    haptic.light();
     setShowHint(true);
 
     // Auto-place the next correct word
@@ -166,7 +167,7 @@ export function TapWordCard({ block, onAnswer }: Props) {
       // Check if sentence is complete after hint
       if (newSelected.length === block.correctSentence.length) {
         setShowResult(true);
-        haptics.medium();
+        haptic.medium();
         const pointsEarned = Math.max(1, Math.floor(block.points / 2));
         setTimeout(() => onAnswer(true, pointsEarned), 1500);
       }
@@ -218,10 +219,10 @@ export function TapWordCard({ block, onAnswer }: Props) {
                   style={[
                     styles.selectedWord,
                     {
-                      backgroundColor: showResult ? colors.successMuted : brand.primary + '12',
+                      backgroundColor: showResult ? colors.successMuted : accentColor + '12',
                       borderRadius: radius.md,
                       borderLeftWidth: 3,
-                      borderLeftColor: showResult ? colors.success : brand.primary,
+                      borderLeftColor: showResult ? colors.success : accentColor,
                     },
                   ]}
                 >
@@ -229,7 +230,7 @@ export function TapWordCard({ block, onAnswer }: Props) {
                     style={[
                       styles.numberBadge,
                       {
-                        backgroundColor: showResult ? colors.success + '25' : brand.primary + '18',
+                        backgroundColor: showResult ? colors.success + '25' : accentColor + '18',
                         borderRadius: radius.full,
                       },
                     ]}
@@ -238,7 +239,7 @@ export function TapWordCard({ block, onAnswer }: Props) {
                       style={[
                         typography.labelXs,
                         {
-                          color: showResult ? colors.success : brand.primary,
+                          color: showResult ? colors.success : accentColor,
                           fontWeight: '700',
                         },
                       ]}
@@ -268,8 +269,8 @@ export function TapWordCard({ block, onAnswer }: Props) {
       {selected.length > 0 && !showResult && (
         <Animated.View entering={FadeIn.duration(300)} style={styles.controlRow}>
           <Pressable onPress={handleUndo} style={styles.controlButton}>
-            <Ionicons name="arrow-undo" size={15} color={brand.primary} />
-            <Text style={[typography.labelSmall, { color: brand.primary }]}>Undo</Text>
+            <Ionicons name="arrow-undo" size={15} color={accentColor} />
+            <Text style={[typography.labelSmall, { color: accentColor }]}>Undo</Text>
           </Pressable>
           <View style={[styles.controlDivider, { backgroundColor: colors.separator }]} />
           <Pressable onPress={handleReset} style={styles.controlButton}>

@@ -1,28 +1,36 @@
 /**
- * Settings Screen
+ * Settings Screen — Oasis Design Spec §8.6
  *
- * Parent controls, profile management, parental gate.
- * All toggles wired to settingsStore.
+ * Feel: Clean, functional, trustworthy.
+ * Background: sand50 flat (dark: earth900 flat).
+ * All interactions use JuicyPressable with haptics.
+ * All colors from Oasis token system — no ad-hoc hex values.
+ *
+ * Structural changes vs previous version:
+ *  1. Header matches Family / Progress / Learn pattern
+ *     (Nunito-Bold title, earth800, left-aligned, no dark gradient)
+ *  2. Active child profile indicator lives in the header (top-left),
+ *     removed from the body. Tap avatar to expand inline child switcher.
  */
 
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
   ScrollView,
-  Pressable,
   Switch,
   Alert,
   StyleSheet,
   Linking,
   Appearance,
 } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Avatar, Card, ScalePress } from '../../src/components';
+import { Avatar } from '../../src/components';
+import { JuicyPressable } from '../../src/components/common/JuicyPressable';
 import { ParentalGate } from '../../src/components/common/ParentalGate';
 import { useParentalGate } from '../../src/hooks';
 import { audioService } from '../../src/services/audioService';
@@ -36,6 +44,16 @@ import {
   useToastStore,
 } from '../../src/stores';
 import { useTheme } from '../../src/theme';
+import {
+  tokens,
+  semanticColors,
+  darkSemanticColors,
+  SPRINGS,
+  SPACING,
+  RADIUS,
+  SHADOW,
+} from '../../src/theme/tokens';
+import haptic from '../../src/utils/haptics';
 
 // ── Reminder time options ──────────────────────────────────────────
 
@@ -55,9 +73,31 @@ function formatReminderHour(hour: number): string {
   return `${h}:00 ${suffix}`;
 }
 
+// ── Stagger enter helper — spring-based (§3.1) ────────────────────
+
+function staggerEnter(index: number) {
+  return FadeInDown.delay(Math.min(index * 60, 360))
+    .springify()
+    .damping(SPRINGS.gentle.damping)
+    .stiffness(SPRINGS.gentle.stiffness)
+    .mass(SPRINGS.gentle.mass);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Component
+// ════════════════════════════════════════════════════════════════════
+
 export default function SettingsScreen() {
-  const { brand, colors, typography, spacing, radius, gradients, shadows, isDark } = useTheme();
+  const { isDark } = useTheme();
   const router = useRouter();
+
+  // Oasis semantic palette (light / dark)
+  const sc = isDark ? darkSemanticColors : semanticColors;
+
+  // Screen bg — spec §8.6: sand50 flat (dark: earth900)
+  const screenBg = isDark ? tokens.color.earth900 : tokens.color.sand50;
+
+  // ── Store reads ──────────────────────────────────────────────
 
   const children = useChildStore((s) => s.children);
   const removeChild = useChildStore((s) => s.removeChild);
@@ -66,6 +106,15 @@ export default function SettingsScreen() {
   const resetApp = useAppStore((s) => s.reset);
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const isAnonymous = useAuthStore((s) => s.isAnonymous);
+
+  // Active child (derived)
+  const activeChild = useMemo(
+    () => children.find((c) => c.id === activeChildId),
+    [children, activeChildId],
+  );
+
+  // Child switcher expand state
+  const [childSwitcherOpen, setChildSwitcherOpen] = useState(false);
 
   // Settings store
   const soundEnabled = useSettingsStore((s) => s.soundEnabled);
@@ -123,7 +172,6 @@ export default function SettingsScreen() {
   const handleToggleSound = useCallback(
     (value: boolean) => {
       setSoundEnabled(value);
-      // Stop any playing TTS immediately when sound is switched off
       if (!value) audioService.stop();
     },
     [setSoundEnabled],
@@ -131,14 +179,12 @@ export default function SettingsScreen() {
 
   const handleToggleHaptics = useCallback(
     (value: boolean) => setHapticsEnabled(value),
-    // haptics.ts reads hapticsEnabled from store directly — no extra wiring needed
     [setHapticsEnabled],
   );
 
   const handleToggleNarration = useCallback(
     (value: boolean) => {
       setNarrationEnabled(value);
-      // Stop any in-progress speech when narration is turned off
       if (!value) audioService.stop();
     },
     [setNarrationEnabled],
@@ -149,7 +195,6 @@ export default function SettingsScreen() {
       if (value) {
         const granted = await notificationService.requestPermissions();
         if (granted) {
-          // Use the stored reminderHour so the toggle respects the current time
           await notificationService.scheduleDailyReminder(reminderHour);
           setDailyReminder(true);
         } else {
@@ -222,22 +267,16 @@ export default function SettingsScreen() {
             text: 'Delete Everything',
             style: 'destructive',
             onPress: async () => {
-              // Attempt remote deletion but never let it block local cleanup.
-              // Anonymous sessions have no remote record to delete.
               if (!isAnonymous) {
                 try {
                   await authService.deleteAccount();
                 } catch (error) {
-                  // Network/server errors are non-fatal — we still wipe
-                  // local data so the user is signed out on this device.
                   console.warn(
                     '[Settings] Remote account deletion failed (local data will still be cleared):',
                     error,
                   );
                 }
               }
-
-              // Always clear local state and navigate away
               clearAuth();
               resetApp();
               router.replace('/welcome');
@@ -248,7 +287,6 @@ export default function SettingsScreen() {
     });
   }, [requireGate, isAnonymous, clearAuth, resetApp, router]);
 
-  // Sign out does NOT require the parental gate — it's a parent action the parent initiates
   const handleSignOut = useCallback(() => {
     Alert.alert('Sign Out', 'Your local data will be preserved. You can sign in again later.', [
       { text: 'Cancel', style: 'cancel' },
@@ -270,7 +308,19 @@ export default function SettingsScreen() {
     ]);
   }, [clearAuth, resetApp, router]);
 
-  // ── Theme segment ──
+  const handleAvatarPress = useCallback(() => {
+    setChildSwitcherOpen((v) => !v);
+  }, []);
+
+  const handleSwitchChild = useCallback(
+    (childId: string) => {
+      setActiveChild(childId);
+      setChildSwitcherOpen(false);
+    },
+    [setActiveChild],
+  );
+
+  // ── Theme options — Oasis palette only ──
 
   const THEME_OPTIONS: {
     value: 'system' | 'light' | 'dark';
@@ -284,26 +334,25 @@ export default function SettingsScreen() {
       value: 'light',
       icon: 'sunny-outline',
       label: 'Light',
-      previewBg: '#F5F5F5',
-      previewBar1: '#1A3A5C',
-      previewBar2: '#C8C8C8',
+      previewBg: tokens.color.sand50,
+      previewBar1: tokens.color.earth800,
+      previewBar2: tokens.color.sand200,
     },
     {
       value: 'system',
       icon: 'phone-portrait-outline',
       label: 'Auto',
-      // Uses current theme colors so the preview is contextual
-      previewBg: isDark ? '#1C1C1E' : '#F5F5F5',
-      previewBar1: isDark ? '#E0E0E0' : '#1A3A5C',
-      previewBar2: isDark ? '#555' : '#C8C8C8',
+      previewBg: isDark ? tokens.color.earth900 : tokens.color.sand50,
+      previewBar1: isDark ? tokens.color.sand50 : tokens.color.earth800,
+      previewBar2: isDark ? tokens.color.earth700 : tokens.color.sand200,
     },
     {
       value: 'dark',
       icon: 'moon-outline',
       label: 'Dark',
-      previewBg: '#1C1C1E',
-      previewBar1: '#E0E0E0',
-      previewBar2: '#555555',
+      previewBg: tokens.color.earth900,
+      previewBar1: tokens.color.sand50,
+      previewBar2: tokens.color.earth700,
     },
   ];
 
@@ -349,539 +398,490 @@ export default function SettingsScreen() {
     },
   ];
 
-  const delay = (i: number) => Math.min(80 + i * 60, 400);
+  // ═══════════════════════════════════════════════════════════════
+  // Render
+  // ═══════════════════════════════════════════════════════════════
 
   return (
-    <SafeAreaView
-      style={[styles.safe, { backgroundColor: colors.background }]}
-      edges={['left', 'right']}
-    >
-      {/* ── Gradient Header (no orbs) ── */}
-      <Animated.View entering={FadeIn.duration(400)}>
-        <LinearGradient
-          colors={gradients.settingsHero}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{
-            paddingHorizontal: spacing.lg,
-            paddingTop: spacing.xl + 54,
-            paddingBottom: spacing.xxl + 12,
-          }}
-        >
-          <Text style={[typography.largeTitle, { color: '#FFFFFF' }]}>Settings</Text>
-          <Text
-            style={[typography.body, { color: 'rgba(255,255,255,0.75)', marginTop: spacing.xxs }]}
-          >
-            Preferences & child profiles
-          </Text>
-        </LinearGradient>
-        <View
-          style={{
-            height: 24,
-            marginTop: -24,
-            backgroundColor: colors.background,
-            borderTopLeftRadius: radius.xl,
-            borderTopRightRadius: radius.xl,
-          }}
-        />
-      </Animated.View>
-
+    <SafeAreaView style={[styles.safe, { backgroundColor: screenBg }]} edges={['left', 'right']}>
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: spacing.md, paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── Child Profiles ── */}
-        <Animated.View entering={FadeInDown.delay(delay(0)).duration(400)}>
-          <Text style={[typography.title3, { color: colors.text, marginTop: spacing.xxxs }]}>
-            Profiles
-          </Text>
+        {/* ══════ Header (matches Family / Progress / Learn pattern) ══════ */}
+        <Animated.View entering={staggerEnter(0)} style={{ zIndex: 100 }}>
+          <View style={styles.header}>
+            {/* Title row — title/subtitle on left, active child avatar on right */}
+            <View style={styles.headerTitleRow}>
+              <View style={{ flex: 1 }}>
+                {/* Page title — Nunito-Bold 26pt, matches Progress headerPageTitle */}
+                <Text style={[styles.headerTitle, { color: sc.textPrimary }]}>Settings</Text>
+                <Text style={[styles.headerSubtitle, { color: sc.textMuted }]}>
+                  Preferences & child profiles
+                </Text>
+              </View>
 
-          {children.length > 0 && (
-            <>
-              <View style={[styles.profileRow, { marginTop: spacing.xs, gap: spacing.sm }]}>
-                {children.map((child) => {
-                  const isActive = child.id === activeChildId;
-                  return (
-                    <ScalePress
-                      key={child.id}
-                      onPress={() => setActiveChild(child.id)}
-                      onLongPress={() => handleRemoveChild(child.id, child.name)}
-                      haptic
-                      pressScale={0.93}
-                      accessibilityLabel={`${child.name}${isActive ? ', selected' : ''}. Long press to remove`}
-                      accessibilityRole="button"
+              {/* Active child avatar + overlay dropdown — top-right */}
+              {activeChild && (
+                <View style={{ position: 'relative' }}>
+                  <JuicyPressable
+                    onPress={handleAvatarPress}
+                    accessibilityLabel={`Active profile: ${activeChild.name}. Tap to switch.`}
+                    accessibilityRole="button"
+                    style={styles.headerProfileRow}
+                  >
+                    <LinearGradient
+                      colors={[tokens.color.olive100, tokens.color.olive200]}
+                      style={styles.headerAvatar}
+                    >
+                      <Avatar avatarId={activeChild.avatarId} size={28} />
+                    </LinearGradient>
+                    <Ionicons
+                      name={childSwitcherOpen ? 'chevron-up' : 'chevron-down'}
+                      size={14}
+                      color={tokens.color.olive600}
+                      style={{ marginLeft: 4 }}
+                    />
+                  </JuicyPressable>
+
+                  {/* ── Dropdown overlays content below ── */}
+                  {childSwitcherOpen && children.length > 0 && (
+                    <Animated.View
+                      entering={FadeInDown.springify()
+                        .damping(SPRINGS.snappy.damping)
+                        .stiffness(SPRINGS.snappy.stiffness)
+                        .mass(SPRINGS.snappy.mass)}
                       style={[
-                        styles.profileItem,
+                        styles.childSwitcher,
                         {
-                          backgroundColor: isActive
-                            ? brand.primary + '12'
-                            : isDark
-                              ? colors.surfaceSecondary
-                              : colors.surface,
-                          borderRadius: radius.lg,
-                          paddingVertical: spacing.sm,
-                          paddingHorizontal: spacing.md,
-                          borderWidth: isActive ? 2 : StyleSheet.hairlineWidth,
-                          borderColor: isActive ? brand.primary : colors.border,
-                          ...(isActive ? shadows.card : {}),
+                          backgroundColor: isDark ? tokens.color.earth800 : tokens.color.white,
+                          borderColor: sc.surfaceBorder,
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.switcherHint, { color: sc.textMuted }]}>
+                        Hold a profile to remove it
+                      </Text>
+                      {children.map((child) => {
+                        const isActive = child.id === activeChildId;
+                        return (
+                          <JuicyPressable
+                            key={child.id}
+                            onPress={() => handleSwitchChild(child.id)}
+                            onLongPress={() => handleRemoveChild(child.id, child.name)}
+                            accessibilityLabel={`${child.name}, ${isActive ? 'active profile' : 'inactive profile'}. Long press to remove.`}
+                            accessibilityRole="button"
+                            style={[
+                              styles.switcherItem,
+                              {
+                                backgroundColor: isActive
+                                  ? isDark
+                                    ? tokens.color.olive400 + '18'
+                                    : tokens.color.olive50
+                                  : sc.surface,
+                                borderColor: isActive ? tokens.color.olive400 : sc.surfaceBorder,
+                                borderWidth: isActive ? 2 : 1,
+                              },
+                            ]}
+                          >
+                            <LinearGradient
+                              colors={[tokens.color.olive100, tokens.color.olive200]}
+                              style={[
+                                styles.switcherAvatar,
+                                {
+                                  borderWidth: 2,
+                                  borderColor: isActive
+                                    ? tokens.color.olive400
+                                    : tokens.color.sand200,
+                                },
+                              ]}
+                            >
+                              <Avatar avatarId={child.avatarId} size={24} />
+                            </LinearGradient>
+                            <Text
+                              style={[
+                                styles.switcherName,
+                                {
+                                  flex: 1,
+                                  color: isActive ? sc.textPrimary : sc.textSecondary,
+                                  fontWeight: isActive ? '700' : '500',
+                                },
+                              ]}
+                              numberOfLines={1}
+                            >
+                              {child.name}
+                            </Text>
+                            {isActive && (
+                              <Ionicons
+                                name="checkmark-circle"
+                                size={18}
+                                color={tokens.color.olive400}
+                              />
+                            )}
+                          </JuicyPressable>
+                        );
+                      })}
+                    </Animated.View>
+                  )}
+                </View>
+              )}
+            </View>
+            <View
+              style={[
+                styles.headerDivider,
+                {
+                  backgroundColor: sc.surfaceBorder,
+                  marginHorizontal: -SPACING.md,
+                },
+              ]}
+            />
+          </View>
+        </Animated.View>
+
+        <View style={{ paddingHorizontal: SPACING.md }}>
+          {/* ══════ PREFERENCES ══════ */}
+          <Animated.View entering={staggerEnter(1)}>
+            <Text style={styles.sectionLabel}>PREFERENCES</Text>
+            <View style={styles.sectionGroup}>
+              {preferenceToggles.map((item, i) => {
+                const isLast = i === preferenceToggles.length - 1 && !dailyReminderEnabled;
+                return (
+                  <JuicyPressable
+                    key={item.label}
+                    onPress={() => {
+                      haptic.selection();
+                      item.onToggle(!item.value);
+                    }}
+                    accessibilityLabel={`${item.label}, currently ${item.value ? 'on' : 'off'}`}
+                    accessibilityRole="switch"
+                    style={[
+                      styles.row,
+                      {
+                        backgroundColor: sc.surface,
+                        borderBottomWidth: isLast ? 0 : 1,
+                        borderBottomColor: sc.surfaceBorder,
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name={item.icon}
+                      size={20}
+                      color={tokens.color.sand400}
+                      style={styles.rowIcon}
+                    />
+                    <Text style={[styles.rowTitle, { color: sc.textPrimary }]}>{item.label}</Text>
+                    <View style={{ marginTop: 3 }}>
+                      <Switch
+                        value={item.value}
+                        onValueChange={(v) => {
+                          haptic.selection();
+                          item.onToggle(v);
+                        }}
+                        trackColor={{
+                          false: isDark ? tokens.color.earth700 : tokens.color.sand200,
+                          true: tokens.color.olive400,
+                        }}
+                        thumbColor={tokens.color.white}
+                      />
+                    </View>
+                  </JuicyPressable>
+                );
+              })}
+
+              {/* Reminder time sub-row — only when daily reminder is on */}
+              {dailyReminderEnabled && (
+                <JuicyPressable
+                  onPress={handleReminderTime}
+                  accessibilityLabel={`Reminder time, currently ${formatReminderHour(reminderHour)}`}
+                  accessibilityRole="button"
+                  style={[
+                    styles.row,
+                    {
+                      backgroundColor: sc.surface,
+                      borderBottomWidth: 0,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="time-outline"
+                    size={20}
+                    color={tokens.color.sand400}
+                    style={styles.rowIcon}
+                  />
+                  <Text style={[styles.rowTitle, { color: sc.textPrimary }]}>Reminder Time</Text>
+                  <Text style={[styles.rowValue, { color: tokens.color.olive400 }]}>
+                    {formatReminderHour(reminderHour)}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={16} color={tokens.color.sand300} />
+                </JuicyPressable>
+              )}
+            </View>
+          </Animated.View>
+
+          {/* ══════ APPEARANCE ══════ */}
+          <Animated.View entering={staggerEnter(2)}>
+            <Text style={styles.sectionLabel}>APPEARANCE</Text>
+            <View style={[styles.themeRow, { gap: SPACING.sm }]}>
+              {THEME_OPTIONS.map(({ value, icon, label, previewBg, previewBar1, previewBar2 }) => {
+                const isSelected = themePreference === value;
+                return (
+                  <JuicyPressable
+                    key={value}
+                    onPress={() => {
+                      setThemePreference(value);
+                      Appearance.setColorScheme(value === 'system' ? null : value);
+                    }}
+                    accessibilityLabel={`${label} theme${isSelected ? ', selected' : ''}`}
+                    accessibilityRole="button"
+                    style={[
+                      styles.themeCard,
+                      {
+                        backgroundColor: isSelected
+                          ? isDark
+                            ? tokens.color.olive400 + '18'
+                            : tokens.color.olive50
+                          : sc.surface,
+                        borderRadius: RADIUS.lg,
+                        borderWidth: isSelected ? 2 : 1,
+                        borderColor: isSelected ? tokens.color.olive400 : sc.surfaceBorder,
+                        ...(isSelected ? SHADOW.rnSm : {}),
+                      },
+                    ]}
+                  >
+                    {/* Mini screen preview */}
+                    <View
+                      style={[
+                        styles.themePreview,
+                        {
+                          backgroundColor: previewBg,
+                          borderRadius: RADIUS.sm,
+                          borderWidth: 1,
+                          borderColor: sc.surfaceBorder,
                         },
                       ]}
                     >
                       <View
-                        style={[
-                          styles.avatarWrap,
-                          { borderWidth: 2, borderColor: isActive ? brand.primary : 'transparent' },
-                        ]}
-                      >
-                        <Avatar avatarId={child.avatarId} size={36} />
-                      </View>
+                        style={{
+                          height: 5,
+                          backgroundColor: previewBar1,
+                          borderRadius: 2,
+                          marginBottom: 3,
+                        }}
+                      />
+                      <View
+                        style={{
+                          height: 4,
+                          backgroundColor: previewBar1,
+                          borderRadius: 2,
+                          width: '70%',
+                          marginBottom: 2,
+                        }}
+                      />
+                      <View
+                        style={{
+                          height: 4,
+                          backgroundColor: previewBar2,
+                          borderRadius: 2,
+                          width: '90%',
+                          marginBottom: 2,
+                        }}
+                      />
+                      <View
+                        style={{
+                          height: 4,
+                          backgroundColor: previewBar2,
+                          borderRadius: 2,
+                          width: '55%',
+                        }}
+                      />
+                    </View>
+
+                    {/* Label */}
+                    <View style={styles.themeCardLabel}>
+                      <Ionicons
+                        name={icon}
+                        size={14}
+                        color={isSelected ? tokens.color.olive400 : sc.textMuted}
+                      />
                       <Text
                         style={[
-                          typography.labelSmall,
+                          styles.themeCardLabelText,
                           {
-                            color: isActive ? brand.primary : colors.textSecondary,
-                            marginTop: spacing.xxs,
-                            fontWeight: isActive ? '600' : '400',
+                            color: isSelected ? tokens.color.olive400 : sc.textMuted,
                           },
                         ]}
-                        numberOfLines={1}
                       >
-                        {child.name}
+                        {label}
                       </Text>
-                    </ScalePress>
-                  );
-                })}
-              </View>
-              <Text
-                style={[
-                  typography.caption,
-                  { color: colors.textTertiary, marginTop: spacing.xs, marginLeft: 2 },
-                ]}
-              >
-                Hold a profile to remove it.
-              </Text>
-            </>
-          )}
-        </Animated.View>
+                    </View>
 
-        {/* ── Preferences ── */}
-        <Animated.View
-          entering={FadeInDown.delay(delay(1)).duration(400)}
-          style={{ marginTop: spacing.xxl }}
-        >
-          <View style={styles.sectionHeader}>
-            <Ionicons name="options-outline" size={17} color={brand.primary} />
-            <Text style={[typography.title3, { color: colors.text, marginLeft: spacing.xs }]}>
-              Preferences
-            </Text>
-          </View>
-          <Card variant="glass" noPadding style={{ marginTop: spacing.sm }}>
-            {preferenceToggles.map((item, i) => (
-              <View
-                key={item.label}
+                    {/* Checkmark badge */}
+                    {isSelected && (
+                      <View style={[styles.themeCheck, { backgroundColor: tokens.color.olive400 }]}>
+                        <Ionicons name="checkmark" size={10} color={tokens.color.white} />
+                      </View>
+                    )}
+                  </JuicyPressable>
+                );
+              })}
+            </View>
+          </Animated.View>
+
+          {/* ══════ PARENT ZONE ══════ */}
+          <Animated.View entering={staggerEnter(3)}>
+            <Text style={styles.sectionLabel}>PARENT ZONE</Text>
+            <View style={styles.sectionGroup}>
+              {/* Add Child Profile */}
+              <JuicyPressable
+                onPress={() => requireGate(() => router.push('/onboarding/child-profile'))}
+                accessibilityLabel="Add child profile"
+                accessibilityRole="button"
                 style={[
-                  styles.settingRow,
+                  styles.row,
                   {
-                    paddingVertical: spacing.sm + 2,
-                    paddingHorizontal: spacing.md,
-                    borderBottomWidth:
-                      i < preferenceToggles.length - 1 ? StyleSheet.hairlineWidth : 0,
-                    borderBottomColor: colors.separator,
+                    backgroundColor: sc.surface,
+                    borderBottomWidth: 1,
+                    borderBottomColor: sc.surfaceBorder,
                   },
                 ]}
               >
-                <View
-                  style={[
-                    styles.iconWrap,
-                    { backgroundColor: brand.primary + '12', borderRadius: radius.sm },
-                  ]}
-                >
-                  <Ionicons name={item.icon} size={16} color={brand.primary} />
-                </View>
-                <Text
-                  style={[typography.body, { color: colors.text, flex: 1, marginLeft: spacing.sm }]}
-                >
-                  {item.label}
-                </Text>
-                <Switch
-                  value={item.value}
-                  onValueChange={item.onToggle}
-                  trackColor={{ false: colors.surfaceTertiary, true: brand.primary + '60' }}
-                  thumbColor={item.value ? brand.primary : colors.textTertiary}
+                <Ionicons
+                  name="person-add-outline"
+                  size={20}
+                  color={tokens.color.sand400}
+                  style={styles.rowIcon}
                 />
-              </View>
-            ))}
+                <Text style={[styles.rowTitle, { color: sc.textPrimary }]}>Add Child Profile</Text>
+                <Ionicons name="chevron-forward" size={16} color={tokens.color.sand300} />
+              </JuicyPressable>
 
-            {/* Reminder time sub-row — only when reminder is on */}
-            {dailyReminderEnabled && (
-              <Pressable
-                onPress={handleReminderTime}
-                style={({ pressed }) => [
-                  styles.settingRow,
+              {/* Delete Account — sand400 text, no red per spec §7.1 */}
+              <JuicyPressable
+                onPress={() => {
+                  haptic.error();
+                  requireGate(handleDeleteAccount);
+                }}
+                accessibilityLabel="Delete account and data"
+                accessibilityRole="button"
+                style={[
+                  styles.row,
                   {
-                    paddingVertical: spacing.sm + 2,
-                    paddingHorizontal: spacing.md,
-                    paddingLeft: spacing.md + 36,
-                    backgroundColor: pressed ? colors.surfaceTertiary : brand.accent + '06',
+                    backgroundColor: sc.surface,
+                    borderBottomWidth: 0,
                   },
                 ]}
               >
-                <View
-                  style={[
-                    styles.iconWrap,
-                    { backgroundColor: brand.accent + '12', borderRadius: radius.sm },
-                  ]}
-                >
-                  <Ionicons name="time-outline" size={16} color={brand.accent} />
-                </View>
+                <Ionicons
+                  name="trash-outline"
+                  size={20}
+                  color={isDark ? tokens.color.rose300 : tokens.color.rose400}
+                  style={styles.rowIcon}
+                />
                 <Text
                   style={[
-                    typography.bodySmall,
-                    { color: colors.textSecondary, flex: 1, marginLeft: spacing.sm },
+                    styles.rowTitle,
+                    { color: isDark ? tokens.color.rose300 : tokens.color.rose400 },
                   ]}
                 >
-                  Reminder Time
+                  Delete Account & Data
                 </Text>
-                <Text
-                  style={[typography.bodySmall, { color: brand.accent, marginRight: spacing.xxs }]}
-                >
-                  {formatReminderHour(reminderHour)}
-                </Text>
-                <Ionicons name="chevron-forward" size={15} color={colors.textTertiary} />
-              </Pressable>
-            )}
-          </Card>
-        </Animated.View>
+                <Ionicons name="chevron-forward" size={16} color={tokens.color.sand300} />
+              </JuicyPressable>
+            </View>
+          </Animated.View>
 
-        {/* ── Appearance ── */}
-        <Animated.View
-          entering={FadeInDown.delay(delay(2)).duration(400)}
-          style={{ marginTop: spacing.xxl }}
-        >
-          <View style={styles.sectionHeader}>
-            <Ionicons name="color-palette-outline" size={17} color={brand.secondary} />
-            <Text style={[typography.title3, { color: colors.text, marginLeft: spacing.xs }]}>
-              Appearance
-            </Text>
-          </View>
-          <Text style={[typography.caption, { color: colors.textTertiary, marginTop: 2 }]}>
-            Choose how Sidrat looks on your device
-          </Text>
-          <View style={[styles.themeRow, { marginTop: spacing.md, gap: spacing.sm }]}>
-            {THEME_OPTIONS.map(({ value, icon, label, previewBg, previewBar1, previewBar2 }) => {
-              const isSelected = themePreference === value;
-              return (
-                <Pressable
-                  key={value}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected: isSelected }}
-                  accessibilityLabel={`${label} theme${isSelected ? ', selected' : ''}`}
-                  onPress={() => {
-                    setThemePreference(value);
-                    Appearance.setColorScheme(value === 'system' ? null : value);
-                  }}
+          {/* ══════ ABOUT ══════ */}
+          <Animated.View entering={staggerEnter(4)}>
+            <Text style={styles.sectionLabel}>ABOUT</Text>
+            <View style={styles.sectionGroup}>
+              {[
+                {
+                  icon: 'information-circle-outline' as keyof typeof Ionicons.glyphMap,
+                  label: 'About Sidrat',
+                  action: () =>
+                    Alert.alert(
+                      'Sidrat',
+                      'Islamic learning for the whole family.\n\nVersion 1.0.0\n\nBuilt with love, Bismillah.',
+                    ),
+                },
+                {
+                  icon: 'shield-checkmark-outline' as keyof typeof Ionicons.glyphMap,
+                  label: 'Privacy Policy',
+                  action: () => Linking.openURL('https://sidratapp.com/privacy'),
+                },
+                {
+                  icon: 'document-text-outline' as keyof typeof Ionicons.glyphMap,
+                  label: 'Terms of Service',
+                  action: () => Linking.openURL('https://sidratapp.com/terms'),
+                },
+              ].map((item, i, arr) => (
+                <JuicyPressable
+                  key={item.label}
+                  onPress={item.action}
+                  accessibilityLabel={item.label}
+                  accessibilityRole="button"
                   style={[
-                    styles.themeCard,
+                    styles.row,
                     {
-                      backgroundColor: isSelected
-                        ? brand.primary + '0E'
-                        : isDark
-                          ? colors.surfaceSecondary
-                          : colors.surface,
-                      borderRadius: radius.lg,
-                      borderWidth: isSelected ? 2 : StyleSheet.hairlineWidth,
-                      borderColor: isSelected ? brand.primary : colors.border,
-                      ...(isSelected ? shadows.card : {}),
+                      backgroundColor: sc.surface,
+                      borderBottomWidth: i < arr.length - 1 ? 1 : 0,
+                      borderBottomColor: sc.surfaceBorder,
                     },
                   ]}
                 >
-                  {/* Mini screen preview */}
-                  <View
-                    style={[
-                      styles.themePreview,
-                      {
-                        backgroundColor: previewBg,
-                        borderRadius: radius.sm,
-                        borderWidth: StyleSheet.hairlineWidth,
-                        borderColor: colors.separator,
-                      },
-                    ]}
-                  >
-                    {/* Simulated status bar */}
-                    <View
-                      style={{
-                        height: 5,
-                        backgroundColor: previewBar1,
-                        borderRadius: 2,
-                        marginBottom: 3,
-                      }}
-                    />
-                    {/* Simulated content rows */}
-                    <View
-                      style={{
-                        height: 4,
-                        backgroundColor: previewBar1,
-                        borderRadius: 2,
-                        width: '70%',
-                        marginBottom: 2,
-                      }}
-                    />
-                    <View
-                      style={{
-                        height: 4,
-                        backgroundColor: previewBar2,
-                        borderRadius: 2,
-                        width: '90%',
-                        marginBottom: 2,
-                      }}
-                    />
-                    <View
-                      style={{
-                        height: 4,
-                        backgroundColor: previewBar2,
-                        borderRadius: 2,
-                        width: '55%',
-                      }}
-                    />
-                  </View>
-
-                  {/* Label row */}
-                  <View style={styles.themeCardLabel}>
-                    <Ionicons
-                      name={icon}
-                      size={14}
-                      color={isSelected ? brand.primary : colors.textSecondary}
-                    />
-                    <Text
-                      style={[
-                        typography.captionBold,
-                        {
-                          color: isSelected ? brand.primary : colors.textSecondary,
-                          marginLeft: 4,
-                          fontSize: 12,
-                        },
-                      ]}
-                    >
-                      {label}
-                    </Text>
-                  </View>
-
-                  {/* Selected checkmark */}
-                  {isSelected && (
-                    <View
-                      style={[
-                        styles.themeCheck,
-                        { backgroundColor: brand.primary, borderRadius: radius.full },
-                      ]}
-                    >
-                      <Ionicons name="checkmark" size={10} color="#FFF" />
-                    </View>
-                  )}
-                </Pressable>
-              );
-            })}
-          </View>
-        </Animated.View>
-
-        {/* ── Parent Zone ── */}
-        <Animated.View
-          entering={FadeInDown.delay(delay(3)).duration(400)}
-          style={{ marginTop: spacing.xxl }}
-        >
-          <View style={styles.sectionHeader}>
-            <Ionicons name="shield-outline" size={17} color={brand.accent} />
-            <Text style={[typography.title3, { color: colors.text, marginLeft: spacing.xs }]}>
-              Parent Zone
-            </Text>
-          </View>
-          <Text
-            style={[
-              typography.caption,
-              { color: colors.textTertiary, marginTop: 2, marginBottom: spacing.sm },
-            ]}
-          >
-            Protected by parental gate
-          </Text>
-          <Card variant="glass" noPadding>
-            <Pressable
-              onPress={() => requireGate(() => router.push('/onboarding/child-profile'))}
-              style={({ pressed }) => [
-                styles.settingRow,
-                {
-                  paddingVertical: spacing.sm + 2,
-                  paddingHorizontal: spacing.md,
-                  backgroundColor: pressed ? colors.surfaceTertiary : 'transparent',
-                  borderBottomWidth: StyleSheet.hairlineWidth,
-                  borderBottomColor: colors.separator,
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.iconWrap,
-                  { backgroundColor: brand.accent + '12', borderRadius: radius.sm },
-                ]}
-              >
-                <Ionicons name="person-add-outline" size={16} color={brand.accent} />
-              </View>
-              <Text
-                style={[typography.body, { color: colors.text, flex: 1, marginLeft: spacing.sm }]}
-              >
-                Add Child Profile
-              </Text>
-              <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
-            </Pressable>
-            <Pressable
-              onPress={() => requireGate(handleDeleteAccount)}
-              style={({ pressed }) => [
-                styles.settingRow,
-                {
-                  paddingVertical: spacing.sm + 2,
-                  paddingHorizontal: spacing.md,
-                  backgroundColor: pressed ? colors.surfaceTertiary : 'transparent',
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.iconWrap,
-                  { backgroundColor: colors.error + '12', borderRadius: radius.sm },
-                ]}
-              >
-                <Ionicons name="trash-outline" size={16} color={colors.error} />
-              </View>
-              <Text
-                style={[typography.body, { color: colors.error, flex: 1, marginLeft: spacing.sm }]}
-              >
-                Delete Account & Data
-              </Text>
-              <Ionicons name="chevron-forward" size={16} color={colors.error + '60'} />
-            </Pressable>
-          </Card>
-        </Animated.View>
-
-        {/* ── About ── */}
-        <Animated.View
-          entering={FadeInDown.delay(delay(4)).duration(400)}
-          style={{ marginTop: spacing.xxl }}
-        >
-          <View style={styles.sectionHeader}>
-            <Ionicons name="information-circle-outline" size={17} color={brand.lavender} />
-            <Text style={[typography.title3, { color: colors.text, marginLeft: spacing.xs }]}>
-              About
-            </Text>
-          </View>
-          <Card variant="glass" noPadding style={{ marginTop: spacing.sm }}>
-            {[
-              {
-                icon: 'information-circle-outline' as const,
-                label: 'About Sidrat',
-                color: brand.lavender,
-                action: () =>
-                  Alert.alert(
-                    'Sidrat',
-                    'Islamic learning for the whole family.\n\nVersion 1.0.0\n\nBuilt with love, Bismillah.',
-                  ),
-              },
-              {
-                icon: 'shield-checkmark-outline' as const,
-                label: 'Privacy Policy',
-                color: brand.primary,
-                action: () => Linking.openURL('https://sidratapp.com/privacy'),
-              },
-              {
-                icon: 'document-text-outline' as const,
-                label: 'Terms of Service',
-                color: brand.primary,
-                action: () => Linking.openURL('https://sidratapp.com/terms'),
-              },
-            ].map((item, i, arr) => (
-              <Pressable
-                key={item.label}
-                onPress={item.action}
-                style={({ pressed }) => [
-                  styles.settingRow,
-                  {
-                    paddingVertical: spacing.sm + 2,
-                    paddingHorizontal: spacing.md,
-                    backgroundColor: pressed ? colors.surfaceTertiary : 'transparent',
-                    borderBottomWidth: i < arr.length - 1 ? StyleSheet.hairlineWidth : 0,
-                    borderBottomColor: colors.separator,
-                  },
-                ]}
-              >
-                <View
-                  style={[
-                    styles.iconWrap,
-                    { backgroundColor: item.color + '12', borderRadius: radius.sm },
-                  ]}
-                >
-                  <Ionicons name={item.icon} size={16} color={item.color} />
-                </View>
-                <Text
-                  style={[typography.body, { color: colors.text, flex: 1, marginLeft: spacing.sm }]}
-                >
-                  {item.label}
-                </Text>
-                <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
-              </Pressable>
-            ))}
-          </Card>
-        </Animated.View>
-
-        {/* ── Sign Out ── */}
-        <Animated.View
-          entering={FadeInDown.delay(delay(5)).duration(400)}
-          style={{ marginTop: spacing.xl }}
-        >
-          <Pressable
-            onPress={handleSignOut}
-            style={({ pressed }) => [
-              styles.settingRow,
-              {
-                paddingVertical: spacing.sm + 2,
-                paddingHorizontal: spacing.md,
-                backgroundColor: pressed ? colors.surfaceTertiary : colors.surface,
-                borderRadius: radius.lg,
-                borderWidth: StyleSheet.hairlineWidth,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.iconWrap,
-                { backgroundColor: brand.coral + '12', borderRadius: radius.sm },
-              ]}
-            >
-              <Ionicons name="log-out-outline" size={16} color={brand.coral} />
+                  <Ionicons
+                    name={item.icon}
+                    size={20}
+                    color={tokens.color.sand400}
+                    style={styles.rowIcon}
+                  />
+                  <Text style={[styles.rowTitle, { color: sc.textPrimary }]}>{item.label}</Text>
+                  <Ionicons name="chevron-forward" size={16} color={tokens.color.sand300} />
+                </JuicyPressable>
+              ))}
             </View>
-            <Text
-              style={[typography.body, { color: brand.coral, flex: 1, marginLeft: spacing.sm }]}
-            >
-              Sign Out
-            </Text>
-            <Ionicons name="chevron-forward" size={16} color={brand.coral + '60'} />
-          </Pressable>
-        </Animated.View>
+          </Animated.View>
 
-        {/* ── Version ── */}
-        <Animated.View entering={FadeInDown.delay(delay(6)).duration(400)}>
-          <Text
-            style={[
-              typography.caption,
-              {
-                color: colors.textTertiary,
-                textAlign: 'center',
-                marginTop: spacing.xl,
-                fontFamily: 'Amiri-Regular',
-                fontSize: 13,
-              },
-            ]}
-          >
-            Sidrat v1.0.0
-          </Text>
-        </Animated.View>
+          {/* ══════ SIGN OUT ══════ */}
+          <Animated.View entering={staggerEnter(5)} style={{ marginTop: SPACING.lg }}>
+            <JuicyPressable
+              onPress={() => {
+                haptic.error();
+                handleSignOut();
+              }}
+              accessibilityLabel="Sign out"
+              accessibilityRole="button"
+              style={[
+                styles.signOutRow,
+                {
+                  backgroundColor: sc.surface,
+                  borderColor: sc.surfaceBorder,
+                },
+              ]}
+            >
+              <Ionicons
+                name="log-out-outline"
+                size={20}
+                color={isDark ? tokens.color.rose300 : tokens.color.rose400}
+                style={styles.rowIcon}
+              />
+              <Text
+                style={[
+                  styles.rowTitle,
+                  { color: isDark ? tokens.color.rose300 : tokens.color.rose400 },
+                ]}
+              >
+                Sign Out
+              </Text>
+              <Ionicons name="chevron-forward" size={16} color={tokens.color.sand300} />
+            </JuicyPressable>
+          </Animated.View>
+
+          {/* ══════ Version ══════ */}
+          <Animated.View entering={staggerEnter(6)}>
+            <Text style={[styles.versionText, { color: sc.textMuted }]}>Sidrat v1.0.0</Text>
+          </Animated.View>
+        </View>
       </ScrollView>
 
       {gateVisible && (
@@ -895,31 +895,182 @@ export default function SettingsScreen() {
   );
 }
 
+// ════════════════════════════════════════════════════════════════════
+// Styles — all values from Oasis token system
+// ════════════════════════════════════════════════════════════════════
+
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  profileRow: { flexDirection: 'row', flexWrap: 'wrap' },
-  profileItem: { alignItems: 'center', minWidth: 72, overflow: 'hidden' },
-  avatarWrap: {
+
+  // ── Header (matches Family / Progress / Learn pattern) ──
+  header: {
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.xxl + 54,
+    paddingBottom: 0,
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  headerProfileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: SPACING.sm,
+    marginTop: 6,
+  },
+  headerAvatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
+    borderWidth: 2,
+    borderColor: tokens.color.olive400,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center' },
-  settingRow: { flexDirection: 'row', alignItems: 'center' },
-  iconWrap: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: {
+    fontFamily: 'Nunito-Bold',
+    fontSize: 26,
+    fontWeight: '700',
+    lineHeight: 32,
+  },
+  headerSubtitle: {
+    fontFamily: 'Nunito-Regular',
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 2,
+  },
+  headerDivider: {
+    height: 1,
+    marginTop: SPACING.md,
+    borderRadius: 1,
+  },
+
+  // ── Child Switcher (inline expand below header) ──
+  childSwitcher: {
+    position: 'absolute',
+    top: 48,
+    right: 0,
+    width: 200,
+    gap: SPACING.xs,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    padding: SPACING.xs,
+    zIndex: 1000,
+    elevation: 10,
+    ...SHADOW.rnMd,
+  },
+  switcherItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.md,
+    gap: SPACING.sm,
+  },
+  switcherAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  switcherName: {
+    fontFamily: 'Nunito-Bold',
+    fontSize: 14,
+  },
+  switcherHint: {
+    fontFamily: 'Nunito-Regular',
+    fontSize: 11,
+    marginTop: 2,
+    marginLeft: SPACING.xs,
+    textAlign: 'left',
+  },
+
+  // ── Section Label (§8.6: Nunito bold, 11pt, sand400, UPPERCASE, LS 1.2) ──
+  sectionLabel: {
+    fontFamily: 'Nunito-Bold',
+    fontSize: 11,
+    fontWeight: '700',
+    color: tokens.color.sand400,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.sm,
+  },
+
+  // ── Grouped Section (§8.6: 12pt gap between sections, rounded 12pt corners) ──
+  sectionGroup: {
+    borderRadius: RADIUS.md,
+    overflow: 'hidden',
+  },
+
+  // ── Row (min 56pt, 16pt horizontal padding) ──
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 56,
+    paddingHorizontal: SPACING.md,
+  },
+  rowIcon: {
+    width: 20,
+    textAlign: 'center',
+    marginRight: SPACING.sm,
+  },
+  rowTitle: {
+    fontFamily: 'Nunito-Regular',
+    fontSize: 16,
+    lineHeight: 22,
+    flex: 1,
+  },
+  rowValue: {
+    fontFamily: 'Nunito-Regular',
+    fontSize: 14,
+    marginRight: SPACING.xs,
+  },
+
+  // ── Sign Out (standalone rounded row) ──
+  signOutRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 56,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+  },
+
+  // ── Theme Picker ──
   themeRow: { flexDirection: 'row' },
   themeCard: { flex: 1, padding: 10, overflow: 'hidden' },
   themePreview: { height: 56, padding: 8, marginBottom: 8 },
-  themeCardLabel: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  themeCardLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  themeCardLabelText: {
+    fontFamily: 'Nunito-Bold',
+    fontSize: 12,
+    fontWeight: '700',
+    marginLeft: 4,
+  },
   themeCheck: {
     position: 'absolute',
     top: 8,
     right: 8,
     width: 18,
     height: 18,
+    borderRadius: RADIUS.full,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  // ── Version ──
+  versionText: {
+    fontFamily: 'Amiri-Regular',
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: SPACING.xl,
   },
 });

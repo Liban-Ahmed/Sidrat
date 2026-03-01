@@ -16,7 +16,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { springs, timing } from '../../theme/spacing';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 
 interface Props {
   /** Unique key for the current phase — triggers re-animation on change */
@@ -41,7 +41,7 @@ export function PhaseTransition({ phaseKey, children }: Props) {
     translateY.value = withSpring(0, springs.gentle);
 
     // Haptic light on phase transition (Design Spec §2)
-    haptics.light();
+    haptic.light();
   }, [phaseKey, opacity, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({

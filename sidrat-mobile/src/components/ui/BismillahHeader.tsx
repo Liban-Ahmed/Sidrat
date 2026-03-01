@@ -17,9 +17,16 @@ interface BismillahHeaderProps {
   color?: string;
   /** Text alignment */
   align?: 'left' | 'center' | 'right';
+  /** Horizontal stretch scale — widens without changing font size */
+  scaleX?: number;
 }
 
-export function BismillahHeader({ size = 'md', color, align = 'center' }: BismillahHeaderProps) {
+export function BismillahHeader({
+  size = 'md',
+  color,
+  align = 'center',
+  scaleX,
+}: BismillahHeaderProps) {
   const { colors } = useTheme();
   const textColor = color ?? colors.textTertiary;
 
@@ -34,6 +41,7 @@ export function BismillahHeader({ size = 'md', color, align = 'center' }: Bismil
       style={[
         styles.container,
         {
+          width: '100%',
           alignItems: align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start',
         },
       ]}
@@ -45,6 +53,7 @@ export function BismillahHeader({ size = 'md', color, align = 'center' }: Bismil
             fontFamily: 'Amiri-Regular',
             color: textColor,
             textAlign: align,
+            ...(scaleX ? { transform: [{ scaleX }] } : {}),
           },
         ]}
       >

@@ -18,16 +18,17 @@ import Animated, { FadeInDown, FadeIn, ZoomIn, Layout } from 'react-native-reani
 import { FeedbackCard } from './FeedbackCard';
 import { FormattedText } from './FormattedText';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 import type { PracticeOrdering } from '../../types/curriculum';
 
 interface Props {
   block: PracticeOrdering;
   onAnswer: (isCorrect: boolean, pointsEarned: number) => void;
+  accentColor: string;
 }
 
-export function OrderingCard({ block, onAnswer }: Props) {
-  const { brand, colors, typography, radius, isDark, shadows } = useTheme();
+export function OrderingCard({ block, onAnswer, accentColor }: Props) {
+  const { colors, typography, radius, isDark, shadows } = useTheme();
 
   // Shuffle the items
   const [shuffled] = useState(() => [...block.correctOrder].sort(() => Math.random() - 0.5));
@@ -41,14 +42,14 @@ export function OrderingCard({ block, onAnswer }: Props) {
   const handleTap = useCallback(
     (item: string) => {
       if (showResult) return;
-      haptics.light();
+      haptic.light();
       const newSelected = [...selected, item];
       setSelected(newSelected);
 
       if (newSelected.length === block.correctOrder.length) {
         setShowResult(true);
         const correct = newSelected.every((s, i) => s === block.correctOrder[i]);
-        haptics.medium();
+        haptic.medium();
         setTimeout(() => onAnswer(correct, correct ? block.points : 0), 1500);
       }
     },
@@ -57,12 +58,12 @@ export function OrderingCard({ block, onAnswer }: Props) {
 
   const handleUndo = useCallback(() => {
     if (showResult || selected.length === 0) return;
-    haptics.light();
+    haptic.light();
     setSelected((s) => s.slice(0, -1));
   }, [showResult, selected.length]);
 
   const handleReset = useCallback(() => {
-    haptics.light();
+    haptic.light();
     setSelected([]);
     setShowResult(false);
   }, []);
@@ -116,14 +117,14 @@ export function OrderingCard({ block, onAnswer }: Props) {
                           ? itemCorrect
                             ? colors.successMuted
                             : colors.errorMuted
-                          : brand.primary + '12',
+                          : accentColor + '12',
                         borderRadius: radius.md,
                         borderLeftWidth: 3,
                         borderLeftColor: showResult
                           ? itemCorrect
                             ? colors.success
                             : colors.error
-                          : brand.primary,
+                          : accentColor,
                       },
                     ]}
                   >
@@ -135,7 +136,7 @@ export function OrderingCard({ block, onAnswer }: Props) {
                             ? itemCorrect
                               ? colors.success + '25'
                               : colors.error + '25'
-                            : brand.primary + '18',
+                            : accentColor + '18',
                           borderRadius: radius.full,
                         },
                       ]}
@@ -148,7 +149,7 @@ export function OrderingCard({ block, onAnswer }: Props) {
                               ? itemCorrect
                                 ? colors.success
                                 : colors.error
-                              : brand.primary,
+                              : accentColor,
                             fontWeight: '700',
                           },
                         ]}
@@ -189,8 +190,8 @@ export function OrderingCard({ block, onAnswer }: Props) {
       {selected.length > 0 && !showResult && (
         <Animated.View entering={FadeIn.duration(300)} style={styles.undoRow}>
           <Pressable onPress={handleUndo} style={styles.undoButton}>
-            <Ionicons name="arrow-undo" size={15} color={brand.primary} />
-            <Text style={[typography.labelSmall, { color: brand.primary }]}>Undo</Text>
+            <Ionicons name="arrow-undo" size={15} color={accentColor} />
+            <Text style={[typography.labelSmall, { color: accentColor }]}>Undo</Text>
           </Pressable>
           <View style={[styles.undoDivider, { backgroundColor: colors.separator }]} />
           <Pressable onPress={handleReset} style={styles.undoButton}>

@@ -7,6 +7,9 @@
  * launches the lesson in review mode (practice-only).
  *
  * Empty state shown when no reviews are due, with encouragement.
+ *
+ * Design: Oasis palette (Design Spec §6) — olive/gold/sand/earth tones.
+ * Never red for wrong/critical; use warm gold/sand instead.
  */
 
 import { Ionicons } from '@expo/vector-icons';
@@ -18,8 +21,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScalePress, ProgressBar, EmptyState } from '../../src/components';
 import { useReviewQueue } from '../../src/hooks/useReviewQueue';
 import { useTheme } from '../../src/theme';
+import { tokens } from '../../src/theme/tokens';
 import { categoryMeta } from '../../src/types';
-import { haptics } from '../../src/utils/haptics';
+import haptic from '../../src/utils/haptics';
 import { groupReviewsByUrgency } from '../../src/utils/reviewGroups';
 import type { ReviewItem } from '../../src/hooks/useReviewQueue';
 
@@ -31,43 +35,48 @@ const URGENCY_CONFIG = {
   critical: {
     label: 'Critical',
     icon: 'alert-circle' as const,
-    bgSuffix: '18',
-    borderSuffix: '35',
+    // Oasis: gold500 (strong warm warning — never red)
+    colorLight: tokens.color.gold500,
+    colorDark: tokens.color.gold300,
   },
   overdue: {
     label: 'Overdue',
     icon: 'time' as const,
-    bgSuffix: '14',
-    borderSuffix: '28',
+    // Oasis: gold400 (reward/streak warm tone)
+    colorLight: tokens.color.gold400,
+    colorDark: tokens.color.gold300,
   },
   'due-today': {
     label: 'Due Today',
     icon: 'calendar' as const,
-    bgSuffix: '10',
-    borderSuffix: '20',
+    // Oasis: olive400 (primary brand, growth)
+    colorLight: tokens.color.olive400,
+    colorDark: tokens.color.olive400,
   },
 } as const;
 
 // ── Helper ───────────────────────────────────────────────────────
 
-function getUrgencyColor(
-  urgency: ReviewItem['urgency'],
-  brand: { coral: string; accent: string; primary: string },
-) {
-  switch (urgency) {
-    case 'critical':
-      return brand.coral;
-    case 'overdue':
-      return brand.accent;
-    case 'due-today':
-      return brand.primary;
-  }
+/**
+ * Returns Oasis-palette urgency color.
+ * Critical/overdue use warm gold (NOT red — per design spec §4.2 & §11).
+ * Due-today uses primary olive.
+ */
+function getUrgencyColor(urgency: ReviewItem['urgency'], isDark: boolean): string {
+  const config = URGENCY_CONFIG[urgency];
+  return isDark ? config.colorDark : config.colorLight;
 }
 
-function getScoreColor(score: number, brand: { secondary: string; accent: string; coral: string }) {
-  if (score >= 80) return brand.secondary;
-  if (score >= 50) return brand.accent;
-  return brand.coral;
+/**
+ * Returns Oasis-palette score color.
+ * Good (≥80) → olive400 (correct/success)
+ * Moderate (≥50) → gold400 (reward warm tone)
+ * Low (<50) → sand400 (gentle warm, NOT red or orange)
+ */
+function getScoreColor(score: number, isDark: boolean): string {
+  if (score >= 80) return tokens.color.olive400;
+  if (score >= 50) return isDark ? tokens.color.gold300 : tokens.color.gold500;
+  return tokens.color.sand400;
 }
 
 function getDaysLabel(days: number): string {
@@ -79,12 +88,12 @@ function getDaysLabel(days: number): string {
 // ── Main Component ──────────────────────────────────────────────
 
 export default function ReviewScreen() {
-  const { brand, colors, typography, spacing, radius, isDark } = useTheme();
+  const { colors, typography, spacing, radius, isDark } = useTheme();
   const router = useRouter();
   const { reviewQueue, reviewCount, hasReviews, nextReview } = useReviewQueue();
   const navigateToReview = useCallback(
     (lessonId: string) => {
-      haptics.light();
+      haptic.light();
       router.push(`/lesson/${lessonId}?review=1` as any);
     },
     [router],
@@ -99,11 +108,25 @@ export default function ReviewScreen() {
   // Group reviews by urgency for section rendering
   const sections = useMemo(() => groupReviewsByUrgency(reviewQueue), [reviewQueue]);
 
+  // Oasis palette: olive400 for primary action (buttons, progress, active states)
+  const primaryColor = tokens.color.olive400;
+
+  // Oasis summary card: olive50 bg with olive200 border in light;
+  // dark olive tint bg with olive400 border in dark
+  const summaryCardBg = isDark ? '#1E2A16' : tokens.color.olive50;
+  const summaryCardBorder = isDark ? tokens.color.olive400 : tokens.color.olive200;
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       {/* ── Header ── */}
       <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backButton}>
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={12}
+          style={styles.backButton}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+        >
           <Ionicons name="chevron-back" size={24} color={colors.textSecondary} />
         </Pressable>
         <View style={styles.headerCenter}>
@@ -119,16 +142,23 @@ export default function ReviewScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* ── Summary Card ── */}
+          {/* Oasis: olive50 bg + olive200 border → signals "growth/learning" context */}
           <Animated.View
             entering={FadeInDown.duration(600).springify().damping(18)}
             style={[
               styles.summaryCard,
               {
-                backgroundColor: isDark ? colors.surfaceSecondary : brand.primary + '08',
+                backgroundColor: summaryCardBg,
                 borderRadius: radius.lg,
                 padding: spacing.lg,
-                borderWidth: 1,
-                borderColor: brand.primary + '15',
+                borderWidth: 1.5,
+                borderColor: summaryCardBorder,
+                // Warm earth shadow (spec §6.10)
+                shadowColor: tokens.color.earth900,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.08,
+                shadowRadius: 12,
+                elevation: 3,
               },
             ]}
           >
@@ -136,10 +166,13 @@ export default function ReviewScreen() {
               <View
                 style={[
                   styles.summaryIcon,
-                  { backgroundColor: brand.primary + '15', borderRadius: radius.full },
+                  {
+                    backgroundColor: isDark ? tokens.color.olive400 + '25' : tokens.color.olive100,
+                    borderRadius: radius.full,
+                  },
                 ]}
               >
-                <Ionicons name="refresh" size={24} color={brand.primary} />
+                <Ionicons name="refresh" size={24} color={tokens.color.olive400} />
               </View>
               <View style={{ flex: 1, marginLeft: spacing.sm }}>
                 <Text style={[typography.title3, { color: colors.text }]}>
@@ -151,29 +184,41 @@ export default function ReviewScreen() {
               </View>
             </View>
 
-            <Pressable
+            {/* Start button — olive400 → olive500 (spec §6.6 primaryButton gradient) */}
+            <ScalePress
               onPress={handleStartAll}
-              style={[
-                styles.startAllButton,
-                {
-                  backgroundColor: brand.primary,
-                  borderRadius: radius.md,
-                  marginTop: spacing.md,
-                  paddingVertical: spacing.sm,
-                },
-              ]}
               accessibilityLabel={`Start reviewing ${reviewCount} lessons`}
             >
-              <Ionicons name="play-circle" size={20} color="#FFF" />
-              <Text style={[typography.label, { color: '#FFF', marginLeft: spacing.xs }]}>
-                Start Reviewing
-              </Text>
-            </Pressable>
+              <View
+                style={[
+                  styles.startAllButton,
+                  {
+                    backgroundColor: primaryColor,
+                    borderRadius: radius.md,
+                    marginTop: spacing.md,
+                    paddingVertical: spacing.sm + 2,
+                    // Warm shadow to lift the CTA
+                    shadowColor: tokens.color.olive500,
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                    elevation: 4,
+                  },
+                ]}
+              >
+                <Ionicons name="play-circle" size={20} color={tokens.color.white} />
+                <Text
+                  style={[typography.label, { color: tokens.color.white, marginLeft: spacing.xs }]}
+                >
+                  Start Reviewing
+                </Text>
+              </View>
+            </ScalePress>
           </Animated.View>
 
           {/* ── Review Sections by Urgency ── */}
           {sections.map((section, sectionIdx) => {
-            const urgencyColor = getUrgencyColor(section.urgency, brand);
+            const urgencyColor = getUrgencyColor(section.urgency, isDark);
             const config = URGENCY_CONFIG[section.urgency];
 
             return (
@@ -195,7 +240,7 @@ export default function ReviewScreen() {
                     style={[
                       styles.countBadge,
                       {
-                        backgroundColor: urgencyColor + '18',
+                        backgroundColor: urgencyColor + '22',
                         borderRadius: radius.full,
                         marginLeft: spacing.xs,
                       },
@@ -221,14 +266,15 @@ export default function ReviewScreen() {
           })}
 
           {/* ── Motivational footer ── */}
+          {/* Oasis: gold400 sparkle — reward color signals encouragement */}
           <Animated.View
             entering={FadeInUp.delay(STAGGER * (sections.length + 2)).duration(500)}
             style={[styles.footer, { marginTop: spacing.xl, paddingBottom: spacing.xxl }]}
           >
-            <Ionicons name="sparkles" size={18} color={brand.accent} />
+            <Ionicons name="sparkles" size={18} color={tokens.color.gold400} />
             <Text
               style={[
-                typography.bodySmall,
+                typography.caption,
                 { color: colors.textTertiary, marginLeft: spacing.xs, fontStyle: 'italic' },
               ]}
             >
@@ -244,7 +290,7 @@ export default function ReviewScreen() {
           subtitle="No reviews due right now. Keep completing lessons and reviews will appear automatically."
           actionLabel="Back to Home"
           onAction={() => router.back()}
-          color={brand.secondary}
+          color={tokens.color.olive400}
         />
       )}
     </SafeAreaView>
@@ -262,11 +308,18 @@ function ReviewCard({
   delay: number;
   onPress: () => void;
 }) {
-  const { brand, colors, typography, spacing, radius, shadows, isDark } = useTheme();
+  const { colors, typography, spacing, radius, isDark } = useTheme();
 
-  const urgencyColor = getUrgencyColor(item.urgency, brand);
-  const scoreColor = getScoreColor(item.lastScore, brand);
+  // Oasis palette — warm gold/sand for urgency, olive for success scores
+  const urgencyColor = getUrgencyColor(item.urgency, isDark);
+  const scoreColor = getScoreColor(item.lastScore, isDark);
   const categoryInfo = categoryMeta[item.lesson.category];
+
+  // Card border: use urgency color hint in dark, neutral sand200 in light
+  const cardBorderColor = isDark ? urgencyColor + '28' : tokens.color.sand200;
+
+  // Category badge: sky50/sky400 → use categoryColors or subtle olive tint
+  const categoryBadgeBg = isDark ? tokens.color.olive400 + '20' : tokens.color.olive50;
 
   return (
     <Animated.View entering={FadeInDown.delay(delay).duration(500).springify().damping(16)}>
@@ -281,13 +334,18 @@ function ReviewCard({
               backgroundColor: colors.surface,
               borderRadius: radius.lg,
               marginTop: spacing.sm,
-              borderWidth: 1,
-              borderColor: isDark ? urgencyColor + '20' : colors.separator,
-              ...shadows.subtle,
+              borderWidth: 1.5,
+              borderColor: cardBorderColor,
+              // Warm earth shadow (spec §6.10 rnMd)
+              shadowColor: tokens.color.earth900,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: isDark ? 0.2 : 0.08,
+              shadowRadius: 12,
+              elevation: 3,
             },
           ]}
         >
-          {/* Left accent bar */}
+          {/* Left accent bar — Oasis urgency color strip */}
           <View
             style={[
               styles.cardAccent,
@@ -298,28 +356,36 @@ function ReviewCard({
           <View style={[styles.cardBody, { padding: spacing.md, paddingLeft: spacing.sm }]}>
             {/* Category + urgency badges */}
             <View style={styles.cardBadgeRow}>
+              {/* Category badge — olive50/olive400 (primary brand tint) */}
               <View
                 style={[
                   styles.categoryBadge,
                   {
-                    backgroundColor: brand.primary + '12',
+                    backgroundColor: categoryBadgeBg,
                     borderRadius: radius.full,
                     paddingHorizontal: spacing.xs,
                     paddingVertical: 2,
                   },
                 ]}
               >
-                <Ionicons name={categoryInfo?.icon as any} size={12} color={brand.primary} />
-                <Text style={[typography.captionBold, { color: brand.primary, marginLeft: 3 }]}>
+                <Ionicons
+                  name={categoryInfo?.icon as any}
+                  size={12}
+                  color={tokens.color.olive400}
+                />
+                <Text
+                  style={[typography.captionBold, { color: tokens.color.olive500, marginLeft: 3 }]}
+                >
                   {categoryInfo?.label}
                 </Text>
               </View>
 
+              {/* Urgency badge — gold/sand warm tones, never red */}
               <View
                 style={[
                   styles.urgencyBadge,
                   {
-                    backgroundColor: urgencyColor + '12',
+                    backgroundColor: urgencyColor + '18',
                     borderRadius: radius.full,
                     paddingHorizontal: spacing.xs,
                     paddingVertical: 2,
@@ -339,7 +405,7 @@ function ReviewCard({
               </View>
             </View>
 
-            {/* Title */}
+            {/* Title — earth800 (primary text, Oasis spec §6.1) */}
             <Text
               style={[typography.label, { color: colors.text, marginTop: spacing.xs }]}
               numberOfLines={1}
@@ -349,7 +415,7 @@ function ReviewCard({
 
             {/* Meta row */}
             <View style={[styles.cardMeta, { marginTop: spacing.sm, gap: spacing.md }]}>
-              {/* Last score */}
+              {/* Last score — olive (good) / gold (moderate) / sand (needs work) */}
               <View style={styles.metaItem}>
                 <Ionicons name="bar-chart" size={13} color={scoreColor} />
                 <Text style={[typography.caption, { color: scoreColor, marginLeft: 3 }]}>
@@ -357,7 +423,7 @@ function ReviewCard({
                 </Text>
               </View>
 
-              {/* Review count */}
+              {/* Review count — muted sand400 */}
               <View style={styles.metaItem}>
                 <Ionicons name="repeat" size={13} color={colors.textTertiary} />
                 <Text style={[typography.caption, { color: colors.textTertiary, marginLeft: 3 }]}>
@@ -365,7 +431,7 @@ function ReviewCard({
                 </Text>
               </View>
 
-              {/* Duration */}
+              {/* Duration — muted sand400 */}
               <View style={styles.metaItem}>
                 <Ionicons name="time-outline" size={13} color={colors.textTertiary} />
                 <Text style={[typography.caption, { color: colors.textTertiary, marginLeft: 3 }]}>
@@ -374,20 +440,20 @@ function ReviewCard({
               </View>
             </View>
 
-            {/* Score progress bar */}
+            {/* Score progress bar — olive/gold/sand fill on sand100 track */}
             <View style={{ marginTop: spacing.sm }}>
               <ProgressBar
                 progress={item.lastScore / 100}
                 color={scoreColor}
-                trackColor={scoreColor + '18'}
+                trackColor={isDark ? scoreColor + '22' : tokens.color.sand100}
                 height={4}
               />
             </View>
           </View>
 
-          {/* Chevron */}
+          {/* Chevron — urgency color, semi-opaque */}
           <View style={[styles.cardChevron, { paddingRight: spacing.sm }]}>
-            <Ionicons name="play-circle" size={24} color={urgencyColor + '80'} />
+            <Ionicons name="play-circle" size={24} color={urgencyColor + '90'} />
           </View>
         </View>
       </ScalePress>

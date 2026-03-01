@@ -30,7 +30,7 @@ import Animated, {
   FadeInDown,
 } from 'react-native-reanimated';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 
 interface Props {
   /** Final score value */
@@ -97,7 +97,7 @@ function AnimatedStar({
       );
 
       // Haptic on each star
-      const hapticTimer = setTimeout(() => haptics.medium(), delay);
+      const hapticTimer = setTimeout(() => haptic.medium(), delay);
       return () => clearTimeout(hapticTimer);
     }
   }, [filled, delay, scale, opacity, rotation]);

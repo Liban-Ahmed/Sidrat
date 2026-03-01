@@ -22,7 +22,7 @@ import Animated, {
   FadeOut,
 } from 'react-native-reanimated';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 
 interface Props {
   /** Called when countdown finishes */
@@ -50,12 +50,12 @@ export function ThinkingCountdown({ onComplete, accentColor }: Props) {
     opacity.value = withTiming(1, { duration: 150, easing: Easing.out(Easing.ease) });
 
     // Haptic tick for each number
-    haptics.light();
+    haptic.light();
   }, [count, scale, opacity]);
 
   useEffect(() => {
     if (count <= 0) {
-      haptics.medium();
+      haptic.medium();
       onComplete();
       return;
     }

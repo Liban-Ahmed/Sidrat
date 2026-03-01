@@ -2,6 +2,7 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -13,6 +14,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "src/**/*", ".eslintrc.js"],
+  "include": ["**/*.ts", "**/*.tsx", "src/**/*", ".eslintrc.js", "declarations.d.ts"],
   "exclude": ["node_modules", "babel.config.js", "jest.config.js", "scripts"]
 }

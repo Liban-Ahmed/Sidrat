@@ -141,61 +141,61 @@ export const palette = {
     infoMuted: brand.primaryMuted,
   },
   dark: {
-    /** Warm dark navy — not cold black */
-    background: '#0F1218',
-    backgroundSecondary: '#161C24',
-    backgroundTertiary: '#1E2630',
+    /** Warm dark earth — Oasis palette §6.6 */
+    background: '#1C1917',
+    backgroundSecondary: '#1F1D1A',
+    backgroundTertiary: '#252220',
 
-    /** Card surfaces — elevated from background */
-    surface: '#161C24',
-    surfaceSecondary: '#1E2630',
-    surfaceTertiary: '#262E38',
-    surfaceElevated: '#262E38',
+    /** Card surfaces — warm elevation steps */
+    surface: '#292524',
+    surfaceSecondary: '#302D2A',
+    surfaceTertiary: '#3A3632',
+    surfaceElevated: '#3A3632',
 
-    /** Text — warm white, never pure #FFF */
-    text: '#F0ECE6',
-    textSecondary: '#96A2AE',
-    textTertiary: '#5E6E7A',
-    textInverse: '#1A2B35',
+    /** Text — warm sand tones, never cool gray */
+    text: '#FDF8F0',
+    textSecondary: '#E8CFA4',
+    textTertiary: '#A89070',
+    textInverse: '#1C1917',
 
-    /** Interactive states */
-    interactive: '#4A82B4',
-    interactiveHover: '#6499C8',
-    interactivePressed: '#2A6090',
-    interactiveMuted: '#4A82B425',
+    /** Interactive states — olive primary */
+    interactive: '#7EA14B',
+    interactiveHover: '#A8C276',
+    interactivePressed: '#5E7E32',
+    interactiveMuted: '#7EA14B25',
 
-    /** Borders & dividers */
-    separator: '#262E38',
-    border: '#323C48',
-    borderFocused: '#4A82B4',
+    /** Borders & dividers — warm earth tones */
+    separator: '#302D2A',
+    border: '#3A3632',
+    borderFocused: '#7EA14B',
 
-    /** Overlay */
-    overlay: 'rgba(0, 0, 0, 0.60)',
-    overlayHeavy: 'rgba(0, 0, 0, 0.82)',
+    /** Overlay — earth-tinted */
+    overlay: 'rgba(28, 25, 23, 0.65)',
+    overlayHeavy: 'rgba(28, 25, 23, 0.85)',
 
-    /** Feedback colors */
-    success: '#2E8B57',
-    successMuted: '#2E8B5720',
-    warning: '#EDC55E',
-    warningMuted: '#EDC55E20',
-    error: '#E8636F',
-    errorMuted: '#E8636F20',
-    info: '#4A82B4',
-    infoMuted: '#4A82B420',
+    /** Feedback colors — brightened for dark bg */
+    success: '#A8C276',
+    successMuted: '#A8C27620',
+    warning: '#FBBF24',
+    warningMuted: '#FBBF2420',
+    error: '#FB7185',
+    errorMuted: '#FB718520',
+    info: '#38BDF8',
+    infoMuted: '#38BDF820',
   },
 } as const;
 
-// ── Category Colors (for lesson categories) ──────────────────────
+// ── Category Colors — Oasis Palette (Design Spec §6.5) ───────────
 
 export const categoryColors: Record<string, { solid: string; muted: string }> = {
-  aqeedah: { solid: '#1A3A5C', muted: '#1A3A5C18' },
-  salah: { solid: '#D4982A', muted: '#D4982A18' },
-  wudu: { solid: '#2A6090', muted: '#2A609018' },
-  quran: { solid: '#1E6B42', muted: '#1E6B4218' },
-  seerah: { solid: '#B07D1E', muted: '#B07D1E18' },
-  adab: { solid: '#C74E59', muted: '#C74E5918' },
-  duaa: { solid: '#5B4FA0', muted: '#5B4FA018' },
-  stories: { solid: '#2E8B57', muted: '#2E8B5718' },
+  aqeedah: { solid: '#38BDF8', muted: '#F0F9FF' }, // sky400 / sky50
+  salah: { solid: '#7EA14B', muted: '#F4F7EE' }, // olive400 / olive50
+  wudu: { solid: '#0EA5E9', muted: '#E0F2FE' }, // sky500 / sky100
+  quran: { solid: '#D4A017', muted: '#FFFBEB' }, // gold500 / gold50
+  seerah: { solid: '#D4B07A', muted: '#FDF8F0' }, // sand400 / sand50
+  adab: { solid: '#FB7185', muted: '#FFF1F2' }, // rose400 / rose50
+  duaa: { solid: '#FBBF24', muted: '#FFFBEB' }, // gold400 / gold50
+  stories: { solid: '#A8C276', muted: '#F4F7EE' }, // olive300 / olive50
 };
 
 // ── Achievement Rarity Colors ────────────────────────────────────

@@ -4,22 +4,24 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { useOasisColors } from '../../hooks/useOasisColors';
 import { useTheme } from '../../theme';
 import { ShimmerBlock } from '../ui/ShimmerBlock';
 
 // ── Home Skeleton Loader ─────────────────────────────────────────
 
 export function HomeSkeletonLoader() {
-  const { colors, spacing, radius, brand, isDark } = useTheme();
+  const { spacing, radius } = useTheme();
+  const { colors: oasis, t, isDark } = useOasisColors();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: oasis.background }]}>
       {/* Hero skeleton */}
       <View
         style={[
           styles.heroSkeleton,
           {
-            backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : brand.primary + '08',
+            backgroundColor: isDark ? t.earth700 + '20' : t.olive50,
             borderBottomLeftRadius: radius.xl,
             borderBottomRightRadius: radius.xl,
             paddingHorizontal: spacing.lg,
@@ -69,12 +71,12 @@ export function HomeSkeletonLoader() {
           style={[
             styles.cardSkeleton,
             {
-              backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+              backgroundColor: isDark ? t.earth800 + '20' : t.sand50,
               borderRadius: radius.xl,
               marginTop: spacing.sm,
               padding: spacing.lg,
               borderWidth: 1,
-              borderColor: isDark ? colors.border : 'rgba(0,0,0,0.04)',
+              borderColor: isDark ? oasis.surfaceBorder : t.sand200,
             },
           ]}
         >
@@ -131,12 +133,12 @@ export function HomeSkeletonLoader() {
           style={[
             styles.cardSkeleton,
             {
-              backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+              backgroundColor: isDark ? t.earth800 + '20' : t.sand50,
               borderRadius: radius.xl,
               marginTop: spacing.lg,
               padding: spacing.lg,
               borderWidth: 1,
-              borderColor: isDark ? colors.border : 'rgba(0,0,0,0.04)',
+              borderColor: isDark ? oasis.surfaceBorder : t.sand200,
             },
           ]}
         >

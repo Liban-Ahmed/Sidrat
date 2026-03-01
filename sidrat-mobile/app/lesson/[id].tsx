@@ -17,7 +17,7 @@ import {
   PhaseTransition,
   ThinkingCountdown,
 } from '../../src/components/lesson';
-import { getCurriculumLesson } from '../../src/data/curriculum';
+import { allUnits, getCurriculumLesson } from '../../src/data/curriculum';
 import { useLessonPlayer } from '../../src/hooks/useLessonPlayer';
 import { resolveLessonForChild } from '../../src/services/ageAdaptiveService';
 import { useAppStore, useChildStore } from '../../src/stores';
@@ -74,7 +74,7 @@ function LessonPlayerContent({
   childId: string;
   isReview: boolean;
 }) {
-  const { brand, colors, typography, radius, categoryColors, isDark } = useTheme();
+  const { brand, colors, typography, radius, categoryColors } = useTheme();
   const router = useRouter();
 
   const player = useLessonPlayer({ lesson, childId, isReview });
@@ -96,6 +96,10 @@ function LessonPlayerContent({
   }, [player, router]);
 
   const categoryInfo = categoryMeta[lesson.category];
+  const unitLabel = useMemo(() => {
+    const unit = allUnits.find((candidate) => candidate.id === lesson.unitId);
+    return unit ? `Unit: ${unit.title}` : `Unit: ${lesson.unitId}`;
+  }, [lesson.unitId]);
   const accentColor = isReview
     ? brand.accent
     : (categoryColors[lesson.category]?.solid ?? brand.primary);
@@ -110,9 +114,12 @@ function LessonPlayerContent({
     : (['hook', 'teach', 'practice', 'reward'] as const);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={['top', 'left', 'right']}
+    >
       {/* Top bar */}
-      <Animated.View entering={FadeIn.duration(400)} style={styles.topBar}>
+      <Animated.View entering={FadeIn.duration(400)} style={[styles.topBar, { zIndex: 10 }]}>
         <Pressable
           onPress={handleClose}
           hitSlop={12}
@@ -145,7 +152,7 @@ function LessonPlayerContent({
       </Animated.View>
 
       {/* Phase progress dots */}
-      <View style={styles.phaseProgress}>
+      <View style={[styles.phaseProgress, { zIndex: 10 }]}>
         {visiblePhases.map((phase) => {
           const phasesArr: string[] = [...visiblePhases];
           const currentIdx = phasesArr.indexOf(player.phase);
@@ -184,13 +191,17 @@ function LessonPlayerContent({
           />
         )}
 
-        {/* Hook phase — with skip button for review mode (PRD §2.7) */}
+        {/* Hook phase */}
         {!showCountdown && player.phase === 'hook' && (
           <HookPhase
             hook={lesson.hook}
+            unitLabel={unitLabel}
             isNarrating={player.state.isNarrating}
             onNarrate={player.narrate}
             onContinue={() => {
+              player.startTeaching();
+            }}
+            onSkip={() => {
               player.startTeaching();
             }}
             accentColor={accentColor}
@@ -247,37 +258,6 @@ function LessonPlayerContent({
           />
         )}
       </PhaseTransition>
-
-      {/* Skip Hook button (PRD §2.7) — lets user jump ahead to learn/practice */}
-      {player.phase === 'hook' && !showCountdown && (
-        <Animated.View entering={FadeIn.delay(600).duration(400)} style={styles.skipButtonArea}>
-          <Pressable
-            onPress={() => {
-              player.startTeaching();
-            }}
-            hitSlop={12}
-            style={({ pressed }) => [
-              styles.skipButton,
-              {
-                backgroundColor: pressed
-                  ? colors.surfaceTertiary
-                  : isDark
-                    ? colors.surfaceSecondary
-                    : colors.surface,
-                borderRadius: radius.lg,
-                borderWidth: 1,
-                borderColor: colors.border,
-                transform: [{ scale: pressed ? 0.97 : 1 }],
-              },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Skip introduction"
-          >
-            <Ionicons name="play-skip-forward" size={16} color={colors.textSecondary} />
-            <Text style={[typography.label, { color: colors.textSecondary }]}>Skip Intro</Text>
-          </Pressable>
-        </Animated.View>
-      )}
     </SafeAreaView>
   );
 }
@@ -319,20 +299,4 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   content: { flex: 1 },
-  skipButtonArea: {
-    position: 'absolute',
-    bottom: 32,
-    left: 24,
-    right: 24,
-    alignItems: 'center',
-  },
-  skipButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    minHeight: 48,
-  },
 });

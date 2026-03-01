@@ -25,7 +25,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { AnimatedCounter } from './AnimatedCounter';
 import { useTheme } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import haptic from '../../utils/haptics';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -81,7 +81,7 @@ export function AnimatedStatCard({
   };
 
   const handlePress = () => {
-    haptics.light();
+    haptic.light();
     onPress?.();
   };
 
