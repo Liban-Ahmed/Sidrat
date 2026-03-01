@@ -59,6 +59,10 @@ export const tokens = {
     earth800: '#292524',
     earth900: '#1C1917',
 
+    // ── DARK GRADIENT STOPS — Spec §6.6 screenDark ──
+    darkGradientMid: '#1F1D1A',
+    darkGradientEnd: '#222018',
+
     // ── CONSTANTS ──
     white: '#FFFFFF',
     cream: '#FFFEF7',

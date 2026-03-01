@@ -19,14 +19,13 @@ import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withTiming,
-  withDelay,
   withSpring,
+  withDelay,
   FadeIn,
   FadeInDown,
-  Easing,
 } from 'react-native-reanimated';
 import { useTheme } from '../../theme';
+import { tokens, SPRINGS, SPACING, RADIUS } from '../../theme/tokens';
 import { categoryMeta, LESSON_CATEGORIES } from '../../types';
 import type { LessonCategory } from '../../types';
 
@@ -47,25 +46,21 @@ interface BarRowProps {
 }
 
 function BarRow({ category, count, total, index }: BarRowProps) {
-  const { colors, typography, spacing, radius, categoryColors } = useTheme();
+  const { isDark, categoryColors } = useTheme();
 
   const meta = categoryMeta[category];
-  const catColor = categoryColors[category]?.solid ?? '#888';
+  const catColor = categoryColors[category]?.solid ?? tokens.color.sand400;
+  const catMuted = categoryColors[category]?.muted ?? tokens.color.sand100;
+  const textColor = isDark ? tokens.color.sand50 : tokens.color.earth800;
 
-  // Bar fill = completion within this category (count/total). Full when e.g. 15/15 or 5/5.
+  // Bar fill = completion within this category (count/total).
   const fillWidth = useSharedValue(0);
 
   useEffect(() => {
     const ratio = total > 0 ? count / total : 0;
     const target =
       total > 0 ? Math.max(Math.min(ratio, 1), count > 0 ? 0.06 : 0) : count > 0 ? 0.06 : 0;
-    fillWidth.value = withDelay(
-      index * 80,
-      withTiming(target, {
-        duration: 700,
-        easing: Easing.out(Easing.cubic),
-      }),
-    );
+    fillWidth.value = withDelay(index * 60, withSpring(target, SPRINGS.gentle));
   }, [count, total, index, fillWidth]);
 
   const fillStyle = useAnimatedStyle(() => ({
@@ -75,7 +70,7 @@ function BarRow({ category, count, total, index }: BarRowProps) {
   // Count badge entrance
   const badgeScale = useSharedValue(0);
   useEffect(() => {
-    badgeScale.value = withDelay(index * 80 + 400, withSpring(1, { damping: 14, stiffness: 200 }));
+    badgeScale.value = withDelay(index * 60 + 400, withSpring(1, SPRINGS.bouncy));
   }, [index, badgeScale]);
 
   const badgeStyle = useAnimatedStyle(() => ({
@@ -83,10 +78,12 @@ function BarRow({ category, count, total, index }: BarRowProps) {
     opacity: badgeScale.value,
   }));
 
+  const trackColor = isDark ? tokens.color.earth700 : tokens.color.sand100;
+
   return (
     <Animated.View
       entering={FadeInDown.delay(index * 60).duration(400)}
-      style={[styles.barRow, { marginBottom: spacing.sm }]}
+      style={[styles.barRow, { marginBottom: SPACING.sm }]}
     >
       {/* Category icon + label */}
       <View style={styles.labelCol}>
@@ -94,28 +91,28 @@ function BarRow({ category, count, total, index }: BarRowProps) {
           style={[
             styles.iconCircle,
             {
-              backgroundColor: catColor + '15',
-              borderRadius: radius.full,
+              backgroundColor: isDark ? catColor + '25' : catMuted,
+              borderRadius: RADIUS.full,
             },
           ]}
         >
-          <Ionicons name={meta.icon as keyof typeof Ionicons.glyphMap} size={14} color={catColor} />
+          <Ionicons name={meta.icon as keyof typeof Ionicons.glyphMap} size={16} color={catColor} />
         </View>
         <Text
-          style={[typography.labelSmall, { color: colors.text, marginLeft: 6 }]}
+          style={[{ fontWeight: '700', fontSize: 16, color: textColor, marginLeft: SPACING.sm }]}
           numberOfLines={1}
         >
           {meta.label}
         </Text>
       </View>
 
-      {/* Bar track + fill */}
+      {/* Bar track + fill — 8pt height, 6pt radius, sand100 track */}
       <View
         style={[
           styles.barTrack,
           {
-            backgroundColor: colors.surfaceTertiary,
-            borderRadius: radius.full,
+            backgroundColor: trackColor,
+            borderRadius: 6,
           },
         ]}
       >
@@ -124,7 +121,7 @@ function BarRow({ category, count, total, index }: BarRowProps) {
             styles.barFill,
             {
               backgroundColor: catColor,
-              borderRadius: radius.full,
+              borderRadius: 6,
             },
             fillStyle,
           ]}
@@ -135,9 +132,10 @@ function BarRow({ category, count, total, index }: BarRowProps) {
       <Animated.View style={[styles.countCol, badgeStyle]}>
         <Text
           style={[
-            typography.captionBold,
             {
-              color: count > 0 ? catColor : colors.textTertiary,
+              fontWeight: '600',
+              fontSize: 14,
+              color: count > 0 ? catColor : tokens.color.sand400,
             },
           ]}
         >
@@ -145,10 +143,10 @@ function BarRow({ category, count, total, index }: BarRowProps) {
         </Text>
         <Text
           style={[
-            typography.caption,
             {
-              color: colors.textTertiary,
-              fontSize: 10,
+              fontWeight: '400',
+              fontSize: 14,
+              color: tokens.color.sand400,
             },
           ]}
         >
@@ -162,7 +160,7 @@ function BarRow({ category, count, total, index }: BarRowProps) {
 // ── Main chart component ──
 
 export function CategoryBreakdownChart({ data, totalPerCategory }: CategoryBreakdownChartProps) {
-  const { colors, typography, spacing, radius, shadows, brand } = useTheme();
+  const { colors, typography, spacing, radius, shadows } = useTheme();
 
   // Only show categories that have lessons available (total > 0) or have progress
   const categories = useMemo(() => {
@@ -236,12 +234,12 @@ export function CategoryBreakdownChart({ data, totalPerCategory }: CategoryBreak
             style={[
               styles.percentBadge,
               {
-                backgroundColor: brand.primary + '12',
+                backgroundColor: tokens.color.olive400 + '12',
                 borderRadius: radius.full,
               },
             ]}
           >
-            <Text style={[typography.captionBold, { color: brand.primary }]}>
+            <Text style={[typography.captionBold, { color: tokens.color.olive400 }]}>
               {Math.round((totalCompleted / totalLessons) * 100)}%
             </Text>
           </View>
@@ -285,19 +283,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   labelCol: {
-    width: 90,
+    width: 110,
     flexDirection: 'row',
     alignItems: 'center',
   },
   iconCircle: {
-    width: 24,
-    height: 24,
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
   },
   barTrack: {
     flex: 1,
-    height: 10,
+    height: 8,
     overflow: 'hidden',
     marginHorizontal: 8,
   },
