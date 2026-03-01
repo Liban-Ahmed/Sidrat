@@ -34,7 +34,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ProgressRing, EmptyState, ProgressSkeletonLoader } from '../../src/components';
-import { MiniCrescent } from '../../src/components/home/MiniCrescent';
 import { JuicyPressable } from '../../src/components/common/JuicyPressable';
 import { CategoryBreakdownChart } from '../../src/components/progress';
 import { allCurriculumLessons } from '../../src/data/curriculum';
@@ -283,7 +282,7 @@ function AchievementBadge({
 // ── Main Screen ─────────────────────────────────────────────────
 
 export default function ProgressScreen() {
-  const { isDark, typography } = useTheme();
+  const { isDark, typography, brand, colors } = useTheme();
   const sem = isDark ? darkSemanticColors : semanticColors;
 
   const [isReady, setIsReady] = useState(false);
@@ -677,34 +676,42 @@ export default function ProgressScreen() {
                 </View>
               )}
               <View style={styles.calendarRow}>
-                {streakDays.map((day, i) => {
-                  const isTodayIncomplete = day.isToday && !day.active;
-                  return (
-                    <View
-                      key={i}
-                      style={styles.dayCol}
-                      accessible
-                      accessibilityRole="image"
-                      accessibilityLabel={`${day.fullLabel}, ${day.active ? 'completed' : 'missed'}`}
+                {streakDays.map((day, i) => (
+                  <View
+                    key={i}
+                    style={styles.dayCol}
+                    accessible
+                    accessibilityRole="image"
+                    accessibilityLabel={`${day.fullLabel}${day.isToday ? ', today' : ''}${day.active ? ', completed' : ''}`}
+                  >
+                    {day.active ? (
+                      <Ionicons name="moon" size={24} color={brand.secondary} />
+                    ) : day.isToday ? (
+                      <Ionicons
+                        name="moon-outline"
+                        size={24}
+                        color={brand.secondaryLight ?? brand.secondary}
+                      />
+                    ) : (
+                      <Ionicons
+                        name="moon-outline"
+                        size={24}
+                        color={isDark ? 'rgba(255,255,255,0.18)' : colors.textTertiary + '35'}
+                      />
+                    )}
+                    <Text
+                      style={[
+                        styles.dayLabel,
+                        {
+                          color: day.active || day.isToday ? sem.textSecondary : sem.textMuted,
+                          fontWeight: day.isToday ? '600' : '400',
+                        },
+                      ]}
                     >
-                      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                        {isTodayIncomplete && <TodayPulse size={40} />}
-                        <MiniCrescent
-                          active={day.active}
-                          parentBg={isDark ? tokens.color.earth800 : tokens.color.white}
-                          size={32}
-                          moonColor={
-                            isTodayIncomplete ? tokens.color.olive200 : tokens.color.olive400
-                          }
-                          inactiveBorderColor={
-                            isDark ? tokens.color.earth700 : tokens.color.sand200
-                          }
-                        />
-                      </View>
-                      <Text style={[styles.dayLabel, { color: sem.textMuted }]}>{day.label}</Text>
-                    </View>
-                  );
-                })}
+                      {day.label}
+                    </Text>
+                  </View>
+                ))}
               </View>
             </View>
           </Animated.View>
