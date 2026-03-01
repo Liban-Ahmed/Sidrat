@@ -185,6 +185,7 @@ export default function FamilyScreen() {
                       borderColor: isDark ? tokens.color.earth700 : tokens.color.sand200,
                       borderWidth: 1,
                       borderRadius: RADIUS.full,
+                      marginTop: 6,
                     },
                   ]}
                 >
@@ -498,7 +499,7 @@ const styles = StyleSheet.create({
   header: { overflow: 'hidden' },
   headerTop: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
   },
   headerTitle: {

@@ -910,12 +910,13 @@ const styles = StyleSheet.create({
   },
   headerTitleRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   headerProfileRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginLeft: SPACING.sm,
+    marginTop: 6,
   },
   headerAvatar: {
     width: 40,
