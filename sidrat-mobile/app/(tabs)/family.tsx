@@ -129,11 +129,6 @@ export default function FamilyScreen() {
     ? [tokens.color.earth900, '#1F1D1A', '#222018']
     : [tokens.color.sand50, tokens.color.cream, tokens.color.olive50];
 
-  // ── Header gradient (greeting style — olive50 → cream) ──
-  const headerGradient: [string, string] = isDark
-    ? [tokens.color.earth900, '#1F1D1A']
-    : [tokens.color.olive50, tokens.color.cream];
-
   if (isLoading) {
     return (
       <SafeAreaView
@@ -165,10 +160,7 @@ export default function FamilyScreen() {
               .damping(SPRINGS.gentle.damping)
               .stiffness(SPRINGS.gentle.stiffness)}
           >
-            <LinearGradient
-              colors={headerGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
+            <View
               style={[
                 styles.header,
                 {
@@ -202,6 +194,17 @@ export default function FamilyScreen() {
                   </Text>
                 </View>
               </View>
+
+              {/* ── Header Divider ── */}
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: sc.surfaceBorder,
+                  marginHorizontal: -SPACING.md,
+                  marginTop: SPACING.md,
+                }}
+              />
+
               <View style={{ marginTop: SPACING.md, marginBottom: -SPACING.md }}>
                 <BismillahHeader
                   size="md"
@@ -209,7 +212,7 @@ export default function FamilyScreen() {
                   align="center"
                 />
               </View>
-            </LinearGradient>
+            </View>
           </Animated.View>
 
           <View style={{ paddingHorizontal: SPACING.md }}>

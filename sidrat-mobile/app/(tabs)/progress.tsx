@@ -416,10 +416,6 @@ export default function ProgressScreen() {
     ? ([tokens.color.earth900, tokens.color.darkGradientMid, tokens.color.darkGradientEnd] as const)
     : ([tokens.color.sand50, tokens.color.cream, tokens.color.olive50] as const);
 
-  const headerColors = isDark
-    ? ([tokens.color.earth900, '#1F1D1A'] as const)
-    : ([tokens.color.olive50, tokens.color.cream] as const);
-
   return (
     <SafeAreaView style={styles.safe} edges={['left', 'right']}>
       <LinearGradient colors={bgColors} style={styles.safe}>
@@ -436,16 +432,13 @@ export default function ProgressScreen() {
         >
           {/* ── Page Header (matches Family / Learn style) ── */}
           <Animated.View entering={FadeIn.duration(400)}>
-            <LinearGradient
-              colors={headerColors}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
+            <View
               style={[
                 styles.profileHeader,
                 {
                   paddingHorizontal: SPACING.md,
                   paddingTop: SPACING.xxl + 54,
-                  paddingBottom: SPACING.lg,
+                  paddingBottom: 0,
                 },
               ]}
             >
@@ -482,133 +475,197 @@ export default function ProgressScreen() {
                 </View>
               </View>
 
-              {/* Hasanat XP bar — Oasis gold palette */}
-              <View style={{ marginTop: SPACING.md }}>
-                <View
-                  style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}
-                >
-                  <Text style={{ fontWeight: '600', fontSize: 12, color: sem.textMuted }}>
-                    Hasanat
-                  </Text>
-                  <Text style={{ fontWeight: '700', fontSize: 12, color: tokens.color.gold600 }}>
-                    {xpInLevel}/100
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.xpBar,
-                    {
-                      backgroundColor: isDark ? tokens.color.earth700 : tokens.color.sand100,
-                      borderRadius: RADIUS.full,
-                    },
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.xpFill,
-                      {
-                        backgroundColor: tokens.color.gold400,
-                        borderRadius: RADIUS.full,
-                        width: `${Math.min(xpInLevel / 100, 1) * 100}%` as `${number}%`,
-                      },
-                    ]}
-                  />
-                </View>
-              </View>
-            </LinearGradient>
-            {/* Curved overlap */}
-            <View
-              style={{
-                height: 24,
-                marginTop: -24,
-                backgroundColor: isDark ? tokens.color.earth900 : tokens.color.sand50,
-                borderTopLeftRadius: RADIUS.xl,
-                borderTopRightRadius: RADIUS.xl,
-              }}
-            />
+              {/* ── Header Divider ── */}
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: sem.surfaceBorder,
+                  marginHorizontal: -SPACING.md,
+                  marginTop: SPACING.md,
+                }}
+              />
+            </View>
           </Animated.View>
 
-          {/* ── Stats Cards (3 equal-width) ── */}
+          {/* ── Hasanat XP Bar ── */}
+          <Animated.View
+            entering={FadeInDown.delay(50).duration(400)}
+            style={{ paddingHorizontal: SPACING.md, marginTop: SPACING.lg }}
+          >
+            <Text style={[styles.sectionLabel, { color: sem.textMuted, marginBottom: SPACING.sm }]}>
+              Hasanat
+            </Text>
+            <View
+              style={{
+                paddingHorizontal: SPACING.md,
+                paddingVertical: SPACING.sm + 2,
+                backgroundColor: sem.surface,
+                borderRadius: RADIUS.lg,
+                borderWidth: 1,
+                borderColor: sem.surfaceBorder,
+                ...SHADOW.rnSm,
+              }}
+            >
+              <View
+                style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Ionicons name="sparkles" size={12} color={tokens.color.gold500} />
+                  <Text
+                    style={{
+                      fontFamily: 'Nunito-SemiBold',
+                      fontWeight: '600',
+                      fontSize: 12,
+                      color: sem.textMuted,
+                    }}
+                  >
+                    Hasanat · Level {level}
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    fontFamily: 'Nunito-Bold',
+                    fontWeight: '700',
+                    fontSize: 12,
+                    color: tokens.color.gold600,
+                  }}
+                >
+                  {xpInLevel}/100 XP
+                </Text>
+              </View>
+              <View
+                style={{
+                  height: 6,
+                  backgroundColor: isDark ? tokens.color.earth700 : tokens.color.sand100,
+                  borderRadius: RADIUS.full,
+                  overflow: 'hidden',
+                }}
+              >
+                <View
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    backgroundColor: tokens.color.gold400,
+                    borderRadius: RADIUS.full,
+                    width: `${Math.min(xpInLevel / 100, 1) * 100}%` as `${number}%`,
+                  }}
+                />
+              </View>
+            </View>
+          </Animated.View>
+
+          {/* ── Stats Cards ── */}
           <Animated.View
             entering={FadeInDown.delay(100).duration(400)}
-            style={[styles.statsRow, { paddingHorizontal: SPACING.lg, marginTop: SPACING.lg }]}
+            style={{ paddingHorizontal: SPACING.md, marginTop: SPACING.lg }}
           >
-            {/* Istiqamah (Streak) */}
-            <View
-              style={[
-                styles.statCard,
-                {
-                  borderColor: sem.surfaceBorder,
-                  backgroundColor: sem.surface,
-                  ...SHADOW.rnSm,
-                },
-              ]}
-              accessible
-              accessibilityLabel={`${child.currentStreak} day streak`}
-            >
-              <Ionicons name="flame" size={22} color={tokens.color.gold600} />
-              <AnimatedCounter
-                value={child.currentStreak}
-                style={{
-                  fontWeight: '700',
-                  fontSize: 28,
-                  color: tokens.color.gold600,
-                  marginTop: 4,
-                }}
-              />
-              <Text style={[styles.statLabel, { color: sem.textMuted }]}>day streak</Text>
-            </View>
+            <Text style={[styles.sectionLabel, { color: sem.textMuted, marginBottom: SPACING.sm }]}>
+              Overview
+            </Text>
+            <View style={styles.statsRow}>
+              {/* Streak */}
+              <View
+                style={[
+                  styles.statCard,
+                  {
+                    backgroundColor: isDark ? tokens.color.earth800 : tokens.color.gold50,
+                    borderColor: isDark ? tokens.color.earth700 : tokens.color.gold100,
+                  },
+                ]}
+                accessible
+                accessibilityLabel={`${child.currentStreak} day streak`}
+              >
+                <View
+                  style={[
+                    styles.statIconCircle,
+                    { backgroundColor: isDark ? tokens.color.earth700 : tokens.color.white },
+                  ]}
+                >
+                  <Ionicons name="flame" size={18} color={tokens.color.gold600} />
+                </View>
+                <AnimatedCounter
+                  value={child.currentStreak}
+                  style={{
+                    fontFamily: 'Nunito-Bold',
+                    fontWeight: '700',
+                    fontSize: 26,
+                    lineHeight: 30,
+                    color: tokens.color.gold600,
+                    marginTop: SPACING.sm,
+                  }}
+                />
+                <Text style={[styles.statLabel, { color: sem.textMuted }]}>Day Streak</Text>
+              </View>
 
-            {/* Hasanat (XP) */}
-            <View
-              style={[
-                styles.statCard,
-                {
-                  borderColor: sem.surfaceBorder,
-                  backgroundColor: sem.surface,
-                  ...SHADOW.rnSm,
-                },
-              ]}
-              accessible
-              accessibilityLabel={`${child.totalXP} hasanat`}
-            >
-              <Ionicons name="star" size={22} color={tokens.color.gold500} />
-              <AnimatedCounter
-                value={child.totalXP}
-                style={{
-                  fontWeight: '700',
-                  fontSize: 28,
-                  color: tokens.color.gold500,
-                  marginTop: 4,
-                }}
-              />
-              <Text style={[styles.statLabel, { color: sem.textMuted }]}>hasanat</Text>
-            </View>
+              {/* Hasanat */}
+              <View
+                style={[
+                  styles.statCard,
+                  {
+                    backgroundColor: isDark ? tokens.color.earth800 : tokens.color.gold50,
+                    borderColor: isDark ? tokens.color.earth700 : tokens.color.gold100,
+                  },
+                ]}
+                accessible
+                accessibilityLabel={`${child.totalXP} hasanat`}
+              >
+                <View
+                  style={[
+                    styles.statIconCircle,
+                    { backgroundColor: isDark ? tokens.color.earth700 : tokens.color.white },
+                  ]}
+                >
+                  <Ionicons name="sparkles" size={18} color={tokens.color.gold500} />
+                </View>
+                <AnimatedCounter
+                  value={child.totalXP}
+                  style={{
+                    fontFamily: 'Nunito-Bold',
+                    fontWeight: '700',
+                    fontSize: 26,
+                    lineHeight: 30,
+                    color: tokens.color.gold500,
+                    marginTop: SPACING.sm,
+                  }}
+                />
+                <Text style={[styles.statLabel, { color: sem.textMuted }]}>Hasanat</Text>
+              </View>
 
-            {/* Lessons */}
-            <View
-              style={[
-                styles.statCard,
-                {
-                  borderColor: sem.surfaceBorder,
-                  backgroundColor: sem.surface,
-                  ...SHADOW.rnSm,
-                },
-              ]}
-              accessible
-              accessibilityLabel={`${child.totalLessonsCompleted} lessons`}
-            >
-              <Ionicons name="book" size={22} color={tokens.color.olive400} />
-              <AnimatedCounter
-                value={child.totalLessonsCompleted}
-                style={{
-                  fontWeight: '700',
-                  fontSize: 28,
-                  color: tokens.color.gold500,
-                  marginTop: 4,
-                }}
-              />
-              <Text style={[styles.statLabel, { color: sem.textMuted }]}>lessons</Text>
+              {/* Lessons */}
+              <View
+                style={[
+                  styles.statCard,
+                  {
+                    backgroundColor: isDark ? tokens.color.earth800 : tokens.color.olive50,
+                    borderColor: isDark ? tokens.color.earth700 : tokens.color.olive100,
+                  },
+                ]}
+                accessible
+                accessibilityLabel={`${child.totalLessonsCompleted} lessons`}
+              >
+                <View
+                  style={[
+                    styles.statIconCircle,
+                    { backgroundColor: isDark ? tokens.color.earth700 : tokens.color.white },
+                  ]}
+                >
+                  <Ionicons name="book" size={18} color={tokens.color.olive400} />
+                </View>
+                <AnimatedCounter
+                  value={child.totalLessonsCompleted}
+                  style={{
+                    fontFamily: 'Nunito-Bold',
+                    fontWeight: '700',
+                    fontSize: 26,
+                    lineHeight: 30,
+                    color: tokens.color.olive500,
+                    marginTop: SPACING.sm,
+                  }}
+                />
+                <Text style={[styles.statLabel, { color: sem.textMuted }]}>Lessons</Text>
+              </View>
             </View>
           </Animated.View>
 
@@ -920,10 +977,26 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.sm,
     borderRadius: RADIUS.lg,
-    borderWidth: 1.5,
+    borderWidth: 1,
+    ...SHADOW.rnSm,
   },
-  statLabel: { fontWeight: '400', fontSize: 14, marginTop: 2 },
+  statIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: RADIUS.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statLabel: {
+    fontFamily: 'Nunito-SemiBold',
+    fontWeight: '600',
+    fontSize: 11,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: 2,
+  },
 
   // ── Section Labels ──
   sectionLabel: {

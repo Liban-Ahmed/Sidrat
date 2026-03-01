@@ -223,6 +223,9 @@ export default function LearnScreen() {
             </ProgressRing>
           </Animated.View>
 
+          {/* ── Header Divider ── */}
+          <View style={{ height: 1, backgroundColor: oc.surfaceBorder }} />
+
           {/* ════ Continue Learning — Hero Card ════ */}
           {nextLesson && (
             <Animated.View entering={staggerEnter(1)} style={styles.heroWrap}>
@@ -479,7 +482,7 @@ const styles = StyleSheet.create({
   ringLabel: { fontSize: 11, fontWeight: '600', textAlign: 'center' },
 
   // ── Hero Card ──
-  heroWrap: { paddingHorizontal: SPACING.md },
+  heroWrap: { paddingHorizontal: SPACING.md, marginTop: SPACING.lg },
   heroCard: { position: 'relative', overflow: 'hidden' },
   heroAccent: {
     position: 'absolute',
