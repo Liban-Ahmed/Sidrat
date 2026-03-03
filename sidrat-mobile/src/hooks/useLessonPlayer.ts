@@ -50,6 +50,12 @@ interface UseLessonPlayerReturn {
   isLastPracticeBlock: boolean;
   /** Score as percentage (0-100) */
   scorePercent: number;
+  /** Current consecutive correct-answer combo */
+  comboCount: number;
+  /** Highest combo achieved this session */
+  maxCombo: number;
+  /** Current Barakah Multiplier value (×1 / ×1.5 / ×2) */
+  comboMultiplier: number;
 
   // Actions
   /** Start or restart the lesson */
@@ -88,10 +94,22 @@ function createInitialState(
     maxScore,
     correctCount: 0,
     answeredCount: 0,
+    comboCount: 0,
+    maxCombo: 0,
     startedAt: new Date().toISOString(),
     isNarrating: false,
     isReview,
   };
+}
+
+/**
+ * Barakah Multiplier — XP scaling based on combo streak (Quran 6:160).
+ * ×1 default, ×1.5 at 3+ combo, ×2 at 5+ combo.
+ */
+export function getComboMultiplier(comboCount: number): number {
+  if (comboCount >= 5) return 2;
+  if (comboCount >= 3) return 1.5;
+  return 1;
 }
 
 export function useLessonPlayer({
@@ -191,14 +209,29 @@ export function useLessonPlayer({
       const isLast = state.practiceIndex >= totalPracticeBlocks - 1;
 
       setState((s) => {
+        const newCombo = isCorrect ? s.comboCount + 1 : 0;
+        const multiplier = isCorrect ? getComboMultiplier(newCombo) : 1;
+        const scaledPoints = Math.round(pointsEarned * multiplier);
+
         const newState = {
           ...s,
-          score: s.score + pointsEarned,
+          score: s.score + scaledPoints,
           correctCount: s.correctCount + (isCorrect ? 1 : 0),
           answeredCount: s.answeredCount + 1,
+          comboCount: newCombo,
+          maxCombo: Math.max(s.maxCombo, newCombo),
         };
 
         if (isLast) {
+          // Check for perfect run — all answers correct
+          const isPerfect = newState.correctCount === totalPracticeBlocks;
+          if (isPerfect) {
+            // Double success haptic for perfect score (deferred to avoid in setState)
+            setTimeout(() => {
+              haptic.success();
+              setTimeout(() => haptic.success(), 150);
+            }, 0);
+          }
           return { ...newState, currentPhase: 'reward' as const };
         }
         return { ...newState, practiceIndex: s.practiceIndex + 1 };
@@ -209,13 +242,30 @@ export function useLessonPlayer({
         setTimeout(() => markPhaseComplete(childId, lesson.id, 'reward'), 0);
       }
 
+      // Escalating haptics based on combo (Design Spec §5.1)
       if (isCorrect) {
-        haptic.success();
+        // We read the *upcoming* combo (current + 1) for haptic selection
+        const nextCombo = state.comboCount + 1;
+        if (nextCombo >= 5) {
+          haptic.heavy();
+        } else if (nextCombo >= 2) {
+          haptic.medium();
+        } else {
+          haptic.success();
+        }
       } else {
-        haptic.error();
+        // Wrong answer — soft warning, no punishment
+        haptic.warning();
       }
     },
-    [totalPracticeBlocks, state.practiceIndex, childId, lesson.id, markPhaseComplete],
+    [
+      totalPracticeBlocks,
+      state.practiceIndex,
+      state.comboCount,
+      childId,
+      lesson.id,
+      markPhaseComplete,
+    ],
   );
 
   const finishPractice = useCallback(() => {
@@ -278,6 +328,12 @@ export function useLessonPlayer({
     isLastTeachBlock,
     isLastPracticeBlock,
     scorePercent,
+    /** Current combo count for ComboCounter rendering */
+    comboCount: state.comboCount,
+    /** Highest combo achieved this session */
+    maxCombo: state.maxCombo,
+    /** Current Barakah Multiplier value based on combo */
+    comboMultiplier: getComboMultiplier(state.comboCount),
     start,
     startTeaching,
     nextTeachBlock,

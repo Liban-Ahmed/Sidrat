@@ -241,6 +241,8 @@ function LessonPlayerContent({
             maxScore={player.state.maxScore}
             onAnswer={player.submitAnswer}
             accentColor={accentColor}
+            comboCount={player.comboCount}
+            comboMultiplier={player.comboMultiplier}
           />
         )}
 

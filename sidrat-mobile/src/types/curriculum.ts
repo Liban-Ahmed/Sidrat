@@ -273,6 +273,10 @@ export interface LessonPlayerState {
   correctCount: number;
   /** Total practice questions answered */
   answeredCount: number;
+  /** Current consecutive correct-answer streak (Barakah Multiplier) */
+  comboCount: number;
+  /** Highest combo achieved during this lesson attempt */
+  maxCombo: number;
   /** Time started (ISO) */
   startedAt: string;
   /** Whether narration is playing */

@@ -13,6 +13,7 @@ import { OrderingCard } from './OrderingCard';
 import { QuizCard } from './QuizCard';
 import { TapWordCard } from './TapWordCard';
 import { TrueFalseCard } from './TrueFalseCard';
+import { ComboCounter, ComboEdgeGlow } from './ComboCounter';
 import { useTheme } from '../../theme';
 import type { PracticeBlock } from '../../types/curriculum';
 
@@ -24,6 +25,10 @@ interface Props {
   maxScore: number;
   onAnswer: (isCorrect: boolean, pointsEarned: number) => void;
   accentColor: string;
+  /** Current consecutive correct-answer combo (Barakah Multiplier) */
+  comboCount?: number;
+  /** Current Barakah Multiplier value (×1 / ×1.5 / ×2) */
+  comboMultiplier?: number;
 }
 
 export function PracticePhase({
@@ -34,6 +39,8 @@ export function PracticePhase({
   maxScore,
   onAnswer,
   accentColor,
+  comboCount = 0,
+  comboMultiplier = 1,
 }: Props) {
   const { colors, typography, radius, isDark, shadows } = useTheme();
 
@@ -64,6 +71,9 @@ export function PracticePhase({
 
   return (
     <View style={styles.container}>
+      {/* Gold edge glow at combo ≥ 5 */}
+      <ComboEdgeGlow comboCount={comboCount} />
+
       {/* Header */}
       <Animated.View entering={FadeIn.duration(350)} style={styles.header}>
         <Text style={[typography.labelSmall, { color: colors.textSecondary }]}>
@@ -87,6 +97,9 @@ export function PracticePhase({
           <Text style={[typography.labelXs, { color: accentColor + '80' }]}>/{maxScore}</Text>
         </View>
       </Animated.View>
+
+      {/* Combo Counter (Barakah Multiplier) — visible at 2+ streak */}
+      <ComboCounter comboCount={comboCount} multiplier={comboMultiplier} />
 
       {/* Segmented progress bar */}
       <Animated.View entering={FadeIn.delay(100).duration(350)} style={styles.segmentRow}>
